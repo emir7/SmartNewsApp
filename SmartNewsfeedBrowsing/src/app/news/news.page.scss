@@ -1,0 +1,12 @@
+.slika {
+    background-image: url('https://cdn-ssl-devio-img.classmethod.jp/wp-content/uploads/2019/12/reinvent2019_report_eyecatch.jpg');
+    height: 100%;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+* {
+    font-size: calc(12px + (30 - 12) * ((100vw - 300px) / (1600 - 300)));
+}

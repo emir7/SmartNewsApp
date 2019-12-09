@@ -1,0 +1,7 @@
+{
+  "name": "SmartNewsfeedBrowsing",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

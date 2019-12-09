@@ -1,0 +1,39 @@
+<ion-header translucent="true">
+    <ion-toolbar>
+        <ion-title style="font-weight: 700;">Cryptocurrency</ion-title>
+    </ion-toolbar>
+    <ion-toolbar>
+        <ion-searchbar showCancelButton="focus"></ion-searchbar>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen [scrollEvents]="true" id="content" (ionScroll)="onContentScroll()">
+
+    <app-LargeCard [arr]=" arr" *ngIf="currentViewLayout === 'largeCards'" class="activeList"
+        (largeCardLoaded)="viewIsLoaded($event)">
+    </app-LargeCard>
+
+    <app-MiniCard [arr]="arr" *ngIf="currentViewLayout === 'miniCards'" class="activeList"
+        (miniCardLoaded)="viewIsLoaded($event)"></app-MiniCard>
+
+    <app-XLargeCard [arr]="arr" *ngIf="currentViewLayout === 'xLargeCards'" class="activeList"
+        (xLargeCardsLoaded)="viewIsLoaded($event)"></app-XLargeCard>
+</ion-content>
+
+<ion-footer style="background-color: white;">
+    <!-- Icon only -->
+    <ion-segment color="dark">
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('largeCards')">
+            <ion-icon name="logo-buffer"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button style="border-color: transparent;">
+            <ion-icon name="grid"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards')">
+            <ion-icon name="menu"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('xLargeCards')">
+            <ion-icon name="albums"></ion-icon>
+        </ion-segment-button>
+    </ion-segment>
+</ion-footer>

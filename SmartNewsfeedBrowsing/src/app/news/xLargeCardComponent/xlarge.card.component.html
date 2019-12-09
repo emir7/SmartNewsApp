@@ -1,0 +1,22 @@
+<ion-slides class="slides" style="position: relative; height: 100%; overflow: hidden;">
+    <ion-slide *ngFor="let item of arr">
+        <ion-card>
+            <img src="https://www.newsbtc.com/wp-content/uploads/2019/12/shutterstock_476168398-1200x780.jpg" />
+            <ion-card-header>
+                <ion-card-subtitle>Destionation {{item}}</ion-card-subtitle>
+                <ion-card-title style=" font-weight: 700; font-size: 14px; line-height: 25px;"> Only one
+                    cryptocurrency
+                    is
+                    outperforming
+                    bitcoin this year
+                    — and its exchange hasr</ion-card-title>
+            </ion-card-header>
+
+            <ion-row class="ion-justify-content-end" style="padding: 5px">
+                <ion-button color="dark" size="small">
+                    Read more
+                </ion-button>
+            </ion-row>
+        </ion-card>
+    </ion-slide>
+</ion-slides>
