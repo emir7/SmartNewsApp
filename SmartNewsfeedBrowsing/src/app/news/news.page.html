@@ -1,9 +1,15 @@
 <ion-header translucent="true">
     <ion-toolbar>
-        <ion-title style="font-weight: 700;">Cryptocurrency</ion-title>
+        <ion-buttons slot="start">
+            <ion-button (click)="search('default')">
+                <ion-icon name="home"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="font-weight: 700;">Displaying search result for: {{title}}</ion-title>
     </ion-toolbar>
     <ion-toolbar>
-        <ion-searchbar showCancelButton="focus"></ion-searchbar>
+        <ion-searchbar [(ngModel)]="searchQuery" (change)="search($event)" showCancelButton="focus" autocorrect="off">
+        </ion-searchbar>
     </ion-toolbar>
 </ion-header>
 
@@ -18,15 +24,17 @@
 
     <app-XLargeCard [arr]="arr" *ngIf="currentViewLayout === 'xLargeCards'" class="activeList"
         (xLargeCardsLoaded)="viewIsLoaded($event)"></app-XLargeCard>
+
+    <app-GridView [arr]="arr" *ngIf="currentViewLayout === 'gridView'" class="activeList"
+        (gridViewComponentLoaded)="viewIsLoaded($event)"></app-GridView>
 </ion-content>
 
 <ion-footer style="background-color: white;">
-    <!-- Icon only -->
     <ion-segment color="dark">
         <ion-segment-button style="border-color: transparent;" (click)="toggleView('largeCards')">
             <ion-icon name="logo-buffer"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;">
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('gridView')">
             <ion-icon name="grid"></ion-icon>
         </ion-segment-button>
         <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards')">

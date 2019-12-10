@@ -7,6 +7,11 @@ import { NewsPage } from './news.page';
 import { MiniCardComponent } from './miniCardComponent/mini.card.component';
 import { LargeCardComponent } from './largeCardComponent/large.card.component';
 import { XLargeCardComponent } from './xLargeCardComponent/xlarge.card.component';
+import { GridViewComponent } from './gridViewComponent/grid.view.component';
+import { HttpClientModule } from '@angular/common/http';
+import { GoogleNewsApiService } from '../shared/google.news.api.service';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { IndexSlideService } from '../shared/index.slide.service';
 
 const routes: Routes = [
     {
@@ -20,10 +25,14 @@ const routes: Routes = [
         CommonModule,
         FormsModule,
         IonicModule,
-        RouterModule.forChild(routes)
+        RouterModule.forChild(routes),
+        HttpClientModule,
     ],
+
+    providers: [GoogleNewsApiService, InAppBrowser, IndexSlideService],
+
     exports: [MiniCardComponent],
-    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent],
+    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent],
     entryComponents: [MiniCardComponent]
 })
 export class NewsPageModule { }

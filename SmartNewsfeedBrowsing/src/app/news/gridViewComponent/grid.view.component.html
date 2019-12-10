@@ -1,0 +1,9 @@
+<ion-row>
+    <ion-col *ngFor="let item of arr;" [size]="item.colSize" class="card" (click)="openUrl(item.url)">
+        <div class="image-container" [style.backgroundImage]="'url('+ item.urlToImage +')'">
+            <div class="description">
+                {{item.title}}
+            </div>
+        </div>
+    </ion-col>
+</ion-row>

@@ -1,4 +1,6 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone } from '@angular/core';
+import { take } from 'rxjs/operators';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 
 @Component({
     selector: "app-LargeCard",
@@ -7,6 +9,8 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angu
 })
 
 export class LargeCardComponent implements OnInit, OnDestroy {
+
+    constructor(private zone: NgZone, public iab: InAppBrowser) { }
 
     @Input() arr;
     @Output() largeCardLoaded = new EventEmitter<string>();
@@ -19,8 +23,14 @@ export class LargeCardComponent implements OnInit, OnDestroy {
         console.log("app-LargeCard ngOnInit");
     }
 
-    ngAfterContentInit() {
-        console.log("eo me tle");
-        this.largeCardLoaded.emit("largeCardsLoaded");
+    ngAfterViewInit() {
+        this.zone.onMicrotaskEmpty.asObservable().pipe(take(1)).subscribe(() => {
+            this.largeCardLoaded.emit("largeCardsLoaded");
+        });
     }
+
+    openUrl(url: string) {
+        const browser = this.iab.create(url);
+    }
+
 }
