@@ -1,7 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { LoadingController, IonSlides } from '@ionic/angular';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { LoadingController } from '@ionic/angular';
 import { GoogleNewsApiService } from '../shared/google.news.api.service';
 import { IndexSlideService } from '../shared/index.slide.service';
+import { FontSizeService } from '../shared/font.service';
+import { Subscription, Subscriber } from 'rxjs';
+import { PerformanceService } from '../shared/performance.service';
 
 @Component({
     selector: 'app-news',
@@ -19,7 +22,24 @@ export class NewsPage implements OnInit, OnDestroy {
     noImageUrl = 'https://s3.amazonaws.com/focus-misc-assets/image_not_available_829x455.jpg';
     searchQuery = '';
 
-    constructor(public loadingController: LoadingController, public googleNewsApi: GoogleNewsApiService, public indexSlideService: IndexSlideService) { }
+    authorFontSizeSub: Subscription;
+    headlinesFontSizeSub: Subscription;
+
+    defaultFontSize = 12 + (30 - 12) * ((window.innerWidth - 300) / (1600 - 300));
+    authorFontSize = this.defaultFontSize;
+    headlinesFontSize = this.defaultFontSize;
+
+    showImages = true;
+    cache = true;
+    showImageSub: Subscription;
+    cacheSub: Subscription;
+
+    constructor(public loadingController: LoadingController,
+        public googleNewsApi: GoogleNewsApiService,
+        public indexSlideService: IndexSlideService,
+        public fontService: FontSizeService,
+        private changeDetector: ChangeDetectorRef,
+        public performanceService: PerformanceService) { }
 
     ngOnInit() {
         this.displayLoadingElement()
@@ -32,6 +52,35 @@ export class NewsPage implements OnInit, OnDestroy {
                     document.getElementById('content').style.display = 'block';
                 });
             });
+
+        this.authorFontSizeSub = this.fontService.getAuthorFontSize()
+            .subscribe(currentFontSizeValue => {
+                if (currentFontSizeValue !== 0) {
+                    this.authorFontSize = currentFontSizeValue;
+                    this.changeDetector.detectChanges();
+                }
+            });
+
+        this.headlinesFontSizeSub = this.fontService.getHeadlineFontSize()
+            .subscribe(currentFontSizeValue => {
+                if (currentFontSizeValue !== 0) {
+                    this.headlinesFontSize = currentFontSizeValue;
+                    this.changeDetector.detectChanges();
+                }
+            });
+
+        this.cacheSub = this.performanceService.getCache()
+            .subscribe(currentCacheValue => {
+                this.cache = currentCacheValue;
+                this.changeDetector.detectChanges();
+            });
+
+        this.showImageSub = this.performanceService.getShowImage()
+            .subscribe(currentShowImageValue => {
+                this.showImages = currentShowImageValue;
+                this.changeDetector.detectChanges();
+            });
+
     }
 
     displayLoadingElement() {
@@ -41,14 +90,12 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     onContentScroll() {
-        if (this.canWatchScroll && this.currentViewLayout !== "xLargeCards") {
+        if (this.canWatchScroll && this.currentViewLayout !== 'xLargeCards') {
             const elements = document.querySelectorAll('.activeList .card');
-            console.log("hihihi spreminjam index...");
             for (let i = 0; i < elements.length; i++) {
                 const rect = elements[i].getBoundingClientRect() as DOMRect;
                 if (rect.y > 0) {
                     this.currentVisibleElement = i;
-                    console.log(i);
                     break;
                 }
             }
@@ -73,53 +120,57 @@ export class NewsPage implements OnInit, OnDestroy {
 
     viewIsLoaded($event) {
         if ($event === 'miniCardsLoaded' || $event === 'largeCardsLoaded') {
-            this.canWatchScroll = false; // IMPORTANT
-            this.showLoadingElementFor(500)
-                .then(() => {
-                    this.scrollToElement()
-                        .then(() => {
-                            document.getElementById('content').style.overflow = 'hidden';
-                            setTimeout(() => {
-                                this.canWatchScroll = true;
-                                document.getElementById('content').style.overflow = 'scroll';
-                            }, 200);
-                        });
-                });
+            this.normalScroll(false);
         } else if ($event === 'xLargeCardsLoaded') {
-            this.canWatchScroll = false;
-            const ionSlider = document.querySelector('.activeList .slides') as any;
-            this.showLoadingElementFor(500)
-                .then(() => {
-                    console.log("potujem do elementa ... " + this.currentVisibleElement);
-                    ionSlider.slideTo(this.currentVisibleElement, 100)
-                        .then(() => {
-                            return this.nekTimeout();
-                        }).then(() => {
-                            document.getElementById('content').style.display = 'block';
-                            document.getElementById('content').style.overflow = 'hidden';
-                            setTimeout(() => {
-                                this.canWatchScroll = true;
-                                document.getElementById('content').style.overflow = 'scroll';
-                            }, 200);
-                        });
-
-                });
+            this.fullScreenVerticalScroll();
         } else if ($event === 'gridViewLoaded') {
-            this.canWatchScroll = false; // IMPORTANT
-            document.getElementById('content').style.display = 'none';
-            this.showLoadingElementFor(500)
-                .then(() => {
-                    this.scrollToElement(true)
-                        .then(() => {
-                            document.getElementById('content').style.overflow = 'hidden';
-                            setTimeout(() => {
-                                this.canWatchScroll = true;
-                                document.getElementById('content').style.overflow = 'scroll';
-                                document.getElementById('content').style.display = 'block';
-                            }, 200);
-                        });
-                });
+            this.gridViewScroll();
         }
+    }
+
+    normalScroll(isGridView) {
+        this.canWatchScroll = false; // IMPORTANT
+        this.showLoadingElementFor(500)
+            .then(() => {
+                return this.scrollToElement(isGridView);
+            })
+            .then(() => {
+                setTimeout(() => {
+                    this.canWatchScroll = true;
+                }, 200);
+            });
+    }
+
+    gridViewScroll() {
+        this.canWatchScroll = false; // IMPORTANT
+        this.showLoadingElementFor(500)
+            .then(() => {
+                return this.scrollToElement(true);
+            })
+            .then(() => {
+                setTimeout(() => {
+                    this.canWatchScroll = true;
+                    document.getElementById('content').style.display = 'block';
+                }, 200);
+            });
+    }
+
+    fullScreenVerticalScroll() {
+        this.canWatchScroll = false; // IMPORTANT
+        const ionSlider = document.querySelector('.activeList .slides') as any;
+        this.showLoadingElementFor(500)
+            .then(() => {
+                ionSlider.slideTo(this.currentVisibleElement, 100)
+                    .then(() => {
+                        return this.nekTimeout();
+                    }).then(() => {
+                        document.getElementById('content').style.display = 'block';
+                        setTimeout(() => {
+                            this.canWatchScroll = true;
+                        }, 200);
+                    });
+
+            });
     }
 
     scrollToElement(gridView = false) {
@@ -145,8 +196,6 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     search($event) {
-        console.log($event);
-        console.log("searchQuery = " + this.searchQuery);
         this.displayLoadingElement()
             .then(loadingEl => {
                 loadingEl.present();
@@ -154,7 +203,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
                 let httpRequestToPreform = null;
 
-                if ($event === "default") {
+                if ($event === 'default') {
                     httpRequestToPreform = this.googleNewsApi.getTopHeadlines();
                     this.searchQuery = '';
                 } else {
@@ -180,6 +229,9 @@ export class NewsPage implements OnInit, OnDestroy {
 
     scrollToTop() {
         this.currentVisibleElement = 0;
+        if (this.currentViewLayout === 'xLargeCards') {
+            return this.fullScreenVerticalScroll();
+        }
         return this.scrollToElement(false);
     }
 
@@ -190,6 +242,9 @@ export class NewsPage implements OnInit, OnDestroy {
             if (!el.urlToImage) {
                 el.urlToImage = this.noImageUrl;
             }
+
+            el.title = this.parseFromHTMLIfPossible(el.title);
+            el.author = this.parseFromHTMLIfPossible(el.author);
 
             if (Math.random() <= 0.5) {
                 if (c === 2) {
@@ -205,24 +260,66 @@ export class NewsPage implements OnInit, OnDestroy {
             }
             return el;
         });
+
         this.arr.push(...modifiedArr);
     }
 
+    parseFromHTMLIfPossible(str) {
+        if (!str) {
+            return '';
+        }
+        const a = document.createElement('div');
+        a.innerHTML = str;
+        return a.innerText;
+    }
+
     toggleView(viewType: string) {
-        if (this.currentViewLayout === "xLargeCards") {
-            console.log("eo me....!");
+        if (this.currentViewLayout === 'xLargeCards') {
             this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
-            console.log("k sm prsu nazaj sm dobu " + this.currentVisibleElement);
             document.getElementById('content').style.display = 'none';
         }
         this.currentViewLayout = viewType;
         console.log(this.currentViewLayout);
     }
 
+    doRefresh($event) {
+        let httpRequestToPreform = null;
+        if (this.searchQuery === 'default') {
+            httpRequestToPreform = this.googleNewsApi.getTopHeadlines();
+            this.searchQuery = '';
+        } else {
+            httpRequestToPreform = this.googleNewsApi.getCustomNews(this.searchQuery);
+        }
+
+        httpRequestToPreform.subscribe(res => {
+            this.setupNewsFeedArray(res);
+            this.additionalTimeoutForViewSetup()
+                .then(() => {
+                    return this.scrollToTop();
+                }).then(() => {
+                    $event.target.complete();
+                });
+        });
+
+    }
 
     ngOnDestroy() {
-        console.log('ngOnDestroy');
+        if (this.authorFontSizeSub) {
+            this.authorFontSizeSub.unsubscribe();
+        }
+
+        if (this.headlinesFontSizeSub) {
+            this.headlinesFontSizeSub.unsubscribe();
+        }
+
+        if (this.showImageSub) {
+            this.showImageSub.unsubscribe();
+        }
+
+        if (this.cacheSub) {
+            this.cacheSub.unsubscribe();
+        }
     }
 
 }

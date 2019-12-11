@@ -32,7 +32,6 @@ const routes: Routes = [
     providers: [GoogleNewsApiService, InAppBrowser, IndexSlideService],
 
     exports: [MiniCardComponent],
-    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent],
-    entryComponents: [MiniCardComponent]
+    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent]
 })
 export class NewsPageModule { }

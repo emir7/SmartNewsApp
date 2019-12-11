@@ -1,9 +1,11 @@
 <ion-list>
-    <ion-card *ngFor="let item of arr" class="card">
-        <img [src]="item.urlToImage" />
+    <ion-card *ngFor="let item of arr; let i = index" class="card">
+
+        <img *ngIf="showImages" [src]="item.urlToImage" (error)="updateUrl($event, i)" />
         <ion-card-header>
-            <ion-card-subtitle>{{item.author}}</ion-card-subtitle>
-            <ion-card-title style="font-weight: 700;">
+            <ion-card-subtitle [style.fontSize]="authorFontSize +'px'">{{item.author}}
+            </ion-card-subtitle>
+            <ion-card-title [style.fontSize]="headlinesFontSize +'px'" style="font-weight: 700;">
                 {{(item.title.length > 135) ? item.title.substring(0,135) + '...' : item.title}}
             </ion-card-title>
         </ion-card-header>

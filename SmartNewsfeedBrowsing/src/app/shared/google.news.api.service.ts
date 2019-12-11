@@ -20,8 +20,4 @@ export class GoogleNewsApiService {
             return this.getTopHeadlines();
         }
     }
-
-
-
-
 }

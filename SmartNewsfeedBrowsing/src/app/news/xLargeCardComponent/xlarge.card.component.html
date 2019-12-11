@@ -1,11 +1,13 @@
 <ion-slides class="slides" style="position: relative; height: 100%; overflow: hidden;" #ionSlides
     (ionSlideDidChange)="onSlideChange()">
-    <ion-slide *ngFor="let item of arr">
+    <ion-slide *ngFor="let item of arr; let i = index;">
         <ion-card class="card">
-            <img [src]="item.urlToImage" />
+            <img *ngIf="showImages" [src]="item.urlToImage" (error)="updateUrl($event, i)" />
             <ion-card-header>
-                <ion-card-subtitle>{{item.author}}</ion-card-subtitle>
-                <ion-card-title style=" font-weight: 700; font-size: 14px; line-height: 25px; text-align:left">
+                <ion-card-subtitle [style.fontSize]="authorFontSize +'px'">
+                    {{item.author}}</ion-card-subtitle>
+                <ion-card-title [style.fontSize]="headlinesFontSize +'px'"
+                    style="font-weight: 700; line-height: 25px; text-align:left">
                     {{(item.title.length > 135) ? item.title.substring(0,135) + '...' : item.title}}
                 </ion-card-title>
             </ion-card-header>

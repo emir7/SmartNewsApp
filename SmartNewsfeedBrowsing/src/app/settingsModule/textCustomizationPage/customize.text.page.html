@@ -1,0 +1,44 @@
+<ion-header translucent="true">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Edit Font</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <div class="ion-margin-top">
+        <div class="ion-text-center customizeTitle">
+            Author name font size
+        </div>
+        <ion-item>
+            <ion-range [(ngModel)]="authorSize" [min]="minSize" max="18" pin="false" step="1">
+                <ion-icon slot="start" size="small" name="brush"></ion-icon>
+                <ion-icon slot="end" name="brush"></ion-icon>
+            </ion-range>
+        </ion-item>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <div class="ion-text-center customizeTitle">
+            Description font size
+        </div>
+        <ion-item>
+            <ion-range pin="false" [(ngModel)]="headlineSize" [min]="minSize" max="18" step="1">
+                <ion-icon slot="start" size="small" name="brush"></ion-icon>
+                <ion-icon slot="end" name="brush"></ion-icon>
+            </ion-range>
+        </ion-item>
+    </div>
+
+    <div style="margin-top: 15px">
+        <div class="defaultFontSize ion-padding" [style.fontSize]="authorSize +'px'" style="font-weight: 700;">
+            By Author Name
+        </div>
+        <div class="defaultFontSize ion-padding" [style.fontSize]="headlineSize +'px'" style="font-weight: 700;">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+            dolore magna aliqua. Ut
+        </div>
+    </div>
+</ion-content>

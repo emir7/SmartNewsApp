@@ -1,0 +1,9 @@
+.customizeTitle {
+    width: 100%;
+    margin: auto;
+    font-weight: 700;
+}
+
+.defaultFontSize {
+    font-size: calc(12px + (30 - 12) * ((100vw - 300px) / (1600 - 300)));
+}

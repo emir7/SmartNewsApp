@@ -1,0 +1,27 @@
+<ion-header translucent="true">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Settings</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+    <div class="buttonWrapper">
+        <ion-button expand="block" padding color="dark" [routerLink]="['customize/text']">Customize Text
+            <ion-icon name="create"></ion-icon>
+        </ion-button>
+        <ion-button expand="block" padding color="dark" [routerLink]="['customize/theme']">Select Theme
+            <ion-icon name="contrast"></ion-icon>
+        </ion-button>
+        <ion-button expand="block" padding color="dark" [routerLink]="['customize/powermanagment']">Power Saving
+            Mode
+            <ion-icon name="battery-charging"></ion-icon>
+        </ion-button>
+        <ion-button expand="block" padding color="dark" disabled>Coming Soon <ion-icon name="construct"></ion-icon>
+        </ion-button>
+    </div>
+
+</ion-content>

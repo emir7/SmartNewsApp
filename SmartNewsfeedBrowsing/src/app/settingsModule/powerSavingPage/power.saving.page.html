@@ -1,0 +1,21 @@
+<ion-header translucent>
+    <ion-toolbar>
+        <ion-title>Power Manager</ion-title>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="home"></ion-back-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen>
+    <ion-list>
+        <ion-item>
+            <ion-label>Show image</ion-label>
+            <ion-toggle [(ngModel)]="showImage" slot="start" checked></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Cache TODO</ion-label>
+            <ion-toggle [(ngModel)]="cache" slot="start" checked disabled></ion-toggle>
+        </ion-item>
+    </ion-list>
+</ion-content>

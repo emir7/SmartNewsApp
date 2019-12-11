@@ -5,7 +5,7 @@
                 <ion-icon name="home"></ion-icon>
             </ion-button>
         </ion-buttons>
-        <ion-title style="font-weight: 700;">Displaying search result for: {{title}}</ion-title>
+        <ion-title style="font-weight: 700;">{{title}}</ion-title>
     </ion-toolbar>
     <ion-toolbar>
         <ion-searchbar [(ngModel)]="searchQuery" (change)="search($event)" showCancelButton="focus" autocorrect="off">
@@ -13,20 +13,30 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content fullscreen [scrollEvents]="true" id="content" (ionScroll)="onContentScroll()">
+<ion-content fullscreen [scrollEvents]="true" id="content" (ionScroll)="onContentScroll()" style="overflow: hidden;">
 
-    <app-LargeCard [arr]=" arr" *ngIf="currentViewLayout === 'largeCards'" class="activeList"
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <app-LargeCard [arr]="arr" [showImages]="showImages" [authorFontSize]="authorFontSize"
+        [headlinesFontSize]="headlinesFontSize" *ngIf="currentViewLayout === 'largeCards'" class="activeList"
         (largeCardLoaded)="viewIsLoaded($event)">
     </app-LargeCard>
 
-    <app-MiniCard [arr]="arr" *ngIf="currentViewLayout === 'miniCards'" class="activeList"
-        (miniCardLoaded)="viewIsLoaded($event)"></app-MiniCard>
+    <app-MiniCard [arr]="arr" [showImages]="showImages" [authorFontSize]="authorFontSize"
+        [headlinesFontSize]="headlinesFontSize" *ngIf="currentViewLayout === 'miniCards'" class="activeList"
+        (miniCardLoaded)="viewIsLoaded($event)">
+    </app-MiniCard>
 
-    <app-XLargeCard [arr]="arr" *ngIf="currentViewLayout === 'xLargeCards'" class="activeList"
-        (xLargeCardsLoaded)="viewIsLoaded($event)"></app-XLargeCard>
+    <app-XLargeCard [arr]="arr" [showImages]="showImages" [authorFontSize]="authorFontSize"
+        [headlinesFontSize]="headlinesFontSize" *ngIf="currentViewLayout === 'xLargeCards'" class="activeList"
+        (xLargeCardsLoaded)="viewIsLoaded($event)">
+    </app-XLargeCard>
 
-    <app-GridView [arr]="arr" *ngIf="currentViewLayout === 'gridView'" class="activeList"
-        (gridViewComponentLoaded)="viewIsLoaded($event)"></app-GridView>
+    <app-GridView [arr]="arr" [authorFontSize]="authorFontSize" [headlinesFontSize]="headlinesFontSize"
+        *ngIf="currentViewLayout === 'gridView'" class="activeList" (gridViewComponentLoaded)="viewIsLoaded($event)">
+    </app-GridView>
 </ion-content>
 
 <ion-footer style="background-color: white;">
