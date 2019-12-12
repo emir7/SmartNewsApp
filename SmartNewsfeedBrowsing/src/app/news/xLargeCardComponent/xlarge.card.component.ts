@@ -19,7 +19,7 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() headlinesFontSize;
     @Input() showImages;
     @Output() xLargeCardsLoaded = new EventEmitter<string>();
-    brokenImageUrl = 'https://s3.amazonaws.com/focus-misc-assets/image_not_available_829x455.jpg';
+    brokenImageUrl = 'assets/noImg.jpg';
 
     constructor(private zone: NgZone, public iab: InAppBrowser, public indexSlideService: IndexSlideService) { }
 

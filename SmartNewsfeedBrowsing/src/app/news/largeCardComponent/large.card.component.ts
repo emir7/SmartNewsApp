@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { take } from 'rxjs/operators';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
-
 @Component({
     selector: 'app-LargeCard',
     templateUrl: './large.card.component.html',
@@ -10,7 +9,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 
 export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    brokenImageUrl = 'https://s3.amazonaws.com/focus-misc-assets/image_not_available_829x455.jpg';
+    brokenImageUrl = 'assets/noImg.jpg';
 
     @Input() arr;
     @Input() authorFontSize;
@@ -22,6 +21,8 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngOnInit() {
         console.log('app-LargeCard ngOnInit');
+        console.log("na drugi strani dobim = ");
+        console.log(this.arr);
     }
 
     ngAfterViewInit() {
@@ -31,6 +32,9 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     updateUrl($event, el) {
+        console.log("SMEHI OREHI !!!!!!!!!!!!!!!");
+        console.log($event);
+        console.log(el);
         document.querySelectorAll('img')[el].src = this.brokenImageUrl;
     }
 

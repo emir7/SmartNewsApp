@@ -17,6 +17,10 @@ const routes: Routes = [
     {
         path: 'customize/powermanagment',
         loadChildren: './powerSavingPage/power.saving.module#PowerSavingPageModule'
+    },
+    {
+        path: 'profile',
+        loadChildren: './profile/profile.module#ProfilePageModule'
     }
 ];
 

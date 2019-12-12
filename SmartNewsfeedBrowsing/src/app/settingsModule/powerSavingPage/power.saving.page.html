@@ -11,11 +11,11 @@
     <ion-list>
         <ion-item>
             <ion-label>Show image</ion-label>
-            <ion-toggle [(ngModel)]="showImage" slot="start" checked></ion-toggle>
+            <ion-toggle id="showImage" [(ngModel)]="showImage" slot="start"></ion-toggle>
         </ion-item>
         <ion-item>
-            <ion-label>Cache TODO</ion-label>
-            <ion-toggle [(ngModel)]="cache" slot="start" checked disabled></ion-toggle>
+            <ion-label>Cache</ion-label>
+            <ion-toggle id="cache" [(ngModel)]="cache" slot="start"></ion-toggle>
         </ion-item>
     </ion-list>
 </ion-content>

@@ -3,11 +3,11 @@
 
         <ion-grid>
             <ion-row>
-                <ion-col size="0">
-                    <div *ngIf="showImages" class="slika" [style.backgroundImage]="'url(' + item.urlToImage +')'"></div>
+                <ion-col *ngIf="showImages" size="5">
+                    <div class="slika" [style.backgroundImage]="'url(' + item.urlToImage +')'"></div>
                 </ion-col>
                 <img [src]="item.urlToImage" style="display: none" (error)="updateUrl($event, i)" />
-                <ion-col size="12" style="padding: 5px">
+                <ion-col [size]="showImages? 7 : 12" style="padding: 5px">
                     <ion-card-subtitle [style.fontSize]="authorFontSize +'px'">{{item.author}}</ion-card-subtitle>
 
                     <ion-card-title [style.fontSize]="headlinesFontSize +'px'"

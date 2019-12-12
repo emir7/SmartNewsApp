@@ -11,7 +11,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 
 export class MiniCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
-    brokenImageUrl = 'https://s3.amazonaws.com/focus-misc-assets/image_not_available_829x455.jpg';
+    brokenImageUrl = 'assets/noImg.jpg';
 
     @Input() arr;
     @Input() authorFontSize;
