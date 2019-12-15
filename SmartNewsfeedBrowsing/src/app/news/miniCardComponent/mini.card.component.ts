@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, AfterViewInit } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Plugins } from '@capacitor/core';
+const { Browser } = Plugins;
 
 
 @Component({
@@ -19,7 +20,7 @@ export class MiniCardComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() showImages;
     @Output() miniCardLoaded = new EventEmitter<string>();
 
-    constructor(private zone: NgZone, public iab: InAppBrowser) { }
+    constructor(private zone: NgZone) { }
 
     ngOnInit() {
         console.log('app-MiniCard ngOnInit');
@@ -33,7 +34,7 @@ export class MiniCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openUrl(url: string) {
-        const browser = this.iab.create(url);
+        Browser.open({ url: url });
     }
 
     updateUrl($event, el) {

@@ -14,3 +14,25 @@
 ion-icon {
     font-size: 20px;
 }
+
+
+ion-refresher {
+    z-index: 10;
+}
+
+ion-refresher-content {
+    --color: #ffffff;
+}
+
+
+/*
+.toolbar-background {
+    --background: #30323D !important;
+    background-color: #30323D !important;
+    color: red !important;
+}*/
+/*
+.toolbar-container {
+    color: white !important;
+    --background: #30323D !important;
+}*/

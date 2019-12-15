@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, Input, EventEmitter, Output, NgZone, ViewChild, AfterViewInit } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { IonSlides } from '@ionic/angular';
 import { IndexSlideService } from 'src/app/shared/index.slide.service';
+import { Plugins } from '@capacitor/core';
+const { Browser } = Plugins;
 
 @Component({
     selector: 'app-XLargeCard',
@@ -21,7 +22,7 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     @Output() xLargeCardsLoaded = new EventEmitter<string>();
     brokenImageUrl = 'assets/noImg.jpg';
 
-    constructor(private zone: NgZone, public iab: InAppBrowser, public indexSlideService: IndexSlideService) { }
+    constructor(private zone: NgZone, public indexSlideService: IndexSlideService) { }
 
     ngOnInit() {
         console.log('ngOnInit');
@@ -40,7 +41,7 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
             });
     }
     openUrl(url: string) {
-        const browser = this.iab.create(url);
+        Browser.open({ url: url });
     }
 
     updateUrl($event, el) {

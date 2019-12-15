@@ -66,12 +66,17 @@ export class NewsPage implements OnInit, OnDestroy {
                             loadingEl.present();
                             document.getElementById('content').style.display = 'none';
                             this.googleNewsApi.getTopHeadlines().subscribe(news => {
+                                console.log("od apija sem dobil");
+                                console.log(news);
                                 this.setupNewsFeedArray(news)
                                     .then(() => {
                                         console.log("storam notr");
                                         this.googleNewsApi.storeNews('topHeadlines', this.arr, new Date());
                                         loadingEl.dismiss();
                                         document.getElementById('content').style.display = 'block';
+                                    }).catch(err => {
+                                        console.log("?=????===");
+                                        console.log(err);
                                     });
                             }, err => {
                                 console.log("Unable to fetch data");
@@ -170,6 +175,10 @@ export class NewsPage implements OnInit, OnDestroy {
             }
             this.changeDetector.detectChanges();
         });
+
+    }
+
+    ionViewWillEnter() {
 
     }
 
@@ -381,6 +390,8 @@ export class NewsPage implements OnInit, OnDestroy {
         const imageNeedToCache = [];
         for (let el of res.articles) {
             if (el.urlToImage) {
+                console.log("push. " + el.urlToImage);
+                console.log(this.getImageNameByUrl(el.urlToImage));
                 urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(el.urlToImage) }));
             } else {
                 el.urlToImage = this.noImageUrl;
@@ -390,6 +401,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
         return Promise.all(urlRequestsPromise).then(results => {
             let i = 0;
+            console.log("============================== results =======================");
             console.log(results);
             for (const result of results) {
                 if (result && result.b64 !== 'noImage') {
@@ -403,6 +415,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 i++;
             }
         }).then(() => {
+            console.log("getu sm kar mam iz cachea zdej setupam array");
             const modifiedArr = res.articles.map(el => {
                 el.title = this.parseFromHTMLIfPossible(el.title);
                 el.author = this.parseFromHTMLIfPossible(el.author);
@@ -435,7 +448,7 @@ export class NewsPage implements OnInit, OnDestroy {
     getImageNameByUrl(str) {
         const index = str.lastIndexOf("/") + 1;
         const imageName = str.substr(index);
-        return imageName;
+        return imageName.replace(/[\W_]+/g, "");
     }
 
     saveImageToCache(urls) {

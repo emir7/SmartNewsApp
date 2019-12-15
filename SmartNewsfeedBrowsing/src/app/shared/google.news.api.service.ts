@@ -35,7 +35,7 @@ export class GoogleNewsApiService {
                 if (b && obj != null) { // ce imas internet in imas cache potem preveris starost cachea
                     const currentDate = new Date();
                     const timeDiff = (currentDate.getTime() - new Date(obj.d).getTime()) / 1000;
-                    if (timeDiff > 1 * 60) { // ce so podatki stari vec kot minuto jih requestas sicer ne
+                    if (timeDiff > 10 * 60) { // ce so podatki stari vec kot minuto jih requestas sicer ne
                         return true;
                     }
                     return obj;
