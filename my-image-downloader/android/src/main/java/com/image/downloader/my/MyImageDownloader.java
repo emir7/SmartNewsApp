@@ -26,6 +26,7 @@ public class MyImageDownloader extends Plugin {
 
     @PluginMethod()
     public void saveImage(PluginCall call) {
+
         Log.i(LOG_CHANNEL, "echo method is called.");
         try {
             List<String> urlList = call.getArray("urls").toList();
@@ -42,26 +43,35 @@ public class MyImageDownloader extends Plugin {
 
     @PluginMethod()
     public void getImage(PluginCall call) {
-        Log.i(LOG_CHANNEL, "getImage method is called.");
-        Log.i(LOG_CHANNEL, call.getString("name"));
-        String root = Environment.getExternalStorageDirectory().toString();
-        File imgFile  = new File(root + "/MyFirstApp/"+call.getString("name")+".jpg");
-        Log.i(LOG_CHANNEL, "sorju");
-        if(imgFile.exists()){
-            Log.i(LOG_CHANNEL, "hadukeeeeen");
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream .toByteArray();
-            String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
-            JSObject ret = new JSObject();
-            ret.put("b64", encoded);
-            call.success(ret);
-        }else {
+        Log.i(LOG_CHANNEL, "getImage method is called." +call.getString("name"));
+        try{
+            String root = Environment.getExternalStorageDirectory().toString();
+            File imgFile  = new File(root + "/MyFirstApp/"+call.getString("name")+".jpg");
+            if(imgFile.exists()){
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                byte[] byteArray = byteArrayOutputStream .toByteArray();
+                String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                JSObject ret = new JSObject();
+                ret.put("b64", encoded);
+                Log.i(LOG_CHANNEL, "I am returning b64.. "+call.getString("name"));
+                call.success(ret);
+            }else {
+                Log.i(LOG_CHANNEL, "Could not find image. "+call.getString("name"));
+                JSObject ret = new JSObject();
+                ret.put("b64", "noImage");
+                call.success(ret);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.i(LOG_CHANNEL, "erorr???");
+        }finally {
             JSObject ret = new JSObject();
             ret.put("b64", "noImage");
             call.success(ret);
         }
+
     }
 
 

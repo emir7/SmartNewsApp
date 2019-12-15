@@ -8,6 +8,7 @@ import { PerformanceService } from '../shared/performance.service';
 import { Storage } from '@ionic/storage';
 import { Plugins } from '@capacitor/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { ThemeService } from '../shared/theme.service';
 
 @Component({
     selector: 'app-news',
@@ -38,8 +39,11 @@ export class NewsPage implements OnInit, OnDestroy {
     cacheSub: Subscription;
     myImageDownloader = null;
 
+    currentTheme = '';
+    themeSub: Subscription;
 
-    constructor(public loadingController: LoadingController,
+    constructor(
+        public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
         public indexSlideService: IndexSlideService,
         public fontService: FontSizeService,
@@ -47,14 +51,15 @@ export class NewsPage implements OnInit, OnDestroy {
         public performanceService: PerformanceService,
         public storage: Storage,
         public sanitizer: DomSanitizer,
-        public alertController: AlertController) {
+        public alertController: AlertController,
+        public theme: ThemeService) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
     }
 
     ngOnInit() {
-        console.log("ngOnInit");
+        console.log('ngOnInit');
         let lEl = null;
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
             .then(res => {
@@ -66,20 +71,20 @@ export class NewsPage implements OnInit, OnDestroy {
                             loadingEl.present();
                             document.getElementById('content').style.display = 'none';
                             this.googleNewsApi.getTopHeadlines().subscribe(news => {
-                                console.log("od apija sem dobil");
+                                console.log('od apija sem dobil');
                                 console.log(news);
                                 this.setupNewsFeedArray(news)
                                     .then(() => {
-                                        console.log("storam notr");
+                                        console.log('storam notr');
                                         this.googleNewsApi.storeNews('topHeadlines', this.arr, new Date());
                                         loadingEl.dismiss();
                                         document.getElementById('content').style.display = 'block';
                                     }).catch(err => {
-                                        console.log("?=????===");
+                                        console.log('?=????===');
                                         console.log(err);
                                     });
                             }, err => {
-                                console.log("Unable to fetch data");
+                                console.log('Unable to fetch data');
                                 console.log(err);
                                 loadingEl.dismiss()
                                     .then(() => {
@@ -101,7 +106,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 console.log(err);
                 lEl.dismiss()
                     .then(() => {
-                        this.unableToFetchData()
+                        this.unableToFetchData();
                     }).catch(errorClosingLoadingEl => {
                         console.log(errorClosingLoadingEl);
                     });
@@ -176,9 +181,9 @@ export class NewsPage implements OnInit, OnDestroy {
             this.changeDetector.detectChanges();
         });
 
-    }
-
-    ionViewWillEnter() {
+        this.themeSub = this.theme.getTheme().subscribe((currentTheme) => {
+            this.currentTheme = currentTheme;
+        });
 
     }
 
@@ -317,6 +322,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 if ($event === 'default') {
                     httpRequestToPreform = this.googleNewsApi.getTopHeadlines();
                     keyForStorage = 'topHeadlines';
+                    this.searchQuery = '';
                 } else {
                     httpRequestToPreform = this.googleNewsApi.getCustomNews(this.searchQuery);
                     keyForStorage = this.searchQuery;
@@ -324,10 +330,10 @@ export class NewsPage implements OnInit, OnDestroy {
 
                 this.googleNewsApi.canSendHttpRequestOrStorage(keyForStorage)
                     .then(res => {
-                        console.log("==================================================");
-                        console.log("canSendHttpRequestOrStorage je vrnil");
+                        console.log('==================================================');
+                        console.log('canSendHttpRequestOrStorage je vrnil');
                         console.log(res);
-                        console.log("ki je tipa " + typeof res);
+                        console.log('ki je tipa ' + typeof res);
                         if (typeof res === 'boolean') {
                             httpRequestToPreform.subscribe(news => {
                                 return this.setupNewsFeedArray(news)
@@ -349,7 +355,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
                             });
                         } else {
-                            console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                            console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
 
                             console.log('search cached.');
                             this.arr = [];
@@ -390,7 +396,7 @@ export class NewsPage implements OnInit, OnDestroy {
         const imageNeedToCache = [];
         for (let el of res.articles) {
             if (el.urlToImage) {
-                console.log("push. " + el.urlToImage);
+                console.log('push. ' + el.urlToImage);
                 console.log(this.getImageNameByUrl(el.urlToImage));
                 urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(el.urlToImage) }));
             } else {
@@ -401,12 +407,12 @@ export class NewsPage implements OnInit, OnDestroy {
 
         return Promise.all(urlRequestsPromise).then(results => {
             let i = 0;
-            console.log("============================== results =======================");
+            console.log('============================== results =======================');
             console.log(results);
             for (const result of results) {
                 if (result && result.b64 !== 'noImage') {
                     console.log('got image from cache.');
-                    let myStrB64 = 'data:image/jpg;base64,' + (this.sanitizer.bypassSecurityTrustResourceUrl(result.b64.replace(/(\r\n|\n|\r)/gm, "")) as any).changingThisBreaksApplicationSecurity;
+                    const myStrB64 = 'data:image/jpg;base64,' + (this.sanitizer.bypassSecurityTrustResourceUrl(result.b64.replace(/(\r\n|\n|\r)/gm, "")) as any).changingThisBreaksApplicationSecurity;
                     res.articles[i].urlToImage = myStrB64;
                 } else if (result && result.b64 === 'noImage') {
                     console.log('could not get image from cache.');
@@ -415,7 +421,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 i++;
             }
         }).then(() => {
-            console.log("getu sm kar mam iz cachea zdej setupam array");
+            console.log('getu sm kar mam iz cachea zdej setupam array');
             const modifiedArr = res.articles.map(el => {
                 el.title = this.parseFromHTMLIfPossible(el.title);
                 el.author = this.parseFromHTMLIfPossible(el.author);
@@ -446,17 +452,17 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     getImageNameByUrl(str) {
-        const index = str.lastIndexOf("/") + 1;
+        const index = str.lastIndexOf('/') + 1;
         const imageName = str.substr(index);
         return imageName.replace(/[\W_]+/g, "");
     }
 
     saveImageToCache(urls) {
-        console.log("cache boolean = " + this.cache);
+        console.log('cache boolean = ' + this.cache);
         if (this.cache) {
             this.googleNewsApi.getInternetStatus()
                 .then(b => {
-                    console.log("b = " + b);
+                    console.log('b = ' + b);
                     if (b) {
                         const imgNames = [];
                         for (const url of urls) {
@@ -541,39 +547,14 @@ export class NewsPage implements OnInit, OnDestroy {
                     });
             });
     }
-    /*
-    getImagesFromCache(arr) {
-        const urlRequestsPromise = [];
-        const imageNeedToCache = [];
 
-        for (const el of arr) {
-            if (el.urlToImage) {
-                urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(el.urlToImage) }));
-            } else {
-                el.urlToImage = this.noImageUrl;
-            }
+    toggleTheme() {
+        if (this.currentTheme === 'light-theme') {
+            this.theme.setTheme('dark-theme');
+        } else {
+            this.theme.setTheme('light-theme');
         }
-
-        return Promise.all(urlRequestsPromise)
-            .then((results) => {
-                console.log(results);
-                for (const index in results) {
-                    if (results[index]) {
-                        if (results[index] && results[index].b64 !== 'noImage') {
-                            console.log('got image from cache.');
-                            let myStrB64 = 'data:image/jpg;base64,' + (this.sanitizer.bypassSecurityTrustResourceUrl(results[index].b64.replace(/(\r\n|\n|\r)/gm, "")) as any).changingThisBreaksApplicationSecurity;
-                            arr[index].urlToImage = myStrB64;
-                            console.log('sliko mam baby else part of refresh.');
-                        } else {
-                            imageNeedToCache.push(arr[index].urlToImage);
-                            console.log('slike nimam else part of refresh.');
-                        }
-                    }
-                }
-                return { a: arr, imagesToBeCached: imageNeedToCache };
-            });
-
-    }*/
+    }
 
     ngOnDestroy() {
         if (this.authorFontSizeSub) {
@@ -590,6 +571,10 @@ export class NewsPage implements OnInit, OnDestroy {
 
         if (this.cacheSub) {
             this.cacheSub.unsubscribe();
+        }
+
+        if (this.themeSub) {
+            this.themeSub.unsubscribe();
         }
     }
 

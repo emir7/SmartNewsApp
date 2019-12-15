@@ -21,6 +21,10 @@ const routes: Routes = [
     {
         path: 'profile',
         loadChildren: './profile/profile.module#ProfilePageModule'
+    },
+    {
+        path: 'customize/theme',
+        loadChildren: './themeCustomizationPage/customize.theme.module#CustomizeThemePageModule'
     }
 ];
 

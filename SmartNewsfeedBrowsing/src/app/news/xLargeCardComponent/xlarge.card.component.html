@@ -2,7 +2,8 @@
     (ionSlideDidChange)="onSlideChange()">
     <ion-slide *ngFor="let item of arr; let i = index;">
         <ion-card class="card">
-            <img *ngIf="showImages" [src]="item.urlToImage" (error)="updateUrl($event, i)" />
+            <!--<img *ngIf="showImages" [src]="item.urlToImage" (error)="updateUrl($event, i)" />-->
+            <div class="slika" *ngIf="showImages" [style.backgroundImage]="'url(' + item.urlToImage +')'"></div>
             <ion-card-header>
                 <ion-card-subtitle [style.fontSize]="authorFontSize +'px'">
                     {{item.author}}</ion-card-subtitle>

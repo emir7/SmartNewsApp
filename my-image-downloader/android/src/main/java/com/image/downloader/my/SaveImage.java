@@ -1,6 +1,7 @@
 package com.image.downloader.my;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.util.Log;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -46,6 +48,9 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
     private void createImage(String url, String name){
         Log.i(LOG_CHANNEL, "shranjena slika2222222 "+url + " =========== "+name);
 
+        if(url.equals("assets/noImg.jpg")) {
+            return;
+        }
         String path = Environment.getExternalStorageDirectory() + "/" + "MyFirstApp/";
 
         File dir = new File(path);
@@ -53,12 +58,39 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
             dir.mkdirs();
         }
         File file = new File (path + name + ".jpg");
+
+        if(file.exists()) {
+            return;
+        }
+
+
         FileOutputStream fos = null;
         try {
-            Log.i(LOG_CHANNEL, "gucci2");
             fos = new FileOutputStream(file);
             Bitmap bitmap = Picasso.get().load(url).get();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, fos);
+
+            int currentWidth = bitmap.getWidth();
+            int currentHeight = bitmap.getHeight();
+
+
+            while(currentWidth >= 512 && currentHeight>=512){
+                currentHeight/=2;
+                currentWidth/=2;
+            }
+
+
+            int newWidth = Math.round(currentWidth);
+            int newHeight = Math.round(currentHeight);
+            Log.i(LOG_CHANNEL, "newWidth = "+newWidth + " newHeight "+newHeight);
+
+            Bitmap scaledImage = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+            if(bitmap != scaledImage){
+                bitmap.recycle();
+            }
+            scaledImage.compress(Bitmap.CompressFormat.JPEG, 60, fos);
+
+
+
             Log.i(LOG_CHANNEL, "gucci3");
         } catch (IOException e) {
             Log.i(LOG_CHANNEL, "gucci4");

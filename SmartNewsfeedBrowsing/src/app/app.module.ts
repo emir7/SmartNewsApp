@@ -13,6 +13,7 @@ import { PerformanceService } from './shared/performance.service';
 
 import { IonicStorageModule } from '@ionic/storage';
 import { Network } from '@ionic-native/network/ngx';
+import { ThemeService } from './shared/theme.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,6 +25,7 @@ import { Network } from '@ionic-native/network/ngx';
     FontSizeService,
     PerformanceService,
     Network,
+    ThemeService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]
