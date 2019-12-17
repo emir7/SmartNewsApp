@@ -1,38 +1,28 @@
-import { OnInit, OnDestroy, Component, ViewChild, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { OnInit, OnDestroy, Component, ViewChild, ChangeDetectorRef, AfterViewInit, Input } from '@angular/core';
 import { PerformanceService } from 'src/app/shared/performance.service';
 import { Storage } from '@ionic/storage';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'app-power-saving',
     templateUrl: 'power.saving.page.html',
     styleUrls: ['power.saving.page.scss'],
 })
+
 export class PowerSavingPage implements OnInit, OnDestroy {
 
-    showImage = true;
-    cache = true;
+    showImage: boolean;
+    cache: boolean;
 
-    constructor(private performanceService: PerformanceService, private storage: Storage) {
-
-    }
+    constructor(private performanceService: PerformanceService, private storage: Storage) { }
 
     ngOnInit() {
-        this.storage.get('cache').then((val) => {
-            if (typeof val !== 'boolean') {
-                this.cache = true;
-            } else {
-                this.cache = val;
-                this.performanceService.setCache(val);
-            }
+        this.performanceService.getCache().pipe(take(1)).subscribe((cacheVal) => {
+            this.cache = cacheVal;
         });
 
-        this.storage.get('showImage').then((val) => {
-            if (typeof val !== 'boolean') {
-                this.showImage = true;
-            } else {
-                this.showImage = val;
-                this.performanceService.setCache(val);
-            }
+        this.performanceService.getShowImage().pipe(take(1)).subscribe((showImageVal) => {
+            this.showImage = showImageVal;
         });
 
     }

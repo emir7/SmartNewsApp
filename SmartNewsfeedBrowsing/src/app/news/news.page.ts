@@ -204,12 +204,14 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     onContentScroll() {
+        console.log('onContentScroll');
         if (this.canWatchScroll && this.currentViewLayout !== 'xLargeCards') {
             const elements = document.querySelectorAll('.activeList .card');
             for (let i = 0; i < elements.length; i++) {
                 const rect = elements[i].getBoundingClientRect() as DOMRect;
                 if (rect.y > 0) {
                     this.currentVisibleElement = i;
+                    console.log('onContentScroll ' + i);
                     break;
                 }
             }
@@ -352,7 +354,15 @@ export class NewsPage implements OnInit, OnDestroy {
                                                 }
                                             });
                                     });
-
+                            }, err => {
+                                console.log('Unable to fetch data');
+                                console.log(err);
+                                loadingEl.dismiss()
+                                    .then(() => {
+                                        this.unableToFetchData();
+                                    }).catch(errorClosingLoadingEl => {
+                                        console.log(errorClosingLoadingEl);
+                                    });
                             });
                         } else {
                             console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
