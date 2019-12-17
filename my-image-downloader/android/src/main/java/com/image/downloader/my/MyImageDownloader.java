@@ -55,7 +55,6 @@ public class MyImageDownloader extends Plugin {
                 String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 JSObject ret = new JSObject();
                 ret.put("b64", encoded);
-                Log.i(LOG_CHANNEL, "I am returning b64.. "+call.getString("name"));
                 call.success(ret);
             }else {
                 Log.i(LOG_CHANNEL, "Could not find image. "+call.getString("name"));
@@ -65,7 +64,6 @@ public class MyImageDownloader extends Plugin {
             }
         }catch (Exception e){
             e.printStackTrace();
-            Log.i(LOG_CHANNEL, "erorr???");
         }finally {
             JSObject ret = new JSObject();
             ret.put("b64", "noImage");
