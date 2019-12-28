@@ -29,6 +29,7 @@
                 <data android:scheme="@string/custom_url_scheme" />
             </intent-filter>
 
+
         </activity>
 
         <provider
@@ -62,4 +63,5 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
 </manifest>

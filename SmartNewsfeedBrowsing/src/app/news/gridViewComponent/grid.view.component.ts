@@ -8,8 +8,6 @@ const { Browser } = Plugins;
     templateUrl: './grid.view.component.html',
     styleUrls: ['./grid.view.component.scss']
 })
-
-
 export class GridViewComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @Input() arr;

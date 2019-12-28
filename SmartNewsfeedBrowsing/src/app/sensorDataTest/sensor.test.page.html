@@ -1,0 +1,5 @@
+<ion-content>
+    <h1>Sensor test page</h1>
+    <p *ngFor="let activity of userActivityArr; let i = index">User is currently {{mapToUserActivity(activity)}} I am
+        {{ userActivityProbArr[i] }}% confident </p>
+</ion-content>

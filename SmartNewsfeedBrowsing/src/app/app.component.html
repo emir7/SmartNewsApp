@@ -22,6 +22,10 @@
           <ion-icon class="nav-link" name="settings" slot="start"></ion-icon>
           <ion-label>Settings</ion-label>
         </ion-item>
+        <ion-item [routerLink]="['/test']" (click)="hideNavbar()">
+          <ion-icon class="nav-link" name="code" slot="start"></ion-icon>
+          <ion-label>Sensor value testing</ion-label>
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>

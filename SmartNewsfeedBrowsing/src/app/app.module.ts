@@ -14,6 +14,7 @@ import { PerformanceService } from './shared/performance.service';
 import { IonicStorageModule } from '@ionic/storage';
 import { Network } from '@ionic-native/network/ngx';
 import { ThemeService } from './shared/theme.service';
+import { SensorReadingService } from './shared/sensor.reading.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,6 +25,7 @@ import { ThemeService } from './shared/theme.service';
     SplashScreen,
     FontSizeService,
     PerformanceService,
+    SensorReadingService,
     Network,
     ThemeService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }

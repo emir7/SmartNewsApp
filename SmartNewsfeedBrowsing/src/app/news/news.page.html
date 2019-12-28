@@ -1,24 +1,29 @@
-<ion-header translucent="true">
+<ion-header>
     <ion-toolbar>
         <ion-buttons slot="start">
             <ion-button (click)="search('default')">
                 <ion-icon name="home"></ion-icon>
             </ion-button>
         </ion-buttons>
-        <ion-title style="font-weight: 700;">{{title}}</ion-title>
+        <ion-title style="font-weight: 700; text-transform: capitalize;">{{title}}</ion-title>
         <ion-buttons slot="primary">
+            <img button (click)="toggleFontSize()" class="font-icon" style="display: inline;"
+                src="assets/fontIcons/font-b.png" />
             <ion-button (click)="toggleTheme()">
                 <ion-icon slot="icon-only" name="bulb"></ion-icon>
+            </ion-button>
+            <ion-button (click)="openNewsOptions($event)">
+                <ion-icon slot="icon-only" name="more"></ion-icon>
             </ion-button>
         </ion-buttons>
     </ion-toolbar>
     <ion-toolbar>
-        <ion-searchbar [(ngModel)]="searchQuery" (change)="search($event)" autocorrect="off">
+        <ion-searchbar [(ngModel)]="searchQuery" (keyup.enter)="search($event)" autocorrect="off">
         </ion-searchbar>
     </ion-toolbar>
 </ion-header>
 
-<ion-content fullscreen [scrollEvents]="true" id="content" (ionScroll)="onContentScroll()" style="overflow: hidden;">
+<ion-content fullscreen [scrollEvents]="true" id="content" (ionScroll)="onContentScroll()">
 
     <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
         <ion-refresher-content></ion-refresher-content>
@@ -42,6 +47,7 @@
     <app-GridView [arr]="arr" [authorFontSize]="authorFontSize" [headlinesFontSize]="headlinesFontSize"
         *ngIf="currentViewLayout === 'gridView'" class="activeList" (gridViewComponentLoaded)="viewIsLoaded($event)">
     </app-GridView>
+
 </ion-content>
 
 <ion-footer style="background-color: white;">

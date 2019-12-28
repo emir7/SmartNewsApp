@@ -12,6 +12,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { GoogleNewsApiService } from '../shared/google.news.api.service';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { IndexSlideService } from '../shared/index.slide.service';
+import { PopoverComponent } from './popoverComponent/popover.component';
+import { GagNewsApiService } from '../shared/gag.news.api.service';
 
 const routes: Routes = [
     {
@@ -26,11 +28,11 @@ const routes: Routes = [
         FormsModule,
         IonicModule,
         RouterModule.forChild(routes),
-        HttpClientModule,
+        HttpClientModule
     ],
 
-    providers: [GoogleNewsApiService, InAppBrowser, IndexSlideService],
-    exports: [MiniCardComponent],
-    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent]
+    providers: [GoogleNewsApiService, InAppBrowser, IndexSlideService, GagNewsApiService],
+    entryComponents: [PopoverComponent],
+    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent, PopoverComponent]
 })
 export class NewsPageModule { }

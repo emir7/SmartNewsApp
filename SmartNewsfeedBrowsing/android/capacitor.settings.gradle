@@ -4,3 +4,6 @@ project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/
 
 include ':my-image-downloader'
 project(':my-image-downloader').projectDir = new File('../node_modules/my-image-downloader/android')
+
+include ':users-pa-recognition'
+project(':users-pa-recognition').projectDir = new File('../node_modules/users-pa-recognition/android')

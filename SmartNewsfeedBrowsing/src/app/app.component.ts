@@ -3,9 +3,9 @@ import { Component, ViewChild } from '@angular/core';
 import { Platform, IonMenu } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
-import { Storage } from '@ionic/storage';
 import { ThemeService } from './shared/theme.service';
 import { Subscription } from 'rxjs';
+import { SensorReadingService } from './shared/sensor.reading.service';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +23,8 @@ export class AppComponent {
     private platform: Platform,
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private sensorReadingService: SensorReadingService
   ) {
 
     this.initializeApp();

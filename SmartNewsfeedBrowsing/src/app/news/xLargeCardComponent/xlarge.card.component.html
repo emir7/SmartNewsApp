@@ -1,5 +1,4 @@
-<ion-slides class="slides" style="position: relative; height: 100%; overflow: hidden;" #ionSlides
-    (ionSlideDidChange)="onSlideChange()">
+<ion-slides class="slides" style="position: relative; height: 100%;" #ionSlides (ionSlideDidChange)="onSlideChange()">
     <ion-slide *ngFor="let item of arr; let i = index;">
         <ion-card class="card">
             <!--<img *ngIf="showImages" [src]="item.urlToImage" (error)="updateUrl($event, i)" />-->

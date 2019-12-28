@@ -23,8 +23,6 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     constructor(private zone: NgZone) { }
 
     ngOnInit() {
-        console.log('app-LargeCard ngOnInit');
-        console.log("na drugi strani dobim = ");
         console.log(this.arr);
     }
 
@@ -35,10 +33,8 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     updateUrl($event, el) {
-        console.log("SMEHI OREHI !!!!!!!!!!!!!!!");
-        console.log($event);
-        console.log(el);
-        document.querySelectorAll('img')[el].src = this.brokenImageUrl;
+        const imgElement = document.querySelectorAll('.card img')[el] as HTMLImageElement;
+        imgElement.src = this.brokenImageUrl;
     }
 
     openUrl(url: string) {
@@ -48,13 +44,5 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     ngOnDestroy() {
         console.log('app-LargeCard ngOnDestroy');
     }
-    /*
-    changeDet() {
-        console.log(this.authorFontSize);
-        console.log(this.headlinesFontSize);
-        this.authorFontSize = 18;
-        this.headlinesFontSize = 18;
-        this.changeDetector.detectChanges();
-    }*/
 
 }

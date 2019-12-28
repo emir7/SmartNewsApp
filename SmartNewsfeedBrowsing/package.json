@@ -41,6 +41,7 @@
     "my-image-downloader": "file:../my-image-downloader",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
+    "users-pa-recognition": "file:../users-pa-recognition",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {

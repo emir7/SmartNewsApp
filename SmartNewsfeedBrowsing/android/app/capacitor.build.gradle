@@ -10,6 +10,7 @@ android {
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':my-image-downloader')
+    implementation project(':users-pa-recognition')
 
 }
 

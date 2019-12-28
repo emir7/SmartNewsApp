@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy, Component, ViewChild, ChangeDetectorRef, AfterViewInit, Input } from '@angular/core';
+import { OnInit, OnDestroy, Component } from '@angular/core';
 import { PerformanceService } from 'src/app/shared/performance.service';
 import { Storage } from '@ionic/storage';
 import { take } from 'rxjs/operators';

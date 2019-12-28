@@ -1,5 +1,9 @@
 #dark-theme {
 
+    ion-list-header {
+        color: #ffffff;
+    }
+
     ion-toolbar {
         --background: #30323D;
         color: #ffffff;
@@ -69,4 +73,22 @@
     ion-refresher-content {
         --color: #ffffff;
     }
+
+    app-popover {
+        background-color: #30323D !important;
+    }
+
+    .searchbar-input-container input {
+        background-color: #ffffff !important;
+    }
+
+    ion-button .button-inner {
+        color: #ffffff !important;
+        --color: #ffffff !important;
+    }
+
+    .font-icon {
+        content: url(../assets/fontIcons/font-w.png) !important;
+    }
+
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { LoadingController, AlertController } from '@ionic/angular';
+import { LoadingController, AlertController, PopoverController } from '@ionic/angular';
 import { GoogleNewsApiService } from '../shared/google.news.api.service';
 import { IndexSlideService } from '../shared/index.slide.service';
 import { FontSizeService } from '../shared/font.service';
@@ -9,6 +9,9 @@ import { Storage } from '@ionic/storage';
 import { Plugins } from '@capacitor/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ThemeService } from '../shared/theme.service';
+import { Platform } from '@ionic/angular';
+import { PopoverComponent } from './popoverComponent/popover.component';
+import { GagNewsApiService } from '../shared/gag.news.api.service';
 
 @Component({
     selector: 'app-news',
@@ -37,10 +40,17 @@ export class NewsPage implements OnInit, OnDestroy {
     cache = true;
     showImageSub: Subscription;
     cacheSub: Subscription;
+
     myImageDownloader = null;
 
     currentTheme = '';
     themeSub: Subscription;
+
+    isAndroid = false;
+
+    newsCategory = '';
+
+    fontSizeDefaultB = true;
 
     constructor(
         public loadingController: LoadingController,
@@ -52,30 +62,31 @@ export class NewsPage implements OnInit, OnDestroy {
         public storage: Storage,
         public sanitizer: DomSanitizer,
         public alertController: AlertController,
-        public theme: ThemeService) {
+        public theme: ThemeService,
+        public platform: Platform,
+        public popoverController: PopoverController,
+        public gagsApiService: GagNewsApiService) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
+        this.isAndroid = this.platform.is('android');
     }
 
     ngOnInit() {
-        console.log('ngOnInit');
         let lEl = null;
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
             .then(res => {
-                console.log(res);
                 if (typeof res === 'boolean') {
+                    console.log('sending new http request ngOnInit');
+                    console.log('=========================================');
                     this.displayLoadingElement()
                         .then(loadingEl => {
                             lEl = loadingEl;
                             loadingEl.present();
                             document.getElementById('content').style.display = 'none';
                             this.googleNewsApi.getTopHeadlines().subscribe(news => {
-                                console.log('od apija sem dobil');
-                                console.log(news);
                                 this.setupNewsFeedArray(news)
                                     .then(() => {
-                                        console.log('storam notr');
                                         this.googleNewsApi.storeNews('topHeadlines', this.arr, new Date());
                                         loadingEl.dismiss();
                                         document.getElementById('content').style.display = 'block';
@@ -95,10 +106,10 @@ export class NewsPage implements OnInit, OnDestroy {
                             });
                         });
                 } else {
-                    console.log('iz storegea sm dobu nazaj');
+                    console.log('iz storegea sm dobu nazaj ngOnInit');
                     console.log(res);
-                    this.arr = [];
-                    this.arr.push(...res.n);
+                    console.log('=========================================');
+                    this.arr = [...res.n];
                     this.changeDetector.detectChanges();
                 }
             }).catch(err => {
@@ -204,14 +215,12 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     onContentScroll() {
-        console.log('onContentScroll');
         if (this.canWatchScroll && this.currentViewLayout !== 'xLargeCards') {
             const elements = document.querySelectorAll('.activeList .card');
             for (let i = 0; i < elements.length; i++) {
                 const rect = elements[i].getBoundingClientRect() as DOMRect;
                 if (rect.y > 0) {
                     this.currentVisibleElement = i;
-                    console.log('onContentScroll ' + i);
                     break;
                 }
             }
@@ -313,6 +322,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
     search($event) {
         let lEl = null;
+        this.newsCategory = '';
         this.displayLoadingElement()
             .then(loadingEl => {
                 lEl = loadingEl;
@@ -332,16 +342,13 @@ export class NewsPage implements OnInit, OnDestroy {
 
                 this.googleNewsApi.canSendHttpRequestOrStorage(keyForStorage)
                     .then(res => {
-                        console.log('==================================================');
-                        console.log('canSendHttpRequestOrStorage je vrnil');
-                        console.log(res);
-                        console.log('ki je tipa ' + typeof res);
                         if (typeof res === 'boolean') {
+                            console.log('sending new http request search');
+                            console.log('=================================');
                             httpRequestToPreform.subscribe(news => {
                                 return this.setupNewsFeedArray(news)
                                     .then(() => {
                                         this.googleNewsApi.storeNews(keyForStorage, this.arr, new Date());
-                                        console.log('storam v cache search.');
                                         this.additionalTimeoutForViewSetup()
                                             .then(() => {
                                                 return this.scrollToTop();
@@ -365,11 +372,9 @@ export class NewsPage implements OnInit, OnDestroy {
                                     });
                             });
                         } else {
-                            console.log('EEEEEEEEEEEEEEEEEEEEEEEEEEEEEELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
-
-                            console.log('search cached.');
-                            this.arr = [];
-                            this.arr.push(...res.n);
+                            console.log('got from storage cache.');
+                            console.log('=================================');
+                            this.arr = [...res.n];
                             this.changeDetector.detectChanges();
                             loadingEl.dismiss();
                             document.getElementById('content').style.display = 'block';
@@ -399,39 +404,59 @@ export class NewsPage implements OnInit, OnDestroy {
         return this.scrollToElement(false);
     }
 
-    setupNewsFeedArray(res) {
-        let c = 0;
-        this.arr = [];
+    configureImageCaching(res, is9gag = false) {
         const urlRequestsPromise = [];
-        const imageNeedToCache = [];
-        for (let el of res.articles) {
-            if (el.urlToImage) {
-                console.log('push. ' + el.urlToImage);
-                console.log(this.getImageNameByUrl(el.urlToImage));
-                urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(el.urlToImage) }));
-            } else {
-                el.urlToImage = this.noImageUrl;
-            }
+        const imagesNeedToCache = [];
 
+        if (!is9gag) {
+            for (const el of res.articles) {
+                if (el.urlToImage) {
+                    if (this.isAndroid) {
+                        urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(el.urlToImage) }));
+                    }
+                } else {
+                    el.urlToImage = this.noImageUrl;
+                    if (this.isAndroid) {
+                        urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.noImageUrl }));
+                    }
+                }
+            }
+        } else {
+            for (const el of res) {
+                const imgUrl = this.extract9gagImage(el);
+                if (el.urlToImage) {
+                    urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(imgUrl) }));
+                }
+            }
         }
 
-        return Promise.all(urlRequestsPromise).then(results => {
-            let i = 0;
-            console.log('============================== results =======================');
-            console.log(results);
-            for (const result of results) {
+        return Promise.all(urlRequestsPromise).then((results) => {
+            for (let i = 0; i < results.length; i++) {
+                const result = results[i];
                 if (result && result.b64 !== 'noImage') {
                     console.log('got image from cache.');
                     const myStrB64 = 'data:image/jpg;base64,' + (this.sanitizer.bypassSecurityTrustResourceUrl(result.b64.replace(/(\r\n|\n|\r)/gm, "")) as any).changingThisBreaksApplicationSecurity;
-                    res.articles[i].urlToImage = myStrB64;
+                    if (!is9gag) {
+                        res.articles[i].urlToImage = myStrB64;
+                    } else {
+                        res[i].urlToImage = myStrB64;
+                    }
                 } else if (result && result.b64 === 'noImage') {
-                    console.log('could not get image from cache.');
-                    imageNeedToCache.push(res.articles[i].urlToImage);
+                    if (!is9gag) {
+                        imagesNeedToCache.push(res.articles[i].urlToImage);
+                    } else {
+                        imagesNeedToCache.push(res[i].urlToImage);
+                    }
                 }
-                i++;
             }
-        }).then(() => {
-            console.log('getu sm kar mam iz cachea zdej setupam array');
+            return imagesNeedToCache;
+        });
+
+    }
+
+    setupNewsFeedArray(res) {
+        let c = 0;
+        return this.configureImageCaching(res, false).then((imagesNeedToCache) => {
             const modifiedArr = res.articles.map(el => {
                 el.title = this.parseFromHTMLIfPossible(el.title);
                 el.author = this.parseFromHTMLIfPossible(el.author);
@@ -450,14 +475,12 @@ export class NewsPage implements OnInit, OnDestroy {
                 }
                 return el;
             });
-
-            this.saveImageToCache(imageNeedToCache);
-            this.arr = [];
-            this.arr.push(...modifiedArr);
+            if (this.isAndroid) {
+                this.saveImagesToCache(imagesNeedToCache);
+            }
+            this.arr = [...modifiedArr];
             this.changeDetector.detectChanges();
-
         });
-
 
     }
 
@@ -467,19 +490,16 @@ export class NewsPage implements OnInit, OnDestroy {
         return imageName.replace(/[\W_]+/g, "");
     }
 
-    saveImageToCache(urls) {
-        console.log('cache boolean = ' + this.cache);
+    saveImagesToCache(urls) {
         if (this.cache) {
             this.googleNewsApi.getInternetStatus()
                 .then(b => {
-                    console.log('b = ' + b);
                     if (b) {
                         const imgNames = [];
                         for (const url of urls) {
                             imgNames.push(this.getImageNameByUrl(url));
                         }
-                        console.log({ urls: urls, names: imgNames });
-                        const mDownloader = this.myImageDownloader.saveImage({ urls: urls, names: imgNames }).then(res => {
+                        this.myImageDownloader.saveImage({ urls: urls, names: imgNames }).then(res => {
                             console.log(res);
                         }).catch(err => {
                             console.log(err);
@@ -506,12 +526,12 @@ export class NewsPage implements OnInit, OnDestroy {
             document.getElementById('content').style.display = 'none';
         }
         this.currentViewLayout = viewType;
-        console.log(this.currentViewLayout);
     }
 
     doRefresh($event) {
         let httpRequestToPreform = null;
         let keyForStorage = '';
+
         if (this.searchQuery === '') {
             httpRequestToPreform = this.googleNewsApi.getTopHeadlines();
             keyForStorage = 'topHeadlines';
@@ -520,32 +540,67 @@ export class NewsPage implements OnInit, OnDestroy {
             keyForStorage = this.searchQuery;
         }
 
+        if (this.newsCategory.startsWith('topHeadlines')) {
+            const category = this.newsCategory.substring(12);
+            if (category !== 'fun') {
+                httpRequestToPreform = this.googleNewsApi.searchWithCategory(category);
+            } else {
+                httpRequestToPreform = this.gagsApiService.get9gagNews();
+            }
+            keyForStorage = this.newsCategory;
+        }
+
         this.googleNewsApi.canSendHttpRequestOrStorage(keyForStorage)
             .then(res => {
                 if (typeof res === 'boolean') {
+                    console.log('sending new http request do_refresh');
+                    console.log('=================================');
                     httpRequestToPreform.subscribe(news => {
-                        this.setupNewsFeedArray(news)
-                            .then(() => {
-                                this.googleNewsApi.storeNews(keyForStorage, this.arr, new Date());
-                                console.log('requested new data');
+                        // obj.news.feed.entry
+                        if (keyForStorage !== 'topHeadlinesfun') {
+                            this.setupNewsFeedArray(news)
+                                .then(() => {
+                                    this.googleNewsApi.storeNews(keyForStorage, this.arr, new Date());
+                                    this.additionalTimeoutForViewSetup()
+                                        .then(() => {
+                                            return this.scrollToTop();
+                                        })
+                                        .then(() => {
+                                            $event.target.complete();
+                                        });
+                                });
+                        } else {
+                            const objFor9gag = {
+                                news: {
+                                    rss: {
+                                        channel: {
+                                            item: news.rss.channel.item
+                                        }
+                                    }
+                                }
+                            };
+                            this.setup9GagArray(objFor9gag).then(() => {
                                 this.additionalTimeoutForViewSetup()
                                     .then(() => {
                                         return this.scrollToTop();
-                                    }).then(() => {
+                                    })
+                                    .then(() => {
                                         $event.target.complete();
                                     });
                             });
+                        }
+
                     });
                 } else {
-                    this.arr = [];
-                    this.arr.push(...res.n);
+                    console.log('got from storage do_refresh');
+                    console.log('=================================');
+                    this.arr = [...res.n];
                     this.changeDetector.detectChanges();
                     this.scrollToTop()
                         .then(() => {
                             $event.target.complete();
                         });
                     $event.target.complete();
-
                 }
             }).catch(err => {
                 console.log(err);
@@ -556,6 +611,92 @@ export class NewsPage implements OnInit, OnDestroy {
                         console.log(errClosingRefresher);
                     });
             });
+    }
+
+    openNewsOptions(e) {
+        this.popoverController.create({
+            component: PopoverComponent,
+            event: e
+        }).then(popoverEl => {
+            popoverEl.present();
+            return popoverEl.onDidDismiss();
+        }).then(d => {
+            return d.data;
+        }).then(obj => {
+            if (obj && obj.news && obj.category) {
+                this.newsCategory = 'topHeadlines' + obj.category;
+                this.title = obj.category;
+                this.searchQuery = '';
+                if (!obj.cache) {
+                    console.log('sent new http request popover.');
+                    console.log('==============================');
+                    if (obj.category !== 'fun') {
+                        this.setupNewsFeedArray(obj.news).then(() => {
+                            this.googleNewsApi.storeNews(this.newsCategory, this.arr, new Date());
+                        });
+                    } else {
+                        this.setup9GagArray(obj);
+                    }
+                } else {
+                    console.log('got from storage popover.');
+                    console.log('==============================');
+                    this.arr = [...obj.news.n];
+                }
+                this.scrollToTop();
+            } else {
+                if (obj && obj.error) {
+                    this.unableToFetchData();
+                }
+            }
+        });
+    }
+
+    extract9gagImage(el) {
+        const domNode = document.createElement('div');
+        domNode.innerHTML = el.description;
+        return domNode.querySelector('img').src;
+    }
+
+    setup9GagArray(obj) {
+        this.arr = [];
+        let c = 0;
+
+        console.log(obj);
+        console.log('==========================================');
+        return this.configureImageCaching(obj.news.rss.channel.item, true).then((imagesNeedToCache) => {
+            for (const el of obj.news.rss.channel.item) {
+                const urlToImage = this.extract9gagImage(el);
+                console.log("title = " + el.title);
+                const val = {
+                    title: el.title.replace("&#039;", "'"),
+                    author: '',
+                    urlToImage,
+                    url: el.guid.$t,
+                    colSize: 6
+                };
+
+                if (Math.random() <= 0.5) {
+                    if (c === 2) {
+                        val.colSize = 12;
+                        c = 0;
+                    } else {
+                        c++;
+                        val.colSize = 6;
+                    }
+                } else {
+                    c++;
+                    val.colSize = 6;
+                }
+
+                this.arr.push(val);
+            }
+            if (this.isAndroid) {
+                this.saveImagesToCache(imagesNeedToCache);
+            }
+            this.googleNewsApi.storeNews('topHeadlinesfun', this.arr, new Date());
+            this.changeDetector.detectChanges();
+        });
+
     }
 
     toggleTheme() {
@@ -586,6 +727,17 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.themeSub) {
             this.themeSub.unsubscribe();
         }
+    }
+
+    toggleFontSize() {
+        if (this.fontSizeDefaultB) {
+            this.headlinesFontSize = this.defaultFontSize;
+            this.authorFontSize = this.defaultFontSize;
+        } else {
+            this.headlinesFontSize = 18;
+            this.authorFontSize = 18;
+        }
+        this.fontSizeDefaultB = !this.fontSizeDefaultB;
     }
 
 }

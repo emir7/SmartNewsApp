@@ -7,10 +7,12 @@ import android.support.v4.app.ActivityCompat;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import com.image.downloader.my.MyImageDownloader;
+import com.users.pa.recognition.UsersPARecognition;
 
 import java.util.ArrayList;
 
 public class MainActivity extends BridgeActivity {
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -22,6 +24,7 @@ public class MainActivity extends BridgeActivity {
       // Additional plugins you've installed go here
       // Ex: add(TotallyAwesomePlugin.class);
         add(MyImageDownloader.class);
+        add(UsersPARecognition.class);
     }});
   }
 }
