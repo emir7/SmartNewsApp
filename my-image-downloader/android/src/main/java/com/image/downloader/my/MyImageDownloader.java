@@ -27,7 +27,7 @@ public class MyImageDownloader extends Plugin {
     @PluginMethod()
     public void saveImage(PluginCall call) {
 
-        Log.i(LOG_CHANNEL, "echo method is called.");
+        Log.i(LOG_CHANNEL, "saveImage method is called.");
         try {
             List<String> urlList = call.getArray("urls").toList();
             List<String> nameList = call.getArray("names").toList();
@@ -44,6 +44,12 @@ public class MyImageDownloader extends Plugin {
     @PluginMethod()
     public void getImage(PluginCall call) {
         Log.i(LOG_CHANNEL, "getImage method is called." +call.getString("name"));
+        if(call.getString("name").equals("assets/noImg.jpg")) {
+            JSObject ret = new JSObject();
+            ret.put("b64", "noImage");
+            call.success(ret);
+            return;
+        }
         try{
             String root = Environment.getExternalStorageDirectory().toString();
             File imgFile  = new File(root + "/MyFirstApp/"+call.getString("name")+".jpg");

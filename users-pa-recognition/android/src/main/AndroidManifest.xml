@@ -1,0 +1,14 @@
+
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.users.pa.recognition.usersparecognition">
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+
+    <application>
+      <service android:name="com.users.pa.recognition.UserPActivityIntentService" android:exported="true">
+        <intent-filter>
+          <action android:name="ACTIVITY_DATA_INTENT_ACTION"/>
+        </intent-filter>
+      </service>
+    </application>
+  </manifest>
+  
