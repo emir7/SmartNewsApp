@@ -15,6 +15,22 @@ export class SenosorTestPage implements OnInit, OnDestroy {
     userActivitySub: Subscription;
     userActivityProbSub: Subscription;
 
+    brighntessValue = 0;
+
+    brighnessSub: Subscription;
+
+    cellularNetworkType = null;
+    wifiLevel = null;
+
+    wifiSub: Subscription;
+    cellularNetworkSub: Subscription;
+
+    batLevel = 0;
+    batPluged = false;
+
+    batLevelSub: Subscription;
+    batPlugSub: Subscription;
+
     constructor(private sensorDetectionService: SensorReadingService, private changeDetector: ChangeDetectorRef) { }
 
     ngOnInit() {
@@ -27,6 +43,38 @@ export class SenosorTestPage implements OnInit, OnDestroy {
             this.userActivityProbArr = [...values];
             this.changeDetector.detectChanges();
         });
+
+        this.brighnessSub = this.sensorDetectionService.getBrighntessValue().subscribe((value) => {
+            this.brighntessValue = value;
+            this.changeDetector.detectChanges();
+        });
+
+        this.wifiSub = this.sensorDetectionService.getWifiLevel().subscribe((value) => {
+            this.wifiLevel = value;
+            if (value && value !== 0) {
+                this.cellularNetworkType = null;
+            }
+            this.changeDetector.detectChanges();
+        });
+
+        this.cellularNetworkSub = this.sensorDetectionService.getCellularNetworkType().subscribe((value) => {
+            if (value && value.length !== 0) {
+                this.wifiLevel = null;
+            }
+            this.cellularNetworkType = value;
+            this.changeDetector.detectChanges();
+        });
+
+        this.batLevelSub = this.sensorDetectionService.getBatteryLevel().subscribe((value) => {
+            this.batLevel = value;
+            this.changeDetector.detectChanges();
+        });
+
+        this.batPlugSub = this.sensorDetectionService.getBatteryPluged().subscribe((value) => {
+            this.batPluged = value;
+            this.changeDetector.detectChanges();
+        });
+
     }
 
     ngOnDestroy() {
@@ -36,6 +84,26 @@ export class SenosorTestPage implements OnInit, OnDestroy {
 
         if (this.userActivityProbSub) {
             this.userActivityProbSub.unsubscribe();
+        }
+
+        if (this.brighnessSub) {
+            this.brighnessSub.unsubscribe();
+        }
+
+        if (this.wifiSub) {
+            this.wifiSub.unsubscribe();
+        }
+
+        if (this.cellularNetworkSub) {
+            this.cellularNetworkSub.unsubscribe();
+        }
+
+        if (this.batPlugSub) {
+            this.batPlugSub.unsubscribe();
+        }
+
+        if (this.batLevelSub) {
+            this.batLevelSub.unsubscribe();
         }
 
     }

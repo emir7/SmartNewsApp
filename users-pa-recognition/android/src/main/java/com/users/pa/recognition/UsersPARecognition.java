@@ -53,7 +53,6 @@ public class UsersPARecognition extends Plugin {
             jsObject.put("probs", jsProbsArr);
 
             Log.i(TAG, jsObject.toString());
-            getBridge().triggerWindowJSEvent("userPhysicalActivity", jsObject.toString());
             notifyListeners("userPhysicalActivity", jsObject);
         }
     }

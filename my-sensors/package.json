@@ -1,0 +1,49 @@
+{
+  "name": "my-sensors",
+  "version": "0.0.1",
+  "description": "contains sensors that are relevant for the context of smart news feed browsing application",
+  "main": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf ./dist",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "author": "emir",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/core": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^3.2.4",
+    "@capacitor/ios": "latest",
+    "@capacitor/android": "latest"
+  },
+  "files": [
+    "dist/",
+    "ios/",
+    "android/",
+    "MySensors.podspec"
+  ],
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "native"
+  ],
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://emirha7@bitbucket.org/emirha7/smartnewsfeedbrowsing.git"
+  },
+  "bugs": {
+    "url": "https://emirha7@bitbucket.org/emirha7/smartnewsfeedbrowsing.git/issues"
+  }
+}

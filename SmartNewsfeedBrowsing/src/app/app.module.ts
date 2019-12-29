@@ -15,6 +15,7 @@ import { IonicStorageModule } from '@ionic/storage';
 import { Network } from '@ionic-native/network/ngx';
 import { ThemeService } from './shared/theme.service';
 import { SensorReadingService } from './shared/sensor.reading.service';
+import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -27,6 +28,7 @@ import { SensorReadingService } from './shared/sensor.reading.service';
     PerformanceService,
     SensorReadingService,
     Network,
+    BatteryStatus,
     ThemeService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],

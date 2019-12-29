@@ -7,6 +7,7 @@ import android.support.v4.app.ActivityCompat;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import com.image.downloader.my.MyImageDownloader;
+import com.my.sensors.MySensors;
 import com.users.pa.recognition.UsersPARecognition;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class MainActivity extends BridgeActivity {
       // Ex: add(TotallyAwesomePlugin.class);
         add(MyImageDownloader.class);
         add(UsersPARecognition.class);
+        add(MySensors.class);
     }});
   }
 }
