@@ -1,12 +1,15 @@
 <ion-content>
     <h1>Sensor test page</h1>
-    <p *ngFor="let activity of userActivityArr; let i = index">User is currently {{mapToUserActivity(activity)}} I am
-        {{ userActivityProbArr[i] }}% confident </p>
-    <p>Brightness Value : {{ brighntessValue }}</p>
 
-    <p *ngIf="!wifiLevel && !cellularNetworkType">No internet connection.</p>
-    <p *ngIf="wifiLevel">WifiLevel: {{ wifiLevel }}</p>
-    <p *ngIf="cellularNetworkType">CellularNetworkType: {{ cellularNetworkType }}</p>
-    <p> Battery Status: {{ batLevel }} plugged: {{ batPluged }}</p>
+    <p *ngFor="let activity of userActivity.types; let i = index;"> User is currently {{ activity }} I am
+        {{ userActivity.probs[i] }} % sure</p>
+    <p>Brightness Value : {{ brightnessStatus.value }} Level: {{ brightnessStatus.level }}</p>
+
+    <p> Type: {{ internetStatus.type }} Strength: {{ internetStatus.strength }} Value: {{ internetStatus.value }}</p>
+
+    <p> Battery Percentage: {{ batteryStatus.percentage }} Level: {{ batteryStatus.level }} Plugged:
+        {{ batteryStatus.plugged }}</p>
+
+    <p>Time of day: {{ currentTime }}</p>
 
 </ion-content>

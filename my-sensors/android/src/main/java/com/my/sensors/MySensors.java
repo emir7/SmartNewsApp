@@ -77,6 +77,7 @@ public class MySensors extends Plugin {
                     JSObject ret = new JSObject();
                     ret.put("type","wifi");
                     ret.put("value", level);
+                    ret.put("strength", getWifiStrength(level));
                     call.success(ret);
                 } else {
                     Log.i("MY_SENSOR_INTERNET", "USER HAS cellular");
@@ -84,6 +85,7 @@ public class MySensors extends Plugin {
                     String cellularNetwork = getNetworkClass();
                     ret.put("type","cellular");
                     ret.put("value", cellularNetwork);
+                    ret.put("strength", getCellularStrength(cellularNetwork));
                     call.success(ret);
                 }
             }else{
@@ -91,6 +93,7 @@ public class MySensors extends Plugin {
                 JSObject ret = new JSObject();
                 ret.put("type","none");
                 ret.put("value", 0);
+                ret.put("strength", -1);
                 call.success(ret);
             }
         }catch (Exception e) {
@@ -98,6 +101,30 @@ public class MySensors extends Plugin {
             e.printStackTrace();
         }
 
+    }
+
+    private int getWifiStrength(int value) {
+        if(value == 4) {
+            return 2;
+        }
+
+        if(value == 2 || value == 3) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private int getCellularStrength(String type) {
+        if(type.equals("2G")) {
+            return 0;
+        }
+
+        if(type.equals("3G")) {
+            return 1;
+        }
+
+        return 2;
     }
 
     public String getNetworkClass() {

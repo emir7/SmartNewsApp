@@ -2,7 +2,6 @@ package com.image.downloader.my;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 
 import com.squareup.picasso.Picasso;
@@ -18,11 +17,13 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
 
     private List<String> urls;
     private List<String> names;
+    private String root;
 
-    public SaveImage(List<String> urls, List<String>names){
+    public SaveImage(List<String> urls, List<String>names, String root){
         super();
         this.urls = urls;
         this.names = names;
+        this.root = root;
     }
 
     @Override
@@ -47,7 +48,9 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
         if(url.equals("assets/noImg.jpg")) {
             return;
         }
-        String path = Environment.getExternalStorageDirectory() + "/" + "MyFirstApp/";
+
+
+        String path = root + "/" + "Images/";
 
         File dir = new File(path);
         if (!dir.exists()) {

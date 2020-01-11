@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { LoadingController, AlertController, PopoverController } from '@ionic/angular';
+import { LoadingController, AlertController, PopoverController, ToastController } from '@ionic/angular';
 import { GoogleNewsApiService } from '../shared/google.news.api.service';
 import { IndexSlideService } from '../shared/index.slide.service';
 import { FontSizeService } from '../shared/font.service';
@@ -12,6 +12,14 @@ import { ThemeService } from '../shared/theme.service';
 import { Platform } from '@ionic/angular';
 import { PopoverComponent } from './popoverComponent/popover.component';
 import { GagNewsApiService } from '../shared/gag.news.api.service';
+import { SensorReadingService } from '../shared/sensor.reading.service';
+
+interface ViewDescription {
+    view: string;
+    showimages: string;
+    fontSize: string;
+    theme: string;
+}
 
 @Component({
     selector: 'app-news',
@@ -52,6 +60,11 @@ export class NewsPage implements OnInit, OnDestroy {
 
     fontSizeDefaultB = true;
 
+    contextSub: Subscription;
+
+    currentViewSelectionData = null;
+    fullViewDescription: ViewDescription = null;
+
     constructor(
         public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
@@ -65,7 +78,9 @@ export class NewsPage implements OnInit, OnDestroy {
         public theme: ThemeService,
         public platform: Platform,
         public popoverController: PopoverController,
-        public gagsApiService: GagNewsApiService) {
+        public gagsApiService: GagNewsApiService,
+        public contextService: SensorReadingService,
+        public toastController: ToastController) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
@@ -73,6 +88,9 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+
+        this.selectRandomView();
+
         let lEl = null;
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
             .then(res => {
@@ -196,6 +214,72 @@ export class NewsPage implements OnInit, OnDestroy {
             this.currentTheme = currentTheme;
         });
 
+
+        this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
+
+        });
+
+        this.dataIntervalCollecting();
+    }
+
+    selectRandomView() {
+        this.currentViewSelectionData = new Date();
+
+        const images = (Math.random() < 0.5) ? true : false;
+        this.showImages = images;
+
+        let generatedView = '';
+        const fontSize = (Math.random() < 0.5) ? 'large-font' : 'small-font';
+
+        if (fontSize === 'large-font') {
+            this.headlinesFontSize = 18;
+            this.authorFontSize = 18;
+        } else {
+            this.headlinesFontSize = this.defaultFontSize;
+            this.authorFontSize = this.defaultFontSize;
+        }
+
+        generatedView = this.getView(Math.round(Math.random() * 4), images);
+
+        const theme = (Math.random() < 0.5) ? 'light-theme' : 'dark-theme';
+        this.theme.setTheme(theme);
+
+        this.toastController.create({
+            message: `New view generated with parameters nview=${generatedView}\n \nfont=${fontSize}
+                \nimages=${images}
+                \ntheme=${this.currentTheme}`,
+            duration: 5000
+        }).then(toastEl => {
+            toastEl.present();
+        });
+
+        this.changeDetector.detectChanges();
+        this.toggleView(generatedView);
+    }
+
+    getView(n, images = true) {
+        if (images) {
+            switch (n) {
+                case 0: return 'largeCards';
+                case 1: return 'gridView';
+                case 2: return 'miniCards';
+                case 3: return 'xLargeCards';
+            }
+        } else {
+            if (n < 2) {
+                return 'largeCards';
+            }
+            return 'xLargeCards';
+        }
+
+        return 'largeCards';
+    }
+
+    dataIntervalCollecting() {
+        setInterval(() => {
+            console.log('generating new view');
+            //this.selectRandomView();
+        }, 10000);
     }
 
     unableToFetchData() {
@@ -520,6 +604,9 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleView(viewType: string) {
+        if (this.currentViewLayout === viewType) {
+            return;
+        }
         if (this.currentViewLayout === 'xLargeCards') {
             this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
@@ -727,6 +814,10 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.themeSub) {
             this.themeSub.unsubscribe();
         }
+
+        if (this.contextSub) {
+            this.contextSub.unsubscribe();
+        }
     }
 
     toggleFontSize() {
@@ -738,6 +829,10 @@ export class NewsPage implements OnInit, OnDestroy {
             this.authorFontSize = 18;
         }
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
+    }
+
+    toggleImagesShowing() {
+        this.showImages = !this.showImages;
     }
 
 }

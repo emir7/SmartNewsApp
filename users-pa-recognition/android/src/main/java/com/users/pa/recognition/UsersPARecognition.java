@@ -43,17 +43,36 @@ public class UsersPARecognition extends Plugin {
 
             JSArray jsTypesArr = new JSArray();
             JSArray jsProbsArr = new JSArray();
+            JSArray jsStringTypesArr = new JSArray();
 
             for(int i = 0; i < typesArr.length; i++) {
                 jsTypesArr.put(typesArr[i]);
                 jsProbsArr.put(probsArr[i]);
+                jsStringTypesArr.put(activityTypeToString(typesArr[i]));
             }
 
-            jsObject.put("types", jsTypesArr);
+            jsObject.put("values", jsTypesArr);
             jsObject.put("probs", jsProbsArr);
+            jsObject.put("types", jsStringTypesArr);
 
             Log.i(TAG, jsObject.toString());
             notifyListeners("userPhysicalActivity", jsObject);
+        }
+
+
+        public String activityTypeToString(int activityType) {
+            switch (activityType) {
+                case 0: return "IN_VEHICLE";
+                case 1: return "ON_FOOT"; // ON_BICYCLE
+                case 2: return "ON_FOOT";
+                case 3: return "STILL";
+                case 4: return "ON_FOOT"; // UNKNOWN
+                case 5: return "ON_FOOT"; // TILTING
+                case 7: return "ON_FOOT"; // WALKING
+                case 8: return "ON_FOOT"; // RUNNING
+            }
+
+            return "ON_FOOT";
         }
     }
 
@@ -100,4 +119,5 @@ public class UsersPARecognition extends Plugin {
             }
         });
     }
+
 }
