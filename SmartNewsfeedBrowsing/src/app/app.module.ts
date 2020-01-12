@@ -16,6 +16,7 @@ import { Network } from '@ionic-native/network/ngx';
 import { ThemeService } from './shared/theme.service';
 import { SensorReadingService } from './shared/sensor.reading.service';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -29,6 +30,7 @@ import { BatteryStatus } from '@ionic-native/battery-status/ngx';
     SensorReadingService,
     Network,
     BatteryStatus,
+    InAppBrowser,
     ThemeService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],

@@ -13,13 +13,7 @@ import { Platform } from '@ionic/angular';
 import { PopoverComponent } from './popoverComponent/popover.component';
 import { GagNewsApiService } from '../shared/gag.news.api.service';
 import { SensorReadingService } from '../shared/sensor.reading.service';
-
-interface ViewDescription {
-    view: string;
-    showimages: string;
-    fontSize: string;
-    theme: string;
-}
+import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 
 @Component({
     selector: 'app-news',
@@ -28,7 +22,7 @@ interface ViewDescription {
 })
 export class NewsPage implements OnInit, OnDestroy {
 
-    currentViewLayout = 'largeCards';
+    currentViewLayout = null;
     arr = [];
     currentVisibleElement = 0;
     canWatchScroll = true;
@@ -61,9 +55,11 @@ export class NewsPage implements OnInit, OnDestroy {
     fontSizeDefaultB = true;
 
     contextSub: Subscription;
+    currentContextDescription: ContextModel = null;
 
-    currentViewSelectionData = null;
     fullViewDescription: ViewDescription = null;
+
+    dataCollectionIntervalID = null;
 
     constructor(
         public loadingController: LoadingController,
@@ -164,13 +160,13 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.cache = currentCacheValue;
                 this.changeDetector.detectChanges();
             });
-
+        /*
         this.showImageSub = this.performanceService.getShowImage()
             .subscribe(currentShowImageValue => {
                 this.showImages = currentShowImageValue;
                 this.changeDetector.detectChanges();
             });
-
+        */
 
         this.storage.get('cache').then((val) => {
             if (typeof val !== 'boolean') {
@@ -180,7 +176,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.performanceService.setCache(val);
             }
         });
-
+        /*
         this.storage.get('showImage').then((val) => {
             if (typeof val !== 'boolean') {
                 this.showImages = true;
@@ -188,8 +184,8 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.showImages = val;
                 this.performanceService.setCache(val);
             }
-        });
-
+        });*/
+        /*
         this.storage.get('authorSize').then((val) => {
             if (typeof val !== 'number') {
                 this.authorFontSize = this.defaultFontSize;
@@ -208,7 +204,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.fontService.setHeadLineFontSize(val);
             }
             this.changeDetector.detectChanges();
-        });
+        });*/
 
         this.themeSub = this.theme.getTheme().subscribe((currentTheme) => {
             this.currentTheme = currentTheme;
@@ -216,48 +212,72 @@ export class NewsPage implements OnInit, OnDestroy {
 
 
         this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
-
+            this.currentContextDescription = contextData;
         });
 
         this.dataIntervalCollecting();
+
     }
 
     selectRandomView() {
-        this.currentViewSelectionData = new Date();
-
-        const images = (Math.random() < 0.5) ? true : false;
-        this.showImages = images;
+        this.showImages = (Math.random() < 0.5) ? true : false;
 
         let generatedView = '';
-        const fontSize = (Math.random() < 0.5) ? 'large-font' : 'small-font';
+        let fontSize = (Math.random() < 0.5) ? 'large-font' : 'small-font';
 
         if (fontSize === 'large-font') {
             this.headlinesFontSize = 18;
             this.authorFontSize = 18;
+            this.fontSizeDefaultB = false;
         } else {
             this.headlinesFontSize = this.defaultFontSize;
             this.authorFontSize = this.defaultFontSize;
+            this.fontSizeDefaultB = true;
         }
 
-        generatedView = this.getView(Math.round(Math.random() * 4), images);
+        generatedView = this.getView(Math.floor(Math.random() * 4), this.showImages);
+        if (generatedView === 'gridView') {
+            fontSize = 'small-font';
+            this.fontSizeDefaultB = true;
+        }
 
         const theme = (Math.random() < 0.5) ? 'light-theme' : 'dark-theme';
         this.theme.setTheme(theme);
+        console.log('boolean generiran pa je');
+        console.log(this.showImages);
+        this.fullViewDescription = {
+            fontSize,
+            showimages: (this.showImages) ? 'withImages' : 'noImages',
+            theme,
+            view: generatedView,
+            c: 0,
+            d: new Date()
+        };
 
+        console.log('Nastimu sm view:');
+        console.log(this.fullViewDescription);
+        console.log('===================================================================');
+        this.currentTheme = theme;
         this.toastController.create({
             message: `New view generated with parameters nview=${generatedView}\n \nfont=${fontSize}
-                \nimages=${images}
-                \ntheme=${this.currentTheme}`,
+                    \nimages=${this.showImages}
+                    \ntheme=${this.currentTheme}`,
             duration: 5000
         }).then(toastEl => {
             toastEl.present();
         });
-
+        this.currentViewLayout = generatedView;
         this.changeDetector.detectChanges();
         this.toggleView(generatedView);
+
     }
 
-    getView(n, images = true) {
+    sameView(v: ViewDescription) {
+        return v.fontSize === this.fullViewDescription.fontSize && v.showimages === this.fullViewDescription.showimages
+            && v.theme === this.fullViewDescription.theme && v.view === this.fullViewDescription.view;
+    }
+
+    getView(n, images) {
         if (images) {
             switch (n) {
                 case 0: return 'largeCards';
@@ -276,10 +296,33 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     dataIntervalCollecting() {
-        setInterval(() => {
-            console.log('generating new view');
-            //this.selectRandomView();
+        this.dataCollectionIntervalID = setInterval(() => {
+            const cView: ViewDescription = {
+                c: 0,
+                d: new Date(),
+                fontSize: (this.fontSizeDefaultB) ? 'small-font' : 'large-font',
+                showimages: (this.showImages) ? 'withImages' : 'noImages',
+                theme: this.currentTheme,
+                view: this.currentViewLayout
+            };
+            if (this.sameView(cView)) {
+                this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
+                this.fullViewDescription.c += 1;
+            }
+            if (this.fullViewDescription.c >= 5) {
+                this.selectRandomView();
+            }
         }, 10000);
+    }
+
+    inBrowser($event) {
+        if ($event === 'inBrowser') {
+            clearInterval(this.dataCollectionIntervalID);
+            this.dataCollectionIntervalID = null;
+            this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
+        } else {
+            this.resetDataCollection();
+        }
     }
 
     unableToFetchData() {
@@ -607,6 +650,12 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.currentViewLayout === viewType) {
             return;
         }
+
+        this.fullViewDescription.view = viewType;
+        if (this.currentViewLayout == null) {
+            this.resetDataCollection();
+        }
+
         if (this.currentViewLayout === 'xLargeCards') {
             this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
@@ -789,9 +838,12 @@ export class NewsPage implements OnInit, OnDestroy {
     toggleTheme() {
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
+            this.fullViewDescription.theme = 'dark-theme';
         } else {
             this.theme.setTheme('light-theme');
+            this.fullViewDescription.theme = 'light-theme';
         }
+        this.resetDataCollection();
     }
 
     ngOnDestroy() {
@@ -821,18 +873,29 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleFontSize() {
+        this.fontSizeDefaultB = !this.fontSizeDefaultB;
         if (this.fontSizeDefaultB) {
             this.headlinesFontSize = this.defaultFontSize;
             this.authorFontSize = this.defaultFontSize;
+            this.fullViewDescription.fontSize = 'small-font';
         } else {
             this.headlinesFontSize = 18;
             this.authorFontSize = 18;
+            this.fullViewDescription.fontSize = 'large-font';
         }
-        this.fontSizeDefaultB = !this.fontSizeDefaultB;
+        this.resetDataCollection();
     }
 
     toggleImagesShowing() {
         this.showImages = !this.showImages;
+        this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
+        this.resetDataCollection();
     }
 
+    resetDataCollection() {
+        this.fullViewDescription.d = new Date();
+        this.fullViewDescription.c = 0;
+        clearInterval(this.dataCollectionIntervalID);
+        this.dataIntervalCollecting();
+    }
 }

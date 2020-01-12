@@ -38,21 +38,22 @@
 
     <app-LargeCard [arr]="arr" [showImages]="showImages" [authorFontSize]="authorFontSize"
         [headlinesFontSize]="headlinesFontSize" *ngIf="currentViewLayout === 'largeCards'" class="activeList"
-        (largeCardLoaded)="viewIsLoaded($event)">
+        (largeCardLoaded)="viewIsLoaded($event)" (inBrowser)="inBrowser($event)">
     </app-LargeCard>
 
     <app-MiniCard [arr]="arr" [showImages]="showImages" [authorFontSize]="authorFontSize"
         [headlinesFontSize]="headlinesFontSize" *ngIf="currentViewLayout === 'miniCards'" class="activeList"
-        (miniCardLoaded)="viewIsLoaded($event)">
+        (miniCardLoaded)="viewIsLoaded($event)" (inBrowser)="inBrowser($event)">
     </app-MiniCard>
 
     <app-XLargeCard [arr]="arr" [showImages]="showImages" [authorFontSize]="authorFontSize"
         [headlinesFontSize]="headlinesFontSize" *ngIf="currentViewLayout === 'xLargeCards'" class="activeList"
-        (xLargeCardsLoaded)="viewIsLoaded($event)">
+        (xLargeCardsLoaded)="viewIsLoaded($event)" (inBrowser)="inBrowser($event)">
     </app-XLargeCard>
 
     <app-GridView [arr]="arr" [authorFontSize]="authorFontSize" [headlinesFontSize]="headlinesFontSize"
-        *ngIf="currentViewLayout === 'gridView'" class="activeList" (gridViewComponentLoaded)="viewIsLoaded($event)">
+        *ngIf="currentViewLayout === 'gridView'" class="activeList" (gridViewComponentLoaded)="viewIsLoaded($event)"
+        (inBrowser)="inBrowser($event)">
     </app-GridView>
 
 </ion-content>

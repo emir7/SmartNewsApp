@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Plugins, FilesystemDirectory, FilesystemEncoding } from '@capacitor/core';
 import { BehaviorSubject } from 'rxjs';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
-import { ContextModel, InternetStatusModel, UserActivityModel, BatteryStatusModel, BrightnessModel } from './models/context/contextModel';
+import { ContextModel, InternetStatusModel, UserActivityModel, BatteryStatusModel, BrightnessModel, ViewDescription } from './models/context/contextModel';
 import { take } from 'rxjs/operators';
 
 const { Network, UsersPARecognition, MySensors, Filesystem } = Plugins;
@@ -212,16 +212,16 @@ export class SensorReadingService {
         return this.currentTime;
     }
 
-    writeToFile() {
+    writeToFile(fvd: ViewDescription, ctx: ContextModel) {
+        const uA = ctx.userActivityObj.types[0];
+        const brightness = ctx.brightnessObj.value;
+        const tod = new Date().getHours();
+        const internet = ctx.internetObj.value;
+        const batLevel = ctx.batteryObj.percentage;
+
         Filesystem.appendFile({
             path: 'readings/interval.csv',
-            data: 'hadulem1\n',
-            directory: FilesystemDirectory.External,
-            encoding: FilesystemEncoding.UTF8
-        });
-        Filesystem.appendFile({
-            path: 'readings/interval.csv',
-            data: 'hadulem2\n',
+            data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view}\n`,
             directory: FilesystemDirectory.External,
             encoding: FilesystemEncoding.UTF8
         });

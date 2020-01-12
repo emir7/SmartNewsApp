@@ -1,8 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, AfterViewInit } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { Plugins } from '@capacitor/core';
-const { Browser } = Plugins;
-
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 
 @Component({
     selector: 'app-MiniCard',
@@ -19,22 +17,31 @@ export class MiniCardComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() headlinesFontSize;
     @Input() showImages;
     @Output() miniCardLoaded = new EventEmitter<string>();
+    @Output() inBrowser = new EventEmitter<string>();
 
-    constructor(private zone: NgZone) { }
+    constructor(private zone: NgZone, private iab: InAppBrowser) { }
 
     ngOnInit() {
         console.log('app-MiniCard ngOnInit');
-
     }
 
     ngAfterViewInit() {
+        console.log('ngAfterViewInit');
         this.zone.onMicrotaskEmpty.asObservable().pipe(take(1)).subscribe(() => {
             this.miniCardLoaded.emit('miniCardsLoaded');
         });
     }
 
+    ionViewDidEnter() {
+        console.log('ionViewDidEnter');
+    }
+
     openUrl(url: string) {
-        Browser.open({ url: url });
+        const browser = this.iab.create(url);
+        browser.on('exit').subscribe((event) => {
+            this.inBrowser.emit('outBrowser');
+        });
+        this.inBrowser.emit('inBrowser');
     }
 
     updateUrl($event, el) {

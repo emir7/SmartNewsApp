@@ -27,3 +27,12 @@ export interface ContextModel {
     batteryObj: BatteryStatusModel;
     brightnessObj: BrightnessModel;
 }
+
+export interface ViewDescription {
+    view: string;
+    showimages: string;
+    fontSize: string;
+    theme: string;
+    c: number;
+    d: Date;
+}
