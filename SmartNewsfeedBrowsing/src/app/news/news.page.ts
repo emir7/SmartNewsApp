@@ -62,23 +62,24 @@ export class NewsPage implements OnInit, OnDestroy {
     dataCollectionIntervalID = null;
 
     batteryValidityObj = {
-        percentage: -1,
+        percentage: -2,
         d: new Date()
     };
 
     brightnessValidityObj = {
-        value: -1,
+        value: -2,
         d: new Date()
     };
 
     internetValidityObj = {
-        value: -1,
+        value: -2,
         d: new Date()
     };
 
     userActivity = null;
 
     appInBackground = false;
+    userInBrowser = false;
 
     constructor(
         public loadingController: LoadingController,
@@ -245,9 +246,11 @@ export class NewsPage implements OnInit, OnDestroy {
             });
         } else {
             this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
-                if (this.appInBackground) {
+                if (this.appInBackground || this.userInBrowser) {
+                    this.updatePreviousValues();
                     return;
                 }
+
                 if (this.isValidContextData(contextData)) {
                     this.currentContextDescription = contextData;
                     let writtenToFile = false;
@@ -260,23 +263,25 @@ export class NewsPage implements OnInit, OnDestroy {
                             this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
                                 this.internetValidityObj.value, this.batteryValidityObj.percentage);
                             this.userActivity = contextData.userActivityObj.types[0];
+                            writtenToFile = true;
                         }
                     }
-                    if (this.internetValidityObj.value === -1) {
+                    if (this.internetValidityObj.value === -2) {
                         this.internetValidityObj.value = contextData.internetObj.value;
                         this.internetValidityObj.d = new Date();
                     } else {
                         console.log('1) Internet ' + ((new Date().getTime() - this.internetValidityObj.d.getTime()) / 1000));
                         if (this.passed30sek(this.internetValidityObj.d)
                             && this.internetValidityObj.value !== contextData.internetObj.value) {
-                            this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
-                                this.internetValidityObj.value, this.batteryValidityObj.percentage); writtenToFile = true;
-                            console.log('writing into file because internet changed');
-                            this.internetValidityObj.d = new Date();
-                            this.internetValidityObj.value = contextData.internetObj.value;
+                            if (!writtenToFile) {
+                                this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
+                                    this.internetValidityObj.value, this.batteryValidityObj.percentage);
+                                writtenToFile = true;
+                                console.log('writing into file because internet changed');
+                            }
                         }
                     }
-                    if (this.batteryValidityObj.percentage === -1) {
+                    if (this.batteryValidityObj.percentage === -2) {
                         this.batteryValidityObj.percentage = contextData.batteryObj.percentage;
                         this.batteryValidityObj.d = new Date();
                     } else {
@@ -288,12 +293,10 @@ export class NewsPage implements OnInit, OnDestroy {
                                     this.internetValidityObj.value, this.batteryValidityObj.percentage);
                                 writtenToFile = true;
                                 console.log('writing into file because battery level changed');
-                                this.batteryValidityObj.percentage = contextData.batteryObj.percentage;
-                                this.batteryValidityObj.d = new Date();
                             }
                         }
                     }
-                    if (this.brightnessValidityObj.value === -1) {
+                    if (this.brightnessValidityObj.value === -2) {
                         this.brightnessValidityObj.value = contextData.brightnessObj.value;
                         this.brightnessValidityObj.d = new Date();
                     } else {
@@ -301,17 +304,32 @@ export class NewsPage implements OnInit, OnDestroy {
                         if (this.passed30sek(this.brightnessValidityObj.d)
                             && this.brightnessValidityObj.value !== contextData.brightnessObj.value) {
                             if (!writtenToFile) {
-                                this.dataOnChangeCollection();
+                                this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
+                                    this.internetValidityObj.value, this.batteryValidityObj.percentage);
                                 writtenToFile = true;
                                 console.log('writing into file because Brightness changed');
-                                this.brightnessValidityObj.value = contextData.brightnessObj.value;
-                                this.brightnessValidityObj.d = new Date();
                             }
                         }
                     }
                 }
+
             });
         }
+    }
+
+    updatePreviousValues() {
+        this.userActivity = this.currentContextDescription.userActivityObj.types[0];
+
+        this.batteryValidityObj.percentage = this.currentContextDescription.batteryObj.percentage;
+        this.batteryValidityObj.d = new Date();
+
+        this.internetValidityObj.value = this.currentContextDescription.internetObj.value;
+        this.internetValidityObj.d = new Date();
+
+        this.brightnessValidityObj.value = this.currentContextDescription.brightnessObj.value;
+        this.brightnessValidityObj.d = new Date();
+
+        this.fullViewDescription.d = new Date();
     }
 
     passed30sek(d: Date) {
@@ -332,11 +350,14 @@ export class NewsPage implements OnInit, OnDestroy {
             console.log('pause');
             clearInterval(this.dataCollectionIntervalID);
             this.appInBackground = true;
-            this.dataOnChangeCollection();
+            if (!this.userInBrowser) {
+                this.dataOnChangeCollection();
+            }
         });
 
         this.platform.resume.subscribe(() => {
             this.appInBackground = false;
+            this.fullViewDescription.d = new Date();
             this.resetDataCollection();
         });
     }
@@ -434,15 +455,25 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     dataOnContextChange(uA, brightness, tod, internet, batLevel) {
+        console.log(`writing into file: ${uA}, ${brightness}, ${internet}, ${batLevel},`)
+
         this.contextService.writeToFileOnlyOnContextChange(uA, brightness, tod, internet, batLevel, this.fullViewDescription);
+        this.updatePreviousValues();
+
     }
 
     dataOnChangeCollection() {
-        console.log('writing into file..');
-        console.log(this.currentContextDescription);
         if (this.contextService.getCurrentState() !== 'INTERVAL_SAMPLING') {
-            this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
-            this.fullViewDescription.d = new Date();
+
+            const tmpUa = this.userActivity;
+            const tmpBright = this.brightnessValidityObj.value;
+            const tmpNet = this.internetValidityObj.value;
+            const tmpBat = this.batteryValidityObj.percentage;
+            console.log(`writing into file: ${tmpUa}, ${tmpBright}, ${tmpNet}, ${tmpBat},`)
+            this.contextService.writeToFileOnlyOnContextChange(tmpUa, tmpBright, new Date().getHours(), tmpNet, tmpBat, this.fullViewDescription);
+
+            this.updatePreviousValues();
+
         }
     }
 
@@ -451,8 +482,10 @@ export class NewsPage implements OnInit, OnDestroy {
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
             this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
+            this.userInBrowser = true;
         } else {
             console.log('=========================== BROWSER CLOSED ===========================');
+            this.userInBrowser = false;
             this.resetDataCollection();
         }
     }

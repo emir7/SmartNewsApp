@@ -241,20 +241,15 @@ export class SensorReadingService {
                 directory: FilesystemDirectory.External,
                 encoding: FilesystemEncoding.UTF8
             });
-        } else {
-            const t = (new Date().getTime() - fvd.d.getTime()) / 1000;
-            Filesystem.appendFile({
-                path: 'readings/onchange.csv',
-                data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,
-                directory: FilesystemDirectory.External,
-                encoding: FilesystemEncoding.UTF8
-            });
         }
 
     }
 
     writeToFileOnlyOnContextChange(uA, brightness, tod, internet, batLevel, fvd: ViewDescription) {
         const t = (new Date().getTime() - fvd.d.getTime()) / 1000;
+        if (uA == null || brightness === -2 || batLevel === -2) {
+            return;
+        }
         Filesystem.appendFile({
             path: 'readings/onchange.csv',
             data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,
