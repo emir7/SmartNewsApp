@@ -22,7 +22,7 @@ import { ContextModel, ViewDescription } from '../shared/models/context/contextM
 })
 export class NewsPage implements OnInit, OnDestroy {
 
-    currentViewLayout = null;
+    currentViewLayout = 'largeCards';
     arr = [];
     currentVisibleElement = 0;
     canWatchScroll = true;
@@ -61,6 +61,25 @@ export class NewsPage implements OnInit, OnDestroy {
 
     dataCollectionIntervalID = null;
 
+    batteryValidityObj = {
+        percentage: -1,
+        d: new Date()
+    };
+
+    brightnessValidityObj = {
+        value: -1,
+        d: new Date()
+    };
+
+    internetValidityObj = {
+        value: -1,
+        d: new Date()
+    };
+
+    userActivity = null;
+
+    appInBackground = false;
+
     constructor(
         public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
@@ -84,8 +103,8 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-
         this.selectRandomView();
+        this.handleResumeBackgroundEvents();
 
         let lEl = null;
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
@@ -211,12 +230,115 @@ export class NewsPage implements OnInit, OnDestroy {
         });
 
 
-        this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
-            this.currentContextDescription = contextData;
+        this.initContextSubscriber();
+
+        if (this.contextService.getCurrentState() === 'INTERVAL_SAMPLING') {
+            this.dataIntervalCollecting();
+        }
+
+    }
+
+    initContextSubscriber() {
+        if (this.contextService.getCurrentState() === 'INTERVAL_SAMPLING') {
+            this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
+                this.currentContextDescription = contextData;
+            });
+        } else {
+            this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
+                if (this.appInBackground) {
+                    return;
+                }
+                if (this.isValidContextData(contextData)) {
+                    this.currentContextDescription = contextData;
+                    let writtenToFile = false;
+
+                    if (!this.userActivity) {
+                        this.userActivity = contextData.userActivityObj.types[0];
+                    } else {
+                        if (this.userActivity !== contextData.userActivityObj.types[0]) {
+                            console.log('writing into file because user activity changed');
+                            this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
+                                this.internetValidityObj.value, this.batteryValidityObj.percentage);
+                            this.userActivity = contextData.userActivityObj.types[0];
+                        }
+                    }
+                    if (this.internetValidityObj.value === -1) {
+                        this.internetValidityObj.value = contextData.internetObj.value;
+                        this.internetValidityObj.d = new Date();
+                    } else {
+                        console.log('1) Internet ' + ((new Date().getTime() - this.internetValidityObj.d.getTime()) / 1000));
+                        if (this.passed30sek(this.internetValidityObj.d)
+                            && this.internetValidityObj.value !== contextData.internetObj.value) {
+                            this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
+                                this.internetValidityObj.value, this.batteryValidityObj.percentage); writtenToFile = true;
+                            console.log('writing into file because internet changed');
+                            this.internetValidityObj.d = new Date();
+                            this.internetValidityObj.value = contextData.internetObj.value;
+                        }
+                    }
+                    if (this.batteryValidityObj.percentage === -1) {
+                        this.batteryValidityObj.percentage = contextData.batteryObj.percentage;
+                        this.batteryValidityObj.d = new Date();
+                    } else {
+                        console.log('2) Battery' + ((new Date().getTime() - this.batteryValidityObj.d.getTime()) / 1000));
+                        if (this.passed30sek(this.batteryValidityObj.d)
+                            && this.batteryValidityObj.percentage !== contextData.batteryObj.percentage) {
+                            if (!writtenToFile) {
+                                this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
+                                    this.internetValidityObj.value, this.batteryValidityObj.percentage);
+                                writtenToFile = true;
+                                console.log('writing into file because battery level changed');
+                                this.batteryValidityObj.percentage = contextData.batteryObj.percentage;
+                                this.batteryValidityObj.d = new Date();
+                            }
+                        }
+                    }
+                    if (this.brightnessValidityObj.value === -1) {
+                        this.brightnessValidityObj.value = contextData.brightnessObj.value;
+                        this.brightnessValidityObj.d = new Date();
+                    } else {
+                        console.log('3) Brightness' + ((new Date().getTime() - this.brightnessValidityObj.d.getTime()) / 1000));
+                        if (this.passed30sek(this.brightnessValidityObj.d)
+                            && this.brightnessValidityObj.value !== contextData.brightnessObj.value) {
+                            if (!writtenToFile) {
+                                this.dataOnChangeCollection();
+                                writtenToFile = true;
+                                console.log('writing into file because Brightness changed');
+                                this.brightnessValidityObj.value = contextData.brightnessObj.value;
+                                this.brightnessValidityObj.d = new Date();
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    passed30sek(d: Date) {
+        return (new Date().getTime() - d.getTime()) / 1000 >= 30;
+    }
+
+    isValidContextData(contextData: ContextModel) {
+        for (const el of contextData.validObjs) {
+            if (!el) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    handleResumeBackgroundEvents() {
+        this.platform.pause.subscribe(() => {
+            console.log('pause');
+            clearInterval(this.dataCollectionIntervalID);
+            this.appInBackground = true;
+            this.dataOnChangeCollection();
         });
 
-        this.dataIntervalCollecting();
-
+        this.platform.resume.subscribe(() => {
+            this.appInBackground = false;
+            this.resetDataCollection();
+        });
     }
 
     selectRandomView() {
@@ -236,6 +358,7 @@ export class NewsPage implements OnInit, OnDestroy {
         }
 
         generatedView = this.getView(Math.floor(Math.random() * 4), this.showImages);
+
         if (generatedView === 'gridView') {
             fontSize = 'small-font';
             this.fontSizeDefaultB = true;
@@ -243,8 +366,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
         const theme = (Math.random() < 0.5) ? 'light-theme' : 'dark-theme';
         this.theme.setTheme(theme);
-        console.log('boolean generiran pa je');
-        console.log(this.showImages);
         this.fullViewDescription = {
             fontSize,
             showimages: (this.showImages) ? 'withImages' : 'noImages',
@@ -254,9 +375,6 @@ export class NewsPage implements OnInit, OnDestroy {
             d: new Date()
         };
 
-        console.log('Nastimu sm view:');
-        console.log(this.fullViewDescription);
-        console.log('===================================================================');
         this.currentTheme = theme;
         this.toastController.create({
             message: `New view generated with parameters nview=${generatedView}\n \nfont=${fontSize}
@@ -266,10 +384,10 @@ export class NewsPage implements OnInit, OnDestroy {
         }).then(toastEl => {
             toastEl.present();
         });
+
         this.currentViewLayout = generatedView;
         this.changeDetector.detectChanges();
         this.toggleView(generatedView);
-
     }
 
     sameView(v: ViewDescription) {
@@ -309,10 +427,23 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
                 this.fullViewDescription.c += 1;
             }
-            if (this.fullViewDescription.c >= 5) {
+            if (this.fullViewDescription.c >= 12) { // po 120sek zamenjamo view.
                 this.selectRandomView();
             }
         }, 10000);
+    }
+
+    dataOnContextChange(uA, brightness, tod, internet, batLevel) {
+        this.contextService.writeToFileOnlyOnContextChange(uA, brightness, tod, internet, batLevel, this.fullViewDescription);
+    }
+
+    dataOnChangeCollection() {
+        console.log('writing into file..');
+        console.log(this.currentContextDescription);
+        if (this.contextService.getCurrentState() !== 'INTERVAL_SAMPLING') {
+            this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
+            this.fullViewDescription.d = new Date();
+        }
     }
 
     inBrowser($event) {
@@ -321,6 +452,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.dataCollectionIntervalID = null;
             this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
         } else {
+            console.log('=========================== BROWSER CLOSED ===========================');
             this.resetDataCollection();
         }
     }
@@ -651,11 +783,11 @@ export class NewsPage implements OnInit, OnDestroy {
             return;
         }
 
+        this.dataOnChangeCollection();
         this.fullViewDescription.view = viewType;
-        if (this.currentViewLayout == null) {
-            this.resetDataCollection();
-        }
-
+        this.resetDataCollection();
+        console.log('HERE I AM! spremenu se je view na ' + viewType + ' iz ' + this.currentViewLayout);
+        console.log('==================================');
         if (this.currentViewLayout === 'xLargeCards') {
             this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
@@ -836,6 +968,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleTheme() {
+        this.dataOnChangeCollection();
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
             this.fullViewDescription.theme = 'dark-theme';
@@ -844,6 +977,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.theme = 'light-theme';
         }
         this.resetDataCollection();
+        console.log('HERE I AM! spremenu se je thema ' + this.currentTheme);
     }
 
     ngOnDestroy() {
@@ -873,6 +1007,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleFontSize() {
+        this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
         if (this.fontSizeDefaultB) {
             this.headlinesFontSize = this.defaultFontSize;
@@ -883,19 +1018,25 @@ export class NewsPage implements OnInit, OnDestroy {
             this.authorFontSize = 18;
             this.fullViewDescription.fontSize = 'large-font';
         }
+        console.log('HERE I AM! spremenu se je font na ' + this.fontSizeDefaultB);
         this.resetDataCollection();
     }
 
     toggleImagesShowing() {
+        this.dataOnChangeCollection();
         this.showImages = !this.showImages;
         this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
         this.resetDataCollection();
+        console.log('HERE I AM! spremenu se je toggleImagesShowing ' + this.showImages);
+
     }
 
     resetDataCollection() {
-        this.fullViewDescription.d = new Date();
-        this.fullViewDescription.c = 0;
-        clearInterval(this.dataCollectionIntervalID);
-        this.dataIntervalCollecting();
+        if (this.contextService.getCurrentState() === 'INTERVAL_SAMPLING') {
+            this.fullViewDescription.d = new Date();
+            this.fullViewDescription.c = 0;
+            clearInterval(this.dataCollectionIntervalID);
+            this.dataIntervalCollecting();
+        }
     }
 }

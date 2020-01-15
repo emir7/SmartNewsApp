@@ -26,6 +26,7 @@ export interface ContextModel {
     userActivityObj: UserActivityModel;
     batteryObj: BatteryStatusModel;
     brightnessObj: BrightnessModel;
+    validObjs: boolean[];
 }
 
 export interface ViewDescription {

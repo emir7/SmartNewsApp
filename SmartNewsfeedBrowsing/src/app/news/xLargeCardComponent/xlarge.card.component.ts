@@ -2,7 +2,9 @@ import { Component, OnInit, OnDestroy, Input, EventEmitter, Output, NgZone, View
 import { take } from 'rxjs/operators';
 import { IonSlides } from '@ionic/angular';
 import { IndexSlideService } from 'src/app/shared/index.slide.service';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Plugins } from '@capacitor/core';
+
+const { CustomChromeBrowser } = Plugins;
 
 @Component({
     selector: 'app-XLargeCard',
@@ -23,7 +25,7 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     brokenImageUrl = 'assets/noImg.jpg';
 
-    constructor(private zone: NgZone, public indexSlideService: IndexSlideService, private iab: InAppBrowser) { }
+    constructor(private zone: NgZone, public indexSlideService: IndexSlideService) { }
 
     ngOnInit() {
         console.log('ngOnInit');
@@ -46,9 +48,10 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.indexSlideService.setIndexToGoBack(index);
             });
     }
+
     openUrl(url: string) {
-        const browser = this.iab.create(url);
-        browser.on('exit').subscribe((event) => {
+        CustomChromeBrowser.open({ url });
+        CustomChromeBrowser.addListener('browserClosed', () => {
             this.inBrowser.emit('outBrowser');
         });
         this.inBrowser.emit('inBrowser');

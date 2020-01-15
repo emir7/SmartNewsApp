@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Plugins } from '@capacitor/core';
+const { CustomChromeBrowser } = Plugins;
+const { Browser } = Plugins;
 
 @Component({
     selector: 'app-LargeCard',
     templateUrl: './large.card.component.html',
     styleUrls: ['./large.card.component.scss']
 })
-
 export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     brokenImageUrl = 'assets/noImg.jpg';
@@ -19,7 +20,7 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     @Output() largeCardLoaded = new EventEmitter<string>();
     @Output() inBrowser = new EventEmitter<string>();
 
-    constructor(private zone: NgZone, private iab: InAppBrowser) { }
+    constructor(private zone: NgZone) { }
 
     ngOnInit() {
         console.log(this.arr);
@@ -44,8 +45,8 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openUrl(url: string) {
-        const browser = this.iab.create(url);
-        browser.on('exit').subscribe((event) => {
+        CustomChromeBrowser.open({ url });
+        CustomChromeBrowser.addListener('browserClosed', () => {
             this.inBrowser.emit('outBrowser');
         });
         this.inBrowser.emit('inBrowser');

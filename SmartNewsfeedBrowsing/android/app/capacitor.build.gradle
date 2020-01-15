@@ -9,6 +9,7 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
+    implementation project(':CustomChromeBrowser')
     implementation project(':my-image-downloader')
     implementation project(':my-sensors')
     implementation project(':users-pa-recognition')

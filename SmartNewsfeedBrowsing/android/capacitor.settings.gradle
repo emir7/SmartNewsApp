@@ -2,6 +2,9 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
 
+include ':CustomChromeBrowser'
+project(':CustomChromeBrowser').projectDir = new File('../node_modules/CustomChromeBrowser/android')
+
 include ':my-image-downloader'
 project(':my-image-downloader').projectDir = new File('../node_modules/my-image-downloader/android')
 

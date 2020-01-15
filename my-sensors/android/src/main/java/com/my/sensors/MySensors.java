@@ -70,14 +70,14 @@ public class MySensors extends Plugin {
                 if(mWifi.isConnected()) {
                     Log.i("MY_SENSOR_INTERNET", "USER HAS wifi");
                     WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                    int numberOfLevels = 5;
+                    int numberOfLevels = 3;
                     WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                     int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), numberOfLevels);
                     Log.i("MY_SENSOR_INTERNET", "wifi level = " + level);
                     JSObject ret = new JSObject();
                     ret.put("type","wifi");
                     ret.put("value", level);
-                    ret.put("strength", getWifiStrength(level));
+                    ret.put("strength", level);
                     call.success(ret);
                 } else {
                     Log.i("MY_SENSOR_INTERNET", "USER HAS cellular");
@@ -101,18 +101,6 @@ public class MySensors extends Plugin {
             e.printStackTrace();
         }
 
-    }
-
-    private int getWifiStrength(int value) {
-        if(value == 4) {
-            return 2;
-        }
-
-        if(value == 2 || value == 3) {
-            return 1;
-        }
-
-        return 0;
     }
 
     private int getCellularStrength(String type) {

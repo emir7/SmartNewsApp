@@ -10,31 +10,36 @@ const { Network, UsersPARecognition, MySensors, Filesystem } = Plugins;
 @Injectable()
 export class SensorReadingService {
 
+    // currentState = 'INTERVAL_SAMPLING';
+    currentState = 'ON_CHANGE_SAMPLING';
+
     currentContext = new BehaviorSubject<ContextModel>({
         batteryObj: {
             plugged: false,
             level: 1,
-            percentage: 50
+            percentage: 50,
         },
         brightnessObj: {
             level: 1,
-            value: 30
+            value: 30,
         },
         internetObj: {
             type: 'none',
             strength: - 1,
-            value: -1
+            value: -1,
         },
         userActivityObj: {
             types: ['STILL'],
             probs: [100],
             values: [3]
-        }
+        },
+        validObjs: [false, false, false]
     });
 
     userPARecognition = null;
     mySensors = null;
 
+    timeWatch = false;
     currentTime = 0;
 
     constructor(private batteryStatus: BatteryStatus) {
@@ -70,21 +75,15 @@ export class SensorReadingService {
 
             this.setCurrentBrighness({
                 value: data.value,
-                level
+                level,
             });
 
         });
 
+        this.getCurrentInternetStatus();
+
         setInterval(() => {
-            this.mySensors.getNetworkStatus().then((res) => {
-
-                this.setCurrentInternetStatus({
-                    type: res.type,
-                    strength: res.strength,
-                    value: res.value
-                });
-            });
-
+            this.getCurrentInternetStatus();
         }, 5000);
 
 
@@ -95,14 +94,14 @@ export class SensorReadingService {
                     this.setCurrentInternetStatus({
                         type: res.type,
                         strength: res.strength,
-                        value: res.value
+                        value: res.value,
                     });
                 });
             } else {
                 this.setCurrentInternetStatus({
                     type: 'none',
                     strength: -1,
-                    value: -1
+                    value: -1,
                 });
             }
 
@@ -110,13 +109,25 @@ export class SensorReadingService {
         });
 
         this.batteryStatus.onChange().subscribe(status => {
-
+            console.log('opa, baterija se je spremenila :)');
+            console.log(status);
             this.setCurrentBatteryStatus({
                 level: this.getBatteryLevel(status.isPlugged, status.level),
                 percentage: status.level,
-                plugged: status.isPlugged
+                plugged: status.isPlugged,
             });
 
+        });
+    }
+
+    getCurrentInternetStatus() {
+        this.mySensors.getNetworkStatus().then((res) => {
+
+            this.setCurrentInternetStatus({
+                type: res.type,
+                strength: res.strength,
+                value: res.value,
+            });
         });
     }
 
@@ -126,6 +137,7 @@ export class SensorReadingService {
                 currentContextRec.internetObj.value = obj.value;
                 currentContextRec.internetObj.strength = obj.strength;
                 currentContextRec.internetObj.type = obj.type;
+                currentContextRec.validObjs[2] = true;
                 this.currentContext.next(currentContextRec);
             }
         });
@@ -137,6 +149,7 @@ export class SensorReadingService {
                 currentContextRec.batteryObj.percentage = obj.percentage;
                 currentContextRec.batteryObj.level = obj.level;
                 currentContextRec.batteryObj.plugged = obj.plugged;
+                currentContextRec.validObjs[0] = true;
                 this.currentContext.next(currentContextRec);
             }
         });
@@ -156,13 +169,15 @@ export class SensorReadingService {
 
     setCurrentBrighness(obj: BrightnessModel) {
         this.getCurrentContext().pipe(take(1)).subscribe((currentContextRec) => {
-            if (currentContextRec.brightnessObj.value !== obj.value) {
+            if (!this.timeWatch && currentContextRec.brightnessObj.value !== obj.value) {
                 currentContextRec.brightnessObj.value = obj.value;
                 currentContextRec.brightnessObj.level = obj.level;
+                currentContextRec.validObjs[1] = true;
                 this.currentContext.next(currentContextRec);
             }
         });
     }
+
 
     getCurrentContext() {
         return this.currentContext.asObservable();
@@ -219,13 +234,43 @@ export class SensorReadingService {
         const internet = ctx.internetObj.value;
         const batLevel = ctx.batteryObj.percentage;
 
+        if (this.getCurrentState() === 'INTERVAL_SAMPLING') {
+            Filesystem.appendFile({
+                path: 'readings/interval.csv',
+                data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view}\n`,
+                directory: FilesystemDirectory.External,
+                encoding: FilesystemEncoding.UTF8
+            });
+        } else {
+            const t = (new Date().getTime() - fvd.d.getTime()) / 1000;
+            Filesystem.appendFile({
+                path: 'readings/onchange.csv',
+                data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,
+                directory: FilesystemDirectory.External,
+                encoding: FilesystemEncoding.UTF8
+            });
+        }
+
+    }
+
+    writeToFileOnlyOnContextChange(uA, brightness, tod, internet, batLevel, fvd: ViewDescription) {
+        const t = (new Date().getTime() - fvd.d.getTime()) / 1000;
         Filesystem.appendFile({
-            path: 'readings/interval.csv',
-            data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view}\n`,
+            path: 'readings/onchange.csv',
+            data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,
             directory: FilesystemDirectory.External,
             encoding: FilesystemEncoding.UTF8
         });
     }
+
+    setTimeWatch() {
+        this.timeWatch = true;
+    }
+
+    getCurrentState() {
+        return this.currentState;
+    }
+
 
 }
 

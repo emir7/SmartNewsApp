@@ -1,6 +1,10 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, AfterViewInit } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Plugins } from '@capacitor/core';
+
+const { Browser } = Plugins;
+const { CustomChromeBrowser } = Plugins;
+
 
 @Component({
     selector: 'app-GridView',
@@ -18,7 +22,7 @@ export class GridViewComponent implements OnInit, OnDestroy, AfterViewInit {
 
     brokenImageUrl = 'assets/noImg.jpg';
 
-    constructor(private zone: NgZone, private iab: InAppBrowser) { }
+    constructor(private zone: NgZone) { }
 
     ngOnInit() {
         console.log('app-GridView ngOnInit');
@@ -39,10 +43,9 @@ export class GridViewComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openUrl(url: string) {
-        const browser = this.iab.create(url);
-        browser.on('exit').subscribe((event) => {
+        CustomChromeBrowser.open({ url });
+        CustomChromeBrowser.addListener('browserClosed', () => {
             this.inBrowser.emit('outBrowser');
-
         });
         this.inBrowser.emit('inBrowser');
     }
