@@ -58,29 +58,23 @@ public class MySensors extends Plugin {
 
     @PluginMethod()
     public void getNetworkStatus(PluginCall call) {
-        Log.i("MY_SENSOR_INTERNET", "called0");
 
         ConnectivityManager connManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
-        Log.i("MY_SENSOR_INTERNET", "called");
         try{
             if(networkInfo.isConnected()) {
-                Log.i("MY_SENSOR_INTERNET", "USER HAS INTERNET");
                 if(mWifi.isConnected()) {
-                    Log.i("MY_SENSOR_INTERNET", "USER HAS wifi");
                     WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                     int numberOfLevels = 3;
                     WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                     int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), numberOfLevels);
-                    Log.i("MY_SENSOR_INTERNET", "wifi level = " + level);
                     JSObject ret = new JSObject();
                     ret.put("type","wifi");
                     ret.put("value", level);
                     ret.put("strength", level);
                     call.success(ret);
                 } else {
-                    Log.i("MY_SENSOR_INTERNET", "USER HAS cellular");
                     JSObject ret = new JSObject();
                     String cellularNetwork = getNetworkClass();
                     ret.put("type","cellular");
@@ -89,7 +83,6 @@ public class MySensors extends Plugin {
                     call.success(ret);
                 }
             }else{
-                Log.i("MY_SENSOR_INTERNET", "USER HAS no internet");
                 JSObject ret = new JSObject();
                 ret.put("type","none");
                 ret.put("value", 0);

@@ -34,11 +34,9 @@ export class SenosorTestPage implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-
         if (this.currentContextSub) {
             this.currentContextSub.unsubscribe();
         }
-
     }
 
 }

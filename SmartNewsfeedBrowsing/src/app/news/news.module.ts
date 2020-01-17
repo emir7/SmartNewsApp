@@ -14,6 +14,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { IndexSlideService } from '../shared/index.slide.service';
 import { PopoverComponent } from './popoverComponent/popover.component';
 import { GagNewsApiService } from '../shared/gag.news.api.service';
+import { FileModal } from './modalFile/file.modal.data';
 
 const routes: Routes = [
     {
@@ -32,7 +33,7 @@ const routes: Routes = [
     ],
 
     providers: [GoogleNewsApiService, InAppBrowser, IndexSlideService, GagNewsApiService],
-    entryComponents: [PopoverComponent],
-    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent, PopoverComponent]
+    entryComponents: [PopoverComponent, FileModal],
+    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent, PopoverComponent, FileModal]
 })
 export class NewsPageModule { }

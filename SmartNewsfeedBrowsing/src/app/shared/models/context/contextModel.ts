@@ -1,7 +1,7 @@
 export interface InternetStatusModel {
     type: string;
     strength: number;
-    value: number;
+    value: number | string;
 }
 
 export interface UserActivityModel {

@@ -34,11 +34,9 @@ public class UsersPARecognition extends Plugin {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "ON RECEIVE!!!!!!!!!!!!!!!!!!!");
             int [] typesArr = intent.getIntArrayExtra(Constants.ACTIVITY_ARRAY_OF_TYPES);
             int [] probsArr = intent.getIntArrayExtra(Constants.ACTIVITY_ARRAY_OF_PROBS);
-            Log.i(TAG, "onReceive1 "+ Arrays.toString(typesArr));
-            Log.i(TAG, "onReceive2 "+ Arrays.toString(probsArr));
+
             JSObject jsObject = new JSObject();
 
             JSArray jsTypesArr = new JSArray();
@@ -55,7 +53,6 @@ public class UsersPARecognition extends Plugin {
             jsObject.put("probs", jsProbsArr);
             jsObject.put("types", jsStringTypesArr);
 
-            Log.i(TAG, jsObject.toString());
             notifyListeners("userPhysicalActivity", jsObject);
         }
 

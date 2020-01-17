@@ -14,6 +14,7 @@ import { PopoverComponent } from './popoverComponent/popover.component';
 import { GagNewsApiService } from '../shared/gag.news.api.service';
 import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
+import { ModalController } from '@ionic/angular';
 
 @Component({
     selector: 'app-news',
@@ -96,7 +97,8 @@ export class NewsPage implements OnInit, OnDestroy {
         public popoverController: PopoverController,
         public gagsApiService: GagNewsApiService,
         public contextService: SensorReadingService,
-        public toastController: ToastController) {
+        public toastController: ToastController,
+        public modalController: ModalController) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
@@ -267,10 +269,11 @@ export class NewsPage implements OnInit, OnDestroy {
                         }
                     }
                     if (this.internetValidityObj.value === -2) {
-                        this.internetValidityObj.value = contextData.internetObj.value;
+                        this.internetValidityObj.value = contextData.internetObj.value as number;
                         this.internetValidityObj.d = new Date();
                     } else {
                         console.log('1) Internet ' + ((new Date().getTime() - this.internetValidityObj.d.getTime()) / 1000));
+                        console.log(`Internet ${this.internetValidityObj.value} and ${contextData.internetObj.value}`);
                         if (this.passed30sek(this.internetValidityObj.d)
                             && this.internetValidityObj.value !== contextData.internetObj.value) {
                             if (!writtenToFile) {
@@ -286,6 +289,7 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.batteryValidityObj.d = new Date();
                     } else {
                         console.log('2) Battery' + ((new Date().getTime() - this.batteryValidityObj.d.getTime()) / 1000));
+                        console.log(`Battery ${this.batteryValidityObj.percentage} and ${contextData.batteryObj.percentage}`);
                         if (this.passed30sek(this.batteryValidityObj.d)
                             && this.batteryValidityObj.percentage !== contextData.batteryObj.percentage) {
                             if (!writtenToFile) {
@@ -301,6 +305,8 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.brightnessValidityObj.d = new Date();
                     } else {
                         console.log('3) Brightness' + ((new Date().getTime() - this.brightnessValidityObj.d.getTime()) / 1000));
+                        console.log(`Battery ${this.brightnessValidityObj.value} and ${contextData.brightnessObj.value}`);
+
                         if (this.passed30sek(this.brightnessValidityObj.d)
                             && this.brightnessValidityObj.value !== contextData.brightnessObj.value) {
                             if (!writtenToFile) {
@@ -323,7 +329,7 @@ export class NewsPage implements OnInit, OnDestroy {
         this.batteryValidityObj.percentage = this.currentContextDescription.batteryObj.percentage;
         this.batteryValidityObj.d = new Date();
 
-        this.internetValidityObj.value = this.currentContextDescription.internetObj.value;
+        this.internetValidityObj.value = this.currentContextDescription.internetObj.value as number;
         this.internetValidityObj.d = new Date();
 
         this.brightnessValidityObj.value = this.currentContextDescription.brightnessObj.value;
@@ -397,14 +403,6 @@ export class NewsPage implements OnInit, OnDestroy {
         };
 
         this.currentTheme = theme;
-        this.toastController.create({
-            message: `New view generated with parameters nview=${generatedView}\n \nfont=${fontSize}
-                    \nimages=${this.showImages}
-                    \ntheme=${this.currentTheme}`,
-            duration: 5000
-        }).then(toastEl => {
-            toastEl.present();
-        });
 
         this.currentViewLayout = generatedView;
         this.changeDetector.detectChanges();
@@ -448,18 +446,15 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
                 this.fullViewDescription.c += 1;
             }
-            if (this.fullViewDescription.c >= 12) { // po 120sek zamenjamo view.
+            if (this.fullViewDescription.c >= 2) { // po 120sek zamenjamo view.
                 this.selectRandomView();
             }
         }, 10000);
     }
 
     dataOnContextChange(uA, brightness, tod, internet, batLevel) {
-        console.log(`writing into file: ${uA}, ${brightness}, ${internet}, ${batLevel},`)
-
         this.contextService.writeToFileOnlyOnContextChange(uA, brightness, tod, internet, batLevel, this.fullViewDescription);
         this.updatePreviousValues();
-
     }
 
     dataOnChangeCollection() {
@@ -469,11 +464,9 @@ export class NewsPage implements OnInit, OnDestroy {
             const tmpBright = this.brightnessValidityObj.value;
             const tmpNet = this.internetValidityObj.value;
             const tmpBat = this.batteryValidityObj.percentage;
-            console.log(`writing into file: ${tmpUa}, ${tmpBright}, ${tmpNet}, ${tmpBat},`)
             this.contextService.writeToFileOnlyOnContextChange(tmpUa, tmpBright, new Date().getHours(), tmpNet, tmpBat, this.fullViewDescription);
 
             this.updatePreviousValues();
-
         }
     }
 
@@ -484,7 +477,6 @@ export class NewsPage implements OnInit, OnDestroy {
             this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
             this.userInBrowser = true;
         } else {
-            console.log('=========================== BROWSER CLOSED ===========================');
             this.userInBrowser = false;
             this.resetDataCollection();
         }
@@ -819,8 +811,7 @@ export class NewsPage implements OnInit, OnDestroy {
         this.dataOnChangeCollection();
         this.fullViewDescription.view = viewType;
         this.resetDataCollection();
-        console.log('HERE I AM! spremenu se je view na ' + viewType + ' iz ' + this.currentViewLayout);
-        console.log('==================================');
+
         if (this.currentViewLayout === 'xLargeCards') {
             this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
@@ -962,14 +953,14 @@ export class NewsPage implements OnInit, OnDestroy {
         this.arr = [];
         let c = 0;
 
-        console.log(obj);
-        console.log('==========================================');
         return this.configureImageCaching(obj.news.rss.channel.item, true).then((imagesNeedToCache) => {
             for (const el of obj.news.rss.channel.item) {
                 const urlToImage = this.extract9gagImage(el);
-                console.log("title = " + el.title);
+                console.log("EL.TITLE = " + el.title);
+                console.log("EL.TITLE REPLACED CHAR = ", el.title.replace(/&#039;/g, "'"));
+                console.log("================================");
                 const val = {
-                    title: el.title.replace("&#039;", "'"),
+                    title: el.title.replace(/&#039;/g, "'"),
                     author: '',
                     urlToImage,
                     url: el.guid.$t,
@@ -1010,7 +1001,6 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.theme = 'light-theme';
         }
         this.resetDataCollection();
-        console.log('HERE I AM! spremenu se je thema ' + this.currentTheme);
     }
 
     ngOnDestroy() {
@@ -1051,7 +1041,6 @@ export class NewsPage implements OnInit, OnDestroy {
             this.authorFontSize = 18;
             this.fullViewDescription.fontSize = 'large-font';
         }
-        console.log('HERE I AM! spremenu se je font na ' + this.fontSizeDefaultB);
         this.resetDataCollection();
     }
 
@@ -1060,8 +1049,6 @@ export class NewsPage implements OnInit, OnDestroy {
         this.showImages = !this.showImages;
         this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
         this.resetDataCollection();
-        console.log('HERE I AM! spremenu se je toggleImagesShowing ' + this.showImages);
-
     }
 
     resetDataCollection() {

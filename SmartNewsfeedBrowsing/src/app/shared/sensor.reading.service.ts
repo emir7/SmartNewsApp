@@ -109,14 +109,11 @@ export class SensorReadingService {
         });
 
         this.batteryStatus.onChange().subscribe(status => {
-            console.log('opa, baterija se je spremenila :)');
-            console.log(status);
             this.setCurrentBatteryStatus({
                 level: this.getBatteryLevel(status.isPlugged, status.level),
                 percentage: status.level,
                 plugged: status.isPlugged,
             });
-
         });
     }
 
@@ -159,9 +156,11 @@ export class SensorReadingService {
     setCurrentUserActivity(obj: UserActivityModel) {
         this.getCurrentContext().pipe(take(1)).subscribe((currentContextRec) => {
             if (currentContextRec.userActivityObj.types[0] !== obj.types[0]) {
+
                 currentContextRec.userActivityObj.types = [...obj.types];
                 currentContextRec.userActivityObj.probs = [...obj.probs];
                 currentContextRec.userActivityObj.values = [...obj.values];
+
                 this.currentContext.next(currentContextRec);
             }
         });
@@ -255,6 +254,16 @@ export class SensorReadingService {
             data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,
             directory: FilesystemDirectory.External,
             encoding: FilesystemEncoding.UTF8
+        });
+    }
+
+    readFileContent() {
+        return Filesystem.readFile({
+            path: 'readings/onchange.csv',
+            directory: FilesystemDirectory.External,
+            encoding: FilesystemEncoding.UTF8
+        }).then(data => {
+            return data;
         });
     }
 

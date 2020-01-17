@@ -24,7 +24,7 @@ export class AppComponent {
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
     private themeService: ThemeService,
-    private sensorReadingService: SensorReadingService
+    private sensorReadingService: SensorReadingService,
   ) {
 
     this.initializeApp();
