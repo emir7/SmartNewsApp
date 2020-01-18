@@ -249,6 +249,10 @@ export class SensorReadingService {
         if (uA == null || brightness === -2 || batLevel === -2) {
             return;
         }
+        console.log('v datoteko zapisujem:');
+        console.log(`${uA};${brightness};${tod};${internet};${batLevel}`);
+        console.log(fvd);
+        console.log('======================================');
         Filesystem.appendFile({
             path: 'readings/onchange.csv',
             data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,

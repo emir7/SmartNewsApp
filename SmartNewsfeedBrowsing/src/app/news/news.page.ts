@@ -23,7 +23,7 @@ import { ModalController } from '@ionic/angular';
 })
 export class NewsPage implements OnInit, OnDestroy {
 
-    currentViewLayout = 'largeCards';
+    currentViewLayout = null;
     arr = [];
     currentVisibleElement = 0;
     canWatchScroll = true;
@@ -443,10 +443,11 @@ export class NewsPage implements OnInit, OnDestroy {
                 view: this.currentViewLayout
             };
             if (this.sameView(cView)) {
+                console.log('writing data into file');
                 this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
                 this.fullViewDescription.c += 1;
             }
-            if (this.fullViewDescription.c >= 2) { // po 120sek zamenjamo view.
+            if (this.fullViewDescription.c >= 1) { // po 120sek zamenjamo view.
                 this.selectRandomView();
             }
         }, 10000);
@@ -1030,6 +1031,9 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleFontSize() {
+        if (this.currentViewLayout === 'gridView') {
+            return;
+        }
         this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
         if (this.fontSizeDefaultB) {
@@ -1045,10 +1049,22 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleImagesShowing() {
-        this.dataOnChangeCollection();
         this.showImages = !this.showImages;
+
+        if (this.contextService.currentState === 'INTERVAL_SAMPLING') {
+            this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
+        } else {
+            this.fullViewDescription.showimages = (!this.showImages) ? 'withImages' : 'noImages';
+        }
+
+        if (this.currentViewLayout === 'gridView') {
+            this.toggleView('largeCards');
+        } else {
+            this.resetDataCollection();
+            this.dataOnChangeCollection();
+        }
+
         this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
-        this.resetDataCollection();
     }
 
     resetDataCollection() {
