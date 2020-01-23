@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, Afte
 import { take } from 'rxjs/operators';
 import { Plugins } from '@capacitor/core';
 
-const { Browser } = Plugins;
 const { CustomChromeBrowser } = Plugins;
 
 @Component({

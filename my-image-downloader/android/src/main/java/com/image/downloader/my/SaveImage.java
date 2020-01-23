@@ -9,7 +9,9 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class SaveImage extends AsyncTask<Void, Void, Void> {
 
@@ -26,10 +28,32 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
         this.root = root;
     }
 
+    public void deleteImages() {
+        String imagesPath = root + "/Images";
+        File directory = new File(imagesPath);
+
+        File [] files = directory.listFiles();
+        Log.d(LOG_CHANNEL, "Size = "+files.length);
+
+        for (int i = 0; i < files.length; i++) {
+            Date currentDate = new Date();
+            Date fileCreation = new Date(files[i].lastModified());
+            long diff = currentDate.getTime() - fileCreation.getTime();
+            long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+            if (days >= 2) {
+                Log.d(LOG_CHANNEL, "FileName: "+files[i].getName() + " deleted");
+                files[i].delete();
+            }
+
+        }
+
+    }
+
     @Override
     protected Void doInBackground(Void... voids) {
         Log.i(LOG_CHANNEL, "doInBackground1");
 
+        deleteImages();
         try{
 
             for(int i = 0; i < urls.size(); i++){
@@ -50,7 +74,7 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
         }
 
 
-        String path = root + "/" + "Images/";
+        String path = root + "/Images/";
 
         File dir = new File(path);
         if (!dir.exists()) {

@@ -21,6 +21,26 @@ ion-refresher {
 }
 
 
+@media screen and (max-height: 650px) {
+    ::ng-deep .quiz .modal-wrapper {
+        width: 95vw;
+        height: 90vh;
+        border-radius: 25px !important;
+    }
+}
+
+
+@media screen and (min-height: 660px) {
+    ::ng-deep .quiz .modal-wrapper {
+        width: 95vw;
+        height: 75vh;
+        border-radius: 25px !important;
+    }
+}
+
+::ng-deep.quiz-content .inner-scroll.scroll-y {
+    overflow: hidden !important;
+}
 
 /*
 .toolbar-background {

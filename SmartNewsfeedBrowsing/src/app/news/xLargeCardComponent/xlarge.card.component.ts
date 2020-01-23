@@ -58,7 +58,9 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     updateUrl($event, el) {
-        document.querySelectorAll('img')[el].src = this.brokenImageUrl;
+        console.log("UPDATE URL");
+        const imgToFix = document.querySelectorAll('.slika')[el] as any;
+        imgToFix.style.backgroundImage = `url('${this.brokenImageUrl}')`;
     }
 
     ngOnDestroy() {

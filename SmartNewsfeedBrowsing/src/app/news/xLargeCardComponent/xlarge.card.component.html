@@ -1,8 +1,11 @@
 <ion-slides class="slides" style="position: relative; height: 100%;" #ionSlides (ionSlideDidChange)="onSlideChange()">
     <ion-slide *ngFor="let item of arr; let i = index;">
-        <ion-card class="card">
+        <ion-card class="card" style="width:100%">
             <!--<img *ngIf="showImages" [src]="item.urlToImage" (error)="updateUrl($event, i)" />-->
-            <div class="slika" *ngIf="showImages" [style.backgroundImage]="'url(' + item.urlToImage +')'"></div>
+            <div class="slika" [style.display]="(showImages)?'block':'none'"
+                [style.backgroundImage]="'url(' + item.urlToImage +')'"></div>
+            <img [src]="item.urlToImage" style="display: none" (error)="updateUrl($event, i)" />
+
             <ion-card-header>
                 <ion-card-subtitle [style.fontSize]="authorFontSize +'px'">
                     {{item.author}}</ion-card-subtitle>

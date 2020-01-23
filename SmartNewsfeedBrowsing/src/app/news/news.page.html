@@ -19,6 +19,9 @@
             <ion-button (click)="openNewsOptions($event)">
                 <ion-icon slot="icon-only" name="more"></ion-icon>
             </ion-button>
+            <ion-button (click)="openQuiz($event)">
+                <ion-icon slot="icon-only" name="help"></ion-icon>
+            </ion-button>
         </ion-buttons>
     </ion-toolbar>
     <ion-toolbar>
@@ -57,16 +60,18 @@
 
 <ion-footer style="background-color: white;">
     <ion-segment color="dark">
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('largeCards')">
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('largeCards', this)">
             <ion-icon name="logo-buffer"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('gridView')" *ngIf="showImages">
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('gridView', this)"
+            *ngIf="showImages">
             <ion-icon name="grid"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards')" *ngIf="showImages">
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards', this)"
+            *ngIf="showImages">
             <ion-icon name="menu"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('xLargeCards')">
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('xLargeCards', this)">
             <ion-icon name="albums"></ion-icon>
         </ion-segment-button>
     </ion-segment>

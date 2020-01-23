@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, Afte
 import { take } from 'rxjs/operators';
 import { Plugins } from '@capacitor/core';
 const { CustomChromeBrowser } = Plugins;
-const { Browser } = Plugins;
 
 @Component({
     selector: 'app-LargeCard',
@@ -30,7 +29,6 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     ionViewDidEnter() {
         console.log('ionViewDidEnter');
     }
-
 
     ngAfterViewInit() {
         console.log('ngAfterViewInit');

@@ -10,8 +10,8 @@ const { Network, UsersPARecognition, MySensors, Filesystem } = Plugins;
 @Injectable()
 export class SensorReadingService {
 
-    // currentState = 'INTERVAL_SAMPLING';
-    currentState = 'ON_CHANGE_SAMPLING';
+    currentState = 'INTERVAL_SAMPLING';
+    //currentState = 'ON_CHANGE_SAMPLING';
 
     currentContext = new BehaviorSubject<ContextModel>({
         batteryObj: {
@@ -204,9 +204,6 @@ export class SensorReadingService {
 
     evalTime(d: Date) {
 
-        console.log('d.getHours() ' + d.getHours());
-        console.log('===================');
-
         if (d.getHours() >= 0 && d.getHours() < 12) {
             this.currentTime = 0;
         }
@@ -249,10 +246,6 @@ export class SensorReadingService {
         if (uA == null || brightness === -2 || batLevel === -2) {
             return;
         }
-        console.log('v datoteko zapisujem:');
-        console.log(`${uA};${brightness};${tod};${internet};${batLevel}`);
-        console.log(fvd);
-        console.log('======================================');
         Filesystem.appendFile({
             path: 'readings/onchange.csv',
             data: `${uA};${brightness};${tod};${internet};${batLevel};${fvd.fontSize};${fvd.showimages};${fvd.theme};${fvd.view};${t}\n`,

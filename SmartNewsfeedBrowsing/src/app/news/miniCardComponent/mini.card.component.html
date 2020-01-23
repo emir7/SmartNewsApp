@@ -3,7 +3,7 @@
 
         <ion-grid>
             <ion-row>
-                <ion-col *ngIf="showImages" size="5">
+                <ion-col [style.display]="(showImages)?'block':'none'" size="5">
                     <div class="slika" [style.backgroundImage]="'url(' + item.urlToImage +')'"></div>
                 </ion-col>
                 <img [src]="item.urlToImage" style="display: none" (error)="updateUrl($event, i)" />

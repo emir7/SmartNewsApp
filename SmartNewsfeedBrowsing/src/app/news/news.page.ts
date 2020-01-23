@@ -15,6 +15,7 @@ import { GagNewsApiService } from '../shared/gag.news.api.service';
 import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
+import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
 
 @Component({
     selector: 'app-news',
@@ -448,7 +449,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.fullViewDescription.c += 1;
             }
             if (this.fullViewDescription.c >= 1) { // po 120sek zamenjamo view.
-                this.selectRandomView();
+                //this.selectRandomView();
             }
         }, 10000);
     }
@@ -957,9 +958,6 @@ export class NewsPage implements OnInit, OnDestroy {
         return this.configureImageCaching(obj.news.rss.channel.item, true).then((imagesNeedToCache) => {
             for (const el of obj.news.rss.channel.item) {
                 const urlToImage = this.extract9gagImage(el);
-                console.log("EL.TITLE = " + el.title);
-                console.log("EL.TITLE REPLACED CHAR = ", el.title.replace(/&#039;/g, "'"));
-                console.log("================================");
                 const val = {
                     title: el.title.replace(/&#039;/g, "'"),
                     author: '',
@@ -1074,5 +1072,19 @@ export class NewsPage implements OnInit, OnDestroy {
             clearInterval(this.dataCollectionIntervalID);
             this.dataIntervalCollecting();
         }
+    }
+
+    openQuiz($event) {
+        console.log('Opening modal');
+        this.modalController.create({
+            component: QuickQuizModalPage,
+            cssClass: 'quiz',
+            backdropDismiss: false
+        }).then(modalEl => {
+            modalEl.present();
+            return modalEl.onDidDismiss();
+        }).then((obj) => {
+            console.log(obj.data);
+        });
     }
 }

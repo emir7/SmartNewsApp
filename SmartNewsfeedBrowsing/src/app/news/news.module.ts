@@ -15,6 +15,7 @@ import { IndexSlideService } from '../shared/index.slide.service';
 import { PopoverComponent } from './popoverComponent/popover.component';
 import { GagNewsApiService } from '../shared/gag.news.api.service';
 import { FileModal } from './modalFile/file.modal.data';
+import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
 
 const routes: Routes = [
     {
@@ -33,7 +34,7 @@ const routes: Routes = [
     ],
 
     providers: [GoogleNewsApiService, InAppBrowser, IndexSlideService, GagNewsApiService],
-    entryComponents: [PopoverComponent, FileModal],
-    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent, PopoverComponent, FileModal]
+    entryComponents: [PopoverComponent, FileModal, QuickQuizModalPage],
+    declarations: [NewsPage, MiniCardComponent, LargeCardComponent, XLargeCardComponent, GridViewComponent, PopoverComponent, FileModal, QuickQuizModalPage],
 })
 export class NewsPageModule { }
