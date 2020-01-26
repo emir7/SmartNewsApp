@@ -1,0 +1,33 @@
+<ion-content>
+
+    <ion-slides pager="true" #ionSlides>
+        <ion-slide class="step-one">
+            <ion-img src="https://image.flaticon.com/icons/svg/1688/1688394.svg"></ion-img>
+            <h3>O zbiranju podatkov</h3>
+            <p>Aplikacija bo med uporabo zbirala podatke o vaši trenutni aktivnosti (hoja, vožnja, stanje mirovanja),
+                svetlost okolja v katerem se nahajate, hitrost internetne povezave in trenutni nivo baterije. </p>
+            <ion-button (click)="next()">Nadaljuj</ion-button>
+
+        </ion-slide>
+
+        <ion-slide class="step-two">
+            <ion-img
+                src="https://cdn3.iconfinder.com/data/icons/search-22/512/292_Graphic_Info_graphics_Graph_Search_Chart-512.png">
+            </ion-img>
+            <h3>Uporaba aplikacije</h3>
+            <p>V nekem trenutku vam bomo naključno spremenili trenuten pogled v aplikaciji, lahko pa ga spreminjate tudi
+                sami, ob vsaki spremembi pa vas čaka kratek vprašalnik, s katerim bomo ocenjevali vaše zadovoljstvo
+                (podrobnosti o tem bodo prikazane v nadaljevanju).</p>
+            <ion-button (click)="next()">Nadaljuj</ion-button>
+
+        </ion-slide>
+
+        <ion-slide class="step-three">
+            <ion-img src="/assets/slides/step3.svg"></ion-img>
+            <h1>Spreminjanje velikosti pisave</h1>
+            <p>Text</p>
+
+            <ion-button (click)="finish()">FINISH TUTORIAL!</ion-button>
+        </ion-slide>
+    </ion-slides>
+</ion-content>

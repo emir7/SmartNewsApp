@@ -805,8 +805,9 @@ export class NewsPage implements OnInit, OnDestroy {
         return a.innerText;
     }
 
-    toggleView(viewType: string) {
+    toggleView(viewType: string, htmlEL = false) {
         if (this.currentViewLayout === viewType) {
+            document.querySelector(`.${this.currentViewLayout}-icon`).setAttribute('color', 'primary')
             return;
         }
 
@@ -819,7 +820,11 @@ export class NewsPage implements OnInit, OnDestroy {
             this.canWatchScroll = false;
             document.getElementById('content').style.display = 'none';
         }
+        document.querySelector(`.${this.currentViewLayout}-icon`).removeAttribute('color');
+        document.querySelector(`.${viewType}-icon`).setAttribute('color', 'primary')
+
         this.currentViewLayout = viewType;
+
     }
 
     doRefresh($event) {

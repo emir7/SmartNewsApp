@@ -4,155 +4,158 @@
             Tell us what do you think
         </ion-label>
     </ion-item>
-    <hr>
-    <ion-radio-group (ionChange)="gChanged($event,'p')">
-        <ion-item lines="none" style="margin-top: 5px">
-            <ion-grid style="color: black;">
-                <ion-row>
-                    Previous view satisfied your personal preferences
-                </ion-row>
-                <ion-row class="p">
-                    <ion-col class="ion-text-center">
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Strongly agree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
+    <div class="line"></div>
+    <div id="quiz-content">
+        <ion-radio-group (ionChange)="gChanged($event,'p')">
+            <ion-item lines="none" style="padding-top: 15px">
+                <ion-grid style="color: black;">
+                    <ion-row>
+                        Previous view satisfied your personal preferences
+                    </ion-row>
+                    <ion-row class="p">
+                        <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Strongly agree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
 
-                        <ion-radio></ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Agree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
+                            <ion-radio></ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Agree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
 
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Neutral
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Neutral
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
 
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Disagree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Strongly disagree
-                        </ion-row>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Disagree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Strongly disagree
+                            </ion-row>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-item>
+        </ion-radio-group>
+
+        <ion-radio-group (ionChange)="gChanged($event,'r')">
+            <ion-item lines="none" style="margin-top: 5px">
+                <ion-grid style="color: black;">
+                    <ion-row>
+                        Previous view was clear, readable
+                    </ion-row>
+                    <ion-row class="p">
+                        <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Strongly agree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+
+                            <ion-radio></ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Agree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Neutral
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Disagree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Strongly disagree
+                            </ion-row>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-item>
+        </ion-radio-group>
+
+        <ion-radio-group (ionChange)="gChanged($event,'i')">
+            <ion-item lines="none" style="margin-top: 5px">
+                <ion-grid style="color: black;">
+                    <ion-row>
+                        Previous view was informative
+                    </ion-row>
+                    <ion-row class="p">
+                        <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Strongly agree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+
+                            <ion-radio></ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Agree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Neutral
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Disagree
+                            </ion-row>
+                        </ion-col>
+                        <ion-col class="ion-text-center">
+                            <ion-radio>
+                            </ion-radio>
+                            <ion-row style="font-size: 12px" class="ion-justify-content-center">
+                                Strongly disagree
+                            </ion-row>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-item>
+        </ion-radio-group>
+        <ion-item lines="none" style="position: absolute; bottom: 0; right: 0;">
+            <ion-button (click)="submit()">SUBMIT</ion-button>
         </ion-item>
-    </ion-radio-group>
+    </div>
 
-    <ion-radio-group (ionChange)="gChanged($event,'r')">
-        <ion-item lines="none" style="margin-top: 5px">
-            <ion-grid style="color: black;">
-                <ion-row>
-                    Previous view was clear, readable
-                </ion-row>
-                <ion-row class="p">
-                    <ion-col class="ion-text-center">
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Strongly agree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-
-                        <ion-radio></ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Agree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Neutral
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Disagree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Strongly disagree
-                        </ion-row>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-item>
-    </ion-radio-group>
-
-    <ion-radio-group (ionChange)="gChanged($event,'i')">
-        <ion-item lines="none" style="margin-top: 5px">
-            <ion-grid style="color: black;">
-                <ion-row>
-                    Previous view was informative
-                </ion-row>
-                <ion-row class="p">
-                    <ion-col class="ion-text-center">
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Strongly agree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-
-                        <ion-radio></ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Agree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Neutral
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Disagree
-                        </ion-row>
-                    </ion-col>
-                    <ion-col class="ion-text-center">
-                        <ion-radio>
-                        </ion-radio>
-                        <ion-row style="font-size: 12px" class="ion-justify-content-center">
-                            Strongly disagree
-                        </ion-row>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-item>
-    </ion-radio-group>
-    <ion-item lines="none" style="position: absolute; bottom: 0; right: 0;">
-        <ion-button (click)="submit()">SUBMIT</ion-button>
-    </ion-item>
 
 </ion-content>

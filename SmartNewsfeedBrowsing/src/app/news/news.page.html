@@ -19,9 +19,9 @@
             <ion-button (click)="openNewsOptions($event)">
                 <ion-icon slot="icon-only" name="more"></ion-icon>
             </ion-button>
-            <ion-button (click)="openQuiz($event)">
+            <!--<ion-button (click)="openQuiz($event)">
                 <ion-icon slot="icon-only" name="help"></ion-icon>
-            </ion-button>
+            </ion-button>-->
         </ion-buttons>
     </ion-toolbar>
     <ion-toolbar>
@@ -60,19 +60,19 @@
 
 <ion-footer style="background-color: white;">
     <ion-segment color="dark">
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('largeCards', this)">
-            <ion-icon name="logo-buffer"></ion-icon>
+        <ion-segment-button #ref style="border-color: transparent;" (click)="toggleView('largeCards', true)">
+            <ion-icon class="largeCards-icon" name="logo-buffer"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('gridView', this)"
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('gridView', true)"
             *ngIf="showImages">
-            <ion-icon name="grid"></ion-icon>
+            <ion-icon class="gridView-icon" name="grid"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards', this)"
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards', true)"
             *ngIf="showImages">
-            <ion-icon name="menu"></ion-icon>
+            <ion-icon class="miniCards-icon" name="menu"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('xLargeCards', this)">
-            <ion-icon name="albums"></ion-icon>
+        <ion-segment-button style="border-color: transparent;" (click)="toggleView('xLargeCards', true)">
+            <ion-icon class="xLargeCards-icon" name="albums"></ion-icon>
         </ion-segment-button>
     </ion-segment>
 </ion-footer>
