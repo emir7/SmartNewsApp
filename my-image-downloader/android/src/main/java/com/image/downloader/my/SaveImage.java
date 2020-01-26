@@ -33,6 +33,9 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
         File directory = new File(imagesPath);
 
         File [] files = directory.listFiles();
+        if(files == null) {
+            return;
+        }
         Log.d(LOG_CHANNEL, "Size = "+files.length);
 
         for (int i = 0; i < files.length; i++) {

@@ -17,7 +17,10 @@ import { ThemeService } from './shared/theme.service';
 import { SensorReadingService } from './shared/sensor.reading.service';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
-import { TutoralGuard } from './shared/guards/tutorial.guard';
+import { TutorialGuard } from './shared/guards/tutorial.guard';
+
+import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
+import { File } from '@ionic-native/file/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -33,7 +36,9 @@ import { TutoralGuard } from './shared/guards/tutorial.guard';
     BatteryStatus,
     InAppBrowser,
     ThemeService,
-    TutoralGuard,
+    TutorialGuard,
+    StreamingMedia,
+    File,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

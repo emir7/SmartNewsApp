@@ -1,5 +1,7 @@
 import { OnInit, OnDestroy, Component, ViewChild } from '@angular/core';
 import { IonSlides } from '@ionic/angular';
+import { Storage } from '@ionic/storage';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-tutorial',
@@ -10,6 +12,10 @@ import { IonSlides } from '@ionic/angular';
 export class TutorialPage implements OnInit, OnDestroy {
 
     @ViewChild('ionSlides', { static: false }) ionSlides: IonSlides;
+
+    constructor(private storage: Storage, private router: Router) {
+
+    }
 
     ngOnInit() {
         console.log('TutorialPage ngOnInit');
@@ -24,7 +30,10 @@ export class TutorialPage implements OnInit, OnDestroy {
     }
 
     finish() {
-
+        console.log('finish');
+        this.storage.set('tutorialComplete', true).then(() => {
+            this.router.navigateByUrl('/news');
+        });
     }
 
 }

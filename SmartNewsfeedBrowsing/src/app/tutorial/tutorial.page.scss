@@ -3,22 +3,38 @@ ion-slide {
     flex-direction: column;
 }
 
-ion-img {
+.main-img {
     max-width: 50vw;
     max-height: 50vh;
     overflow: hidden;
 }
 
 .step-one {
-    background: #B5D99C;
+    background: #320A28;
+    color: white;
 }
 
 .step-two {
-    background: #E65F5C;
+    background: #511730;
     color: var(--ion-color-success-contrast);
 }
 
 .step-three {
+    background: #3A506B;
+    color: white;
+}
+
+.step-four {
+    background: #241623;
+    color: white;
+}
+
+.step-five {
     background: var(--ion-color-dark);
     color: var(--ion-color-dark-contrast);
+}
+
+ion-slides p {
+    padding-left: 16px;
+    padding-right: 16px;
 }

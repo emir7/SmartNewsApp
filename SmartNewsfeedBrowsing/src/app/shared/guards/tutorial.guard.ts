@@ -1,7 +1,7 @@
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Storage } from '@ionic/storage';
 
-export class TutoralGuard implements CanActivate {
+export class TutorialGuard implements CanActivate {
 
     constructor(private storage: Storage, private router: Router) { }
 
