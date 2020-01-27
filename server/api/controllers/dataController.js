@@ -1,8 +1,6 @@
 const fs = require('fs');
 
 module.exports.saveData = (req, res) => {
-    console.log(req.body);
-    console.log('method saveData called.');
 
     const data = req.body.data;
     if (data != null) {
@@ -23,6 +21,5 @@ module.exports.saveData = (req, res) => {
             m: 'NOK'
         });
     }
-
 
 };

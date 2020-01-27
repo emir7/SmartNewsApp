@@ -1,5 +1,5 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { Component } from '@angular/core';
+import { ModalController, AlertController } from '@ionic/angular';
 
 @Component({
     selector: 'quick-quiz-page',
@@ -9,20 +9,13 @@ import { ModalController } from '@ionic/angular';
 
 export class QuickQuizModalPage {
 
-    @ViewChild('pText', null) pText: ElementRef;
-    @ViewChild('rText', null) rText: ElementRef;
-    @ViewChild('iText', null) iText: ElementRef;
-
-
     quizObj = {
         p: [false, false, false, false, false],
         r: [false, false, false, false, false],
         i: [false, false, false, false, false]
     };
 
-    constructor(private modalController: ModalController) {
-
-    }
+    constructor(private modalController: ModalController, public alertController: AlertController, ) { }
 
     gChanged($event, el) {
         const prevIndex = this.quizObj[el].indexOf(true);
@@ -37,28 +30,25 @@ export class QuickQuizModalPage {
         const pIndex = this.quizObj.p.indexOf(true);
         let missingInput = false;
 
-        this.pText.nativeElement.style.color = 'black';
-        this.rText.nativeElement.style.color = 'black';
-        this.iText.nativeElement.style.color = 'black';
+        document.getElementById('preference-text').style.color = 'black';
+        document.getElementById('readability-text').style.color = 'black';
+        document.getElementById('informativness-text').style.color = 'black';
 
         if (pIndex < 0) {
             missingInput = true;
-            this.pText.nativeElement.style.color = 'red';
-            return;
+            document.getElementById('preference-text').style.color = 'red';
         }
 
         const rIndex = this.quizObj.r.indexOf(true);
         if (rIndex < 0) {
             missingInput = true;
-            this.rText.nativeElement.style.color = 'red';
-            return;
+            document.getElementById('readability-text').style.color = 'red';
         }
 
         const iIndex = this.quizObj.i.indexOf(true);
         if (iIndex < 0) {
             missingInput = true;
-            this.iText.nativeElement.style.color = 'red';
-            return;
+            document.getElementById('informativness-text').style.color = 'red';
         }
 
         if (!missingInput) {
@@ -68,6 +58,22 @@ export class QuickQuizModalPage {
     }
 
     cancel() {
-        this.modalController.dismiss();
+        this.alertController.create({
+            header: 'Skip feedback',
+            message: 'Are you sure you dont want to answer?',
+            buttons: [
+                {
+                    text: 'No'
+                },
+                {
+                    text: 'Yes',
+                    handler: () => {
+                        this.modalController.dismiss();
+                    }
+                },
+            ]
+        }).then(alertEl => {
+            alertEl.present();
+        });
     }
 }

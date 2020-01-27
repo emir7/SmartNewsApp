@@ -47,9 +47,7 @@ public class SaveImage extends AsyncTask<Void, Void, Void> {
                 Log.d(LOG_CHANNEL, "FileName: "+files[i].getName() + " deleted");
                 files[i].delete();
             }
-
         }
-
     }
 
     @Override

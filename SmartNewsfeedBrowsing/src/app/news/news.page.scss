@@ -42,6 +42,10 @@ ion-refresher {
     overflow: hidden !important;
 }
 
+.seg-button {
+    --indicator-color-checked: transparent !important;
+}
+
 /*
 .toolbar-background {
     --background: #30323D !important;

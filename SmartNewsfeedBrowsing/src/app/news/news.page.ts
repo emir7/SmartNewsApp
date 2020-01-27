@@ -83,6 +83,8 @@ export class NewsPage implements OnInit, OnDestroy {
     appInBackground = false;
     userInBrowser = false;
 
+    quizIsOpened = false;
+
     constructor(
         public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
@@ -364,6 +366,7 @@ export class NewsPage implements OnInit, OnDestroy {
         this.platform.pause.subscribe(() => {
             console.log('pause');
             clearInterval(this.dataCollectionIntervalID);
+            this.dataCollectionIntervalID = null;
             this.appInBackground = true;
             if (!this.userInBrowser) {
                 this.dataOnChangeCollection();
@@ -413,7 +416,14 @@ export class NewsPage implements OnInit, OnDestroy {
         };
 
         this.currentTheme = theme;
-
+        console.log('hahahahahahahahahahha');
+        console.log(this.currentViewLayout);
+        console.log('============================');
+        if (this.currentViewLayout != null) {
+            this.removeColorAtribite(`.${this.currentViewLayout}-icon`);
+        } else {
+            this.setColorAtribute(`.${generatedView}-icon`);
+        }
         this.currentViewLayout = generatedView;
         this.changeDetector.detectChanges();
         this.toggleView(generatedView);
@@ -443,6 +453,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     labDataCollecting() {
+        console.log('labDataCollecting started.');
         this.dataCollectionIntervalID = setInterval(() => {
             this.modalController.dismiss().finally(() => {
                 clearInterval(this.dataCollectionIntervalID);
@@ -454,6 +465,8 @@ export class NewsPage implements OnInit, OnDestroy {
                         return;
                     }
                     this.contextService.sendCurrentContextToServer(this.currentContextDescription, data, this.fullViewDescription);
+                    this.selectRandomView();
+                    this.labDataCollecting();
                 });
             });
         }, 10000);
@@ -507,6 +520,7 @@ export class NewsPage implements OnInit, OnDestroy {
         } else {
             this.userInBrowser = false;
             this.resetDataCollection();
+            this.resetDataLabCollection();
         }
     }
 
@@ -555,14 +569,34 @@ export class NewsPage implements OnInit, OnDestroy {
         });
     }
 
+    setColorAtribute(key) {
+        if (document.querySelector(key) != null) {
+            document.querySelector(key).setAttribute('color', 'primary');
+        }
+    }
+
+    removeColorAtribite(key) {
+        if (document.querySelector(key) != null) {
+            document.querySelector(key).removeAttribute('color');
+        }
+    }
+
     viewIsLoaded($event) {
         if ($event === 'miniCardsLoaded' || $event === 'largeCardsLoaded') {
+            if ($event === 'miniCardsLoaded') {
+                this.setColorAtribute('.miniCards-icon');
+            } else {
+                this.setColorAtribute('.largeCards-icon');
+            }
             this.normalScroll(false);
         } else if ($event === 'xLargeCardsLoaded') {
+            this.setColorAtribute('.xLargeCards-icon');
             this.fullScreenVerticalScroll();
         } else if ($event === 'gridViewLoaded') {
+            this.setColorAtribute('.gridView-icon');
             this.gridViewScroll();
         }
+
     }
 
     normalScroll(isGridView) {
@@ -832,10 +866,13 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleView(viewType: string, htmlEL = false) {
+
         if (this.currentViewLayout === viewType) {
-            document.querySelector(`.${this.currentViewLayout}-icon`).setAttribute('color', 'primary')
+            this.setColorAtribute(`.${viewType}-icon`);
             return;
         }
+
+        this.clearAndSend(); // DEBUG
 
         this.dataOnChangeCollection();
         this.fullViewDescription.view = viewType;
@@ -846,11 +883,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.canWatchScroll = false;
             document.getElementById('content').style.display = 'none';
         }
-        console.log('removam atribut iz ' + this.currentViewLayout);
-        console.log('dajem atribut na ' + viewType);
-        document.querySelector(`.${this.currentViewLayout}-icon`).removeAttribute('color');
-        document.querySelector(`.${viewType}-icon`).setAttribute('color', 'primary');
-
+        this.removeColorAtribite(`.${this.currentViewLayout}-icon`);
         this.currentViewLayout = viewType;
 
     }
@@ -1086,7 +1119,12 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
-            this.contextService.sendCurrentContextToServer(this.currentContextDescription, -6, this.fullViewDescription);
+            const badView = {
+                p: -2,
+                r: -2,
+                i: -2
+            };
+            this.contextService.sendCurrentContextToServer(this.currentContextDescription, badView, this.fullViewDescription);
             this.labDataCollecting();
         }
     }
@@ -1126,10 +1164,14 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
+            if (!this.quizIsOpened) {
+                this.labDataCollecting();
+            }
         }
     }
 
     openQuiz() {
+        this.quizIsOpened = true;
         return this.modalController.create({
             component: QuickQuizModalPage,
             cssClass: 'quiz',
@@ -1138,6 +1180,7 @@ export class NewsPage implements OnInit, OnDestroy {
             modalEl.present();
             return modalEl.onDidDismiss();
         }).then((obj) => {
+            this.quizIsOpened = false;
             if (obj.data) {
                 return obj.data;
             }

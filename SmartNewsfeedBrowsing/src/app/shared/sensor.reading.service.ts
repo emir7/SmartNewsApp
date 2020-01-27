@@ -287,7 +287,7 @@ export class SensorReadingService {
             const informativnessAnswer = qResult.i;
 
             const contextData = `${uA};${brightness};${tod};${internet};${batLevel}`;
-            const fvdData = `${fvd.showimages};${fvd.theme};${fvd.view}`;
+            const fvdData = `${fvd.showimages};${fvd.theme};${fvd.view};${fvd.fontSize}`;
             const quizResult = `${preferenceAnswer};${readabiltyAnswer};${informativnessAnswer}`;
             const data = `${contextData};${fvdData};${quizResult}`;
 

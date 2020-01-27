@@ -60,18 +60,20 @@
 
 <ion-footer style="background-color: white;">
     <ion-segment color="dark">
-        <ion-segment-button #ref style="border-color: transparent;" (click)="toggleView('largeCards', true)">
+        <ion-segment-button class="seg-button" style="border-color: transparent;"
+            (click)="toggleView('largeCards', true)">
             <ion-icon class="largeCards-icon" name="logo-buffer"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('gridView', true)"
+        <ion-segment-button class="seg-button" style="border-color: transparent;" (click)="toggleView('gridView', true)"
             *ngIf="showImages">
             <ion-icon class="gridView-icon" name="grid"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('miniCards', true)"
-            *ngIf="showImages">
+        <ion-segment-button class="seg-button" style="border-color: transparent;"
+            (click)="toggleView('miniCards', true)" *ngIf="showImages">
             <ion-icon class="miniCards-icon" name="menu"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button style="border-color: transparent;" (click)="toggleView('xLargeCards', true)">
+        <ion-segment-button class="seg-button" style="border-color: transparent;"
+            (click)="toggleView('xLargeCards', true)">
             <ion-icon class="xLargeCards-icon" name="albums"></ion-icon>
         </ion-segment-button>
     </ion-segment>

@@ -1,2 +1,15 @@
-STILL;20;1;1;95;noImages;dark-theme;xLargeCards;2;2;2
-STILL;5;1;2;95;noImages;light-theme;xLargeCards;-2;-2;-2
+STILL;18;17;1;77;noImages;dark-theme;xLargeCards;large-font;0;0;0
+STILL;19;17;1;77;withImages;light-theme;largeCards;large-font;-2;-1;-1
+STILL;3;17;1;77;noImages;dark-theme;xLargeCards;small-font;-1;-2;-1
+STILL;16;17;1;77;noImages;light-theme;largeCards;large-font;0;2;2
+STILL;17;17;1;77;noImages;light-theme;largeCards;small-font;0;0;0
+STILL;19;17;2;77;noImages;dark-theme;xLargeCards;small-font;2;2;2
+ON_FOOT;18;17;2;77;noImages;dark-theme;largeCards;large-font;0;0;0
+ON_FOOT;19;17;2;77;withImages;dark-theme;gridView;small-font;0;0;1
+ON_FOOT;21;17;1;77;noImages;dark-theme;largeCards;large-font;2;2;2
+STILL;21;17;1;77;withImages;light-theme;miniCards;small-font;0;-1;-1
+STILL;10;17;1;78;noImages;light-theme;largeCards;small-font;-2;-2;-2
+STILL;64;17;1;79;withImages;light-theme;miniCards;small-font;-2;-2;-2
+STILL;49;17;1;79;withImages;dark-theme;miniCards;small-font;-2;-2;-2
+STILL;53;17;1;79;withImages;dark-theme;miniCards;large-font;-2;-2;-2
+STILL;73;17;1;79;noImages;dark-theme;miniCards;large-font;0;0;0
