@@ -3,7 +3,14 @@ const logger = require('morgan');
 
 const app = express();
 const gagApi = require('./api/routes/gag');
+const dataCollectionApi = require('./api/routes/data');
+const bodyParser = require('body-parser');
 
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+app.use(bodyParser.json());
 app.use(function (_, res, next) {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -19,6 +26,7 @@ app.use(function (_, res, next) {
 app.use(logger('dev'));
 
 app.use('/api/gag', gagApi);
+app.use('/data', dataCollectionApi);
 
 app.use(function (_, res, next) {
     res.charset = 'UTF-16'

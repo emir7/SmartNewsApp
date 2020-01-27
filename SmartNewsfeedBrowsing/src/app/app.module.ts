@@ -18,14 +18,16 @@ import { SensorReadingService } from './shared/sensor.reading.service';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { TutorialGuard } from './shared/guards/tutorial.guard';
+import { HttpClientModule } from '@angular/common/http';
 
 import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { File } from '@ionic-native/file/ngx';
+import { HttpClient } from '@angular/common/http';
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, IonicStorageModule.forRoot()],
+  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, HttpClientModule, IonicStorageModule.forRoot()],
   providers: [
     StatusBar,
     SplashScreen,
@@ -39,6 +41,7 @@ import { File } from '@ionic-native/file/ngx';
     TutorialGuard,
     StreamingMedia,
     File,
+    HttpClient,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

@@ -4,14 +4,17 @@ import { BehaviorSubject } from 'rxjs';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 import { ContextModel, InternetStatusModel, UserActivityModel, BatteryStatusModel, BrightnessModel, ViewDescription } from './models/context/contextModel';
 import { take } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 const { Network, UsersPARecognition, MySensors, Filesystem } = Plugins;
 
 @Injectable()
 export class SensorReadingService {
 
-    currentState = 'INTERVAL_SAMPLING';
+    //currentState = 'INTERVAL_SAMPLING';
+    currentState = 'LAB_SAMPLING';
     //currentState = 'ON_CHANGE_SAMPLING';
+    serverUrl = 'http://89.212.33.56:8080/';
 
     currentContext = new BehaviorSubject<ContextModel>({
         batteryObj: {
@@ -42,7 +45,7 @@ export class SensorReadingService {
     timeWatch = false;
     currentTime = 0;
 
-    constructor(private batteryStatus: BatteryStatus) {
+    constructor(private batteryStatus: BatteryStatus, private http: HttpClient) {
         this.userPARecognition = UsersPARecognition;
         this.mySensors = MySensors;
 
@@ -272,6 +275,31 @@ export class SensorReadingService {
         return this.currentState;
     }
 
+    sendCurrentContextToServer(ctx: ContextModel, qResult, fvd: ViewDescription) {
+        if (this.currentState === 'LAB_SAMPLING') {
+            const uA = ctx.userActivityObj.types[0];
+            const brightness = ctx.brightnessObj.value;
+            const tod = new Date().getHours();
+            const internet = ctx.internetObj.value;
+            const batLevel = ctx.batteryObj.percentage;
+            const preferenceAnswer = qResult.p;
+            const readabiltyAnswer = qResult.r;
+            const informativnessAnswer = qResult.i;
 
+            const contextData = `${uA};${brightness};${tod};${internet};${batLevel}`;
+            const fvdData = `${fvd.showimages};${fvd.theme};${fvd.view}`;
+            const quizResult = `${preferenceAnswer};${readabiltyAnswer};${informativnessAnswer}`;
+            const data = `${contextData};${fvdData};${quizResult}`;
+
+            const headers = new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' });
+            this.http.post(`${this.serverUrl}data/`, { data }, { headers }).subscribe((res) => {
+                console.log(res);
+            }, (err) => {
+                console.log('err');
+                console.log(err);
+            });
+        }
+
+    }
 }
 

@@ -9,7 +9,7 @@
         <ion-radio-group (ionChange)="gChanged($event,'p')">
             <ion-item lines="none" style="padding-top: 15px">
                 <ion-grid style="color: black;">
-                    <ion-row>
+                    <ion-row #pText>
                         Previous view satisfied your personal preferences
                     </ion-row>
                     <ion-row class="p">
@@ -58,8 +58,8 @@
         <ion-radio-group (ionChange)="gChanged($event,'r')">
             <ion-item lines="none" style="margin-top: 5px">
                 <ion-grid style="color: black;">
-                    <ion-row>
-                        Previous view was clear, readable
+                    <ion-row #rText>
+                        Previous view was clear and readable
                     </ion-row>
                     <ion-row class="p">
                         <ion-col class="ion-text-center">
@@ -107,7 +107,7 @@
         <ion-radio-group (ionChange)="gChanged($event,'i')">
             <ion-item lines="none" style="margin-top: 5px">
                 <ion-grid style="color: black;">
-                    <ion-row>
+                    <ion-row #iText>
                         Previous view was informative
                     </ion-row>
                     <ion-row class="p">
@@ -152,9 +152,9 @@
                 </ion-grid>
             </ion-item>
         </ion-radio-group>
-        <ion-item lines="none" style="position: absolute; bottom: 0; right: 0;">
-            <ion-button (click)="submit()">SUBMIT</ion-button>
-        </ion-item>
+
+        <ion-button style="position: absolute; bottom: 10px; right: 10px;" (click)="submit()">SUBMIT</ion-button>
+        <ion-button style="position: absolute; bottom: 10px; left: 10px;" (click)="cancel()">cancel</ion-button>
     </div>
 
 

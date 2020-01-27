@@ -30,7 +30,6 @@ export class TutorialPage implements OnInit, OnDestroy {
     }
 
     finish() {
-        console.log('finish');
         this.storage.set('tutorialComplete', true).then(() => {
             this.router.navigateByUrl('/news');
         });

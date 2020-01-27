@@ -240,6 +240,10 @@ export class NewsPage implements OnInit, OnDestroy {
             this.dataIntervalCollecting();
         }
 
+        if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+            this.labDataCollecting();
+        }
+
     }
 
     initContextSubscriber() {
@@ -247,7 +251,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
                 this.currentContextDescription = contextData;
             });
-        } else {
+        } else if (this.contextService.getCurrentState() === 'ON_CHANGE_SAMPLING') {
             this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
                 if (this.appInBackground || this.userInBrowser) {
                     this.updatePreviousValues();
@@ -321,6 +325,10 @@ export class NewsPage implements OnInit, OnDestroy {
                 }
 
             });
+        } else if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+            this.contextSub = this.contextService.getCurrentContext().subscribe((contextData) => {
+                this.currentContextDescription = contextData;
+            });
         }
     }
 
@@ -366,6 +374,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.appInBackground = false;
             this.fullViewDescription.d = new Date();
             this.resetDataCollection();
+            this.resetDataLabCollection();
         });
     }
 
@@ -433,6 +442,23 @@ export class NewsPage implements OnInit, OnDestroy {
         return 'largeCards';
     }
 
+    labDataCollecting() {
+        this.dataCollectionIntervalID = setInterval(() => {
+            this.modalController.dismiss().finally(() => {
+                clearInterval(this.dataCollectionIntervalID);
+                this.dataCollectionIntervalID = null;
+                this.openQuiz().then((data) => {
+                    if (data == null) {
+                        this.selectRandomView();
+                        this.labDataCollecting();
+                        return;
+                    }
+                    this.contextService.sendCurrentContextToServer(this.currentContextDescription, data, this.fullViewDescription);
+                });
+            });
+        }, 10000);
+    }
+
     dataIntervalCollecting() {
         this.dataCollectionIntervalID = setInterval(() => {
             const cView: ViewDescription = {
@@ -460,7 +486,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     dataOnChangeCollection() {
-        if (this.contextService.getCurrentState() !== 'INTERVAL_SAMPLING') {
+        if (this.contextService.getCurrentState() === 'ON_CHANGE_SAMPLING') {
 
             const tmpUa = this.userActivity;
             const tmpBright = this.brightnessValidityObj.value;
@@ -820,8 +846,10 @@ export class NewsPage implements OnInit, OnDestroy {
             this.canWatchScroll = false;
             document.getElementById('content').style.display = 'none';
         }
+        console.log('removam atribut iz ' + this.currentViewLayout);
+        console.log('dajem atribut na ' + viewType);
         document.querySelector(`.${this.currentViewLayout}-icon`).removeAttribute('color');
-        document.querySelector(`.${viewType}-icon`).setAttribute('color', 'primary')
+        document.querySelector(`.${viewType}-icon`).setAttribute('color', 'primary');
 
         this.currentViewLayout = viewType;
 
@@ -997,6 +1025,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
     toggleTheme() {
         this.dataOnChangeCollection();
+        this.clearAndSend(); // DEBUG
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
             this.fullViewDescription.theme = 'dark-theme';
@@ -1037,6 +1066,8 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.currentViewLayout === 'gridView') {
             return;
         }
+
+        this.clearAndSend(); // DEBUG!
         this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
         if (this.fontSizeDefaultB) {
@@ -1051,13 +1082,25 @@ export class NewsPage implements OnInit, OnDestroy {
         this.resetDataCollection();
     }
 
+    clearAndSend() {
+        if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+            clearInterval(this.dataCollectionIntervalID);
+            this.dataCollectionIntervalID = null;
+            this.contextService.sendCurrentContextToServer(this.currentContextDescription, -6, this.fullViewDescription);
+            this.labDataCollecting();
+        }
+    }
+
     toggleImagesShowing() {
         this.showImages = !this.showImages;
 
-        if (this.contextService.currentState === 'INTERVAL_SAMPLING') {
+        if (this.contextService.getCurrentState() === 'INTERVAL_SAMPLING') {
             this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
-        } else {
+        } else if (this.contextService.getCurrentState() === 'ON_CHANGE_SAMPLING') {
             this.fullViewDescription.showimages = (!this.showImages) ? 'withImages' : 'noImages';
+        } else if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+            this.fullViewDescription.showimages = (!this.showImages) ? 'withImages' : 'noImages';
+            this.clearAndSend(); // DEBUG!
         }
 
         if (this.currentViewLayout === 'gridView') {
@@ -1079,9 +1122,15 @@ export class NewsPage implements OnInit, OnDestroy {
         }
     }
 
-    openQuiz($event) {
-        console.log('Opening modal');
-        this.modalController.create({
+    resetDataLabCollection() {
+        if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+            clearInterval(this.dataCollectionIntervalID);
+            this.dataCollectionIntervalID = null;
+        }
+    }
+
+    openQuiz() {
+        return this.modalController.create({
             component: QuickQuizModalPage,
             cssClass: 'quiz',
             backdropDismiss: false
@@ -1089,7 +1138,10 @@ export class NewsPage implements OnInit, OnDestroy {
             modalEl.present();
             return modalEl.onDidDismiss();
         }).then((obj) => {
-            console.log(obj.data);
+            if (obj.data) {
+                return obj.data;
+            }
+            return null;
         });
     }
 }
