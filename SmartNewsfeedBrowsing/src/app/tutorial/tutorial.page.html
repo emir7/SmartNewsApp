@@ -11,6 +11,15 @@
         </ion-slide>
 
         <ion-slide class="step-two">
+            <ion-img class="main-img" src="assets/tutorial/2_1.png"></ion-img>
+            <h3>O zbiranju podatkov</h3>
+            <p> Spodbujamo vas, da aplikacijo uporabljate medtem ko hodite, se vozite z avtobusom ali pa
+                sedite. </p>
+            <ion-button (click)="next()">NADALJUJ</ion-button>
+
+        </ion-slide>
+        <!--
+        <ion-slide class="step-three">
             <ion-img class="main-img" src="assets/tutorial/2_1.png">
             </ion-img>
             <h3>Uporaba aplikacije</h3>
@@ -19,14 +28,14 @@
                 (več podrobnosti sledi v nadaljevanju).</p>
             <ion-button (click)="next()">NADALJUJ</ion-button>
 
-        </ion-slide>
+        </ion-slide>-->
 
         <ion-slide class="step-three">
 
             <h3>Funkcionalnosti aplikacije</h3>
             <ion-img style="padding: 16px;" src="assets/tutorial/top_bar.PNG"></ion-img>
             <p style="padding-left: 16px; padding-right: 16px;">Na vrhu lahko spreminjate tematiko novic, prisotnost
-                slik, velikost pisave in temo aplikacije
+                slik, velikost pisave in temo aplikacije.
             </p>
 
             <ion-button (click)="next()">NADALJUJ</ion-button>
@@ -37,17 +46,44 @@
             <h3>Funkcionalnosti aplikacije</h3>
             <ion-img style="padding: 16px;" src="assets/tutorial/bottom_bar.PNG"></ion-img>
             <p>Spodnji meni pa vam omogoča prilagajati prikaz novic (izbirate lahko med štirimi različnimi
-                pogledi)</p>
+                pogledi).</p>
             <ion-button (click)="next()">NADALJUJ</ion-button>
         </ion-slide>
 
         <ion-slide class="step-five">
+            <ion-img class="main-img" src="assets/tutorial/q.png">
+            </ion-img>
+            <p>Vprašalnik, ki se bo pojavil v nekem trenutku je sestavljen iz treh kratkih vprašanj v povezavi z
+                izgledom aplikacije. </p>
+            <ion-button (click)="next()">NADALJUJ</ion-button>
+        </ion-slide>
+
+        <ion-slide class="step-six">
+            <ion-img class="main-img" src="assets/tutorial/preferences.png">
+            </ion-img>
+            <p>Najprej nas zanima vaše osebno stališče glede trenutnega izgleda aplikacije (ali so slike in pisava
+                primerne velikosti, ali je navigacija po aplikaciji med branjem novic tekoča in ali je tema aplikacije
+                primerna).
+            </p>
+            <ion-button (click)="next()">NADALJUJ</ion-button>
+        </ion-slide>
+
+        <ion-slide class="step-seven">
+            <ion-img class="main-img" src="assets/tutorial/like.png">
+            </ion-img>
+            <p>Nato sledita še vprašanji o čistosti prikaza novic (razločnost slik in ali vam aplikacija omogoča tekoče
+                branje novic).</p>
+            <ion-button (click)="next()">NADALJUJ</ion-button>
+        </ion-slide>
+
+        <ion-slide class="step-eight">
             <ion-img class="main-img" src="assets/tutorial/5.png">
             </ion-img>
             <p>Hvala že v naprej vsem, ki boste pomagali. Vaši podatki bodo prispevali k uspešni izdelavi diplomske
-                naloge
-                Skupaj bomo izdelali sistem, ki bo znal sam določiti kakšen pogled je v določenem trenutku najboljši</p>
+                naloge. Skupaj bomo izdelali sistem, ki bo znal sam določiti kakšen pogled je v določenem trenutku
+                najboljši</p>
             <ion-button (click)="finish()">KONČAJ</ion-button>
         </ion-slide>
+
     </ion-slides>
 </ion-content>

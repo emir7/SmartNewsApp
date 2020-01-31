@@ -59,14 +59,14 @@ export class QuickQuizModalPage {
 
     cancel() {
         this.alertController.create({
-            header: 'Skip feedback',
-            message: 'Are you sure you dont want to answer?',
+            header: 'Preskoči vprašalnik',
+            message: 'Ste prepričani, da ne želite oddati odgovorov?',
             buttons: [
                 {
-                    text: 'No'
+                    text: 'Ne'
                 },
                 {
-                    text: 'Yes',
+                    text: 'Da',
                     handler: () => {
                         this.modalController.dismiss();
                     }

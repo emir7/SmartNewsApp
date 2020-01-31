@@ -23,8 +23,8 @@ ion-refresher {
 
 @media screen and (max-height: 650px) {
     ::ng-deep .quiz .modal-wrapper {
-        width: 95vw;
-        height: 90vh;
+        width: 97vw;
+        height: 95vh;
         border-radius: 25px !important;
     }
 }
@@ -32,8 +32,8 @@ ion-refresher {
 
 @media screen and (min-height: 660px) {
     ::ng-deep .quiz .modal-wrapper {
-        width: 95vw;
-        height: 75vh;
+        width: 97vw;
+        height: 80vh;
         border-radius: 25px !important;
     }
 }

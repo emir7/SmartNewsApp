@@ -8,6 +8,9 @@ ion-checkbox {
     margin-right: auto;
 }
 
+* {
+    font-size: calc(12px + (30 - 12) * ((100vw - 300px) / (1600 - 300)));
+}
 
 ion-radio {
     margin-left: auto;
