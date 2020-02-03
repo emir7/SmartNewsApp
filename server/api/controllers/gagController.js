@@ -10,7 +10,6 @@ module.exports.getAwesomeGags = (req, res) => {
 
     api.sendRequest(options)
         .then(gagData => {
-            console.log(JSON.stringify(api.xml2Json(gagData)));
             res.status(200).send(api.xml2Json(gagData));
         }).catch(err => {
             console.log("======================")

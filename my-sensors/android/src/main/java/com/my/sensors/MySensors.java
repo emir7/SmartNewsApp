@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -53,6 +54,18 @@ public class MySensors extends Plugin {
         JSObject ret = new JSObject();
         ret.put("value", "ok");
         call.success(ret);
+    }
+
+    @PluginMethod
+    public void getScreenBrightness(PluginCall call) {
+        try{
+            JSObject ret = new JSObject();
+            float currBrightness = android.provider.Settings.System.getInt(getContext().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+            ret.put("screenBrightness", currBrightness);
+            call.success(ret);
+        }catch (Settings.SettingNotFoundException e){
+            e.printStackTrace();
+        }
     }
 
 

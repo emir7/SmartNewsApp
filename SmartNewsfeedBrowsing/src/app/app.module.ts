@@ -23,6 +23,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { HttpClient } from '@angular/common/http';
+import { ActionCounterService } from './shared/action.counter.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -34,6 +35,7 @@ import { HttpClient } from '@angular/common/http';
     FontSizeService,
     PerformanceService,
     SensorReadingService,
+    ActionCounterService,
     Network,
     BatteryStatus,
     InAppBrowser,

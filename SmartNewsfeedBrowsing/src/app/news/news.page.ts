@@ -16,6 +16,7 @@ import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
 import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
+import { ActionCounterService } from '../shared/action.counter.service';
 
 @Component({
     selector: 'app-news',
@@ -85,6 +86,12 @@ export class NewsPage implements OnInit, OnDestroy {
 
     quizIsOpened = false;
 
+    indexSub: Subscription = null;
+    upperMenuButtonsColor = '';
+
+    actionSub: Subscription = null;
+    actionCounter = 0;
+
     constructor(
         public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
@@ -101,7 +108,8 @@ export class NewsPage implements OnInit, OnDestroy {
         public gagsApiService: GagNewsApiService,
         public contextService: SensorReadingService,
         public toastController: ToastController,
-        public modalController: ModalController) {
+        public modalController: ModalController,
+        public actionCounterService: ActionCounterService) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
@@ -116,8 +124,6 @@ export class NewsPage implements OnInit, OnDestroy {
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
             .then(res => {
                 if (typeof res === 'boolean') {
-                    console.log('sending new http request ngOnInit');
-                    console.log('=========================================');
                     this.displayLoadingElement()
                         .then(loadingEl => {
                             lEl = loadingEl;
@@ -130,12 +136,10 @@ export class NewsPage implements OnInit, OnDestroy {
                                         loadingEl.dismiss();
                                         document.getElementById('content').style.display = 'block';
                                     }).catch(err => {
-                                        console.log('?=????===');
                                         console.log(err);
                                     });
                             }, err => {
                                 console.log('Unable to fetch data');
-                                console.log(err);
                                 loadingEl.dismiss()
                                     .then(() => {
                                         this.unableToFetchData();
@@ -145,15 +149,10 @@ export class NewsPage implements OnInit, OnDestroy {
                             });
                         });
                 } else {
-                    console.log('iz storegea sm dobu nazaj ngOnInit');
-                    console.log(res);
-                    console.log('=========================================');
                     this.arr = [...res.n];
                     this.changeDetector.detectChanges();
                 }
             }).catch(err => {
-                console.log('canSendHttpRequestOrStorage err');
-                console.log(err);
                 lEl.dismiss()
                     .then(() => {
                         this.unableToFetchData();
@@ -242,9 +241,22 @@ export class NewsPage implements OnInit, OnDestroy {
             this.dataIntervalCollecting();
         }
 
-        if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
-            this.labDataCollecting();
-        }
+        this.indexSlideService.getIndexToGoBack().subscribe((currentSlidingIndex) => {
+            this.currentVisibleElement = currentSlidingIndex;
+        });
+
+        this.actionSub = this.actionCounterService.getActionCounter().subscribe((currentActionCounterVal) => {
+            this.actionCounter = currentActionCounterVal;
+            console.log(this.actionCounter + '========================================================');
+            this.storage.get('actionCounter').then((val) => {
+                console.log(val + 'FROM STORAGE');
+            });
+            if (currentActionCounterVal >= 11) {
+                if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+                    this.labDataCollecting();
+                }
+            }
+        });
 
     }
 
@@ -268,7 +280,6 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.userActivity = contextData.userActivityObj.types[0];
                     } else {
                         if (this.userActivity !== contextData.userActivityObj.types[0]) {
-                            console.log('writing into file because user activity changed');
                             this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
                                 this.internetValidityObj.value, this.batteryValidityObj.percentage);
                             this.userActivity = contextData.userActivityObj.types[0];
@@ -279,15 +290,12 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.internetValidityObj.value = contextData.internetObj.value as number;
                         this.internetValidityObj.d = new Date();
                     } else {
-                        console.log('1) Internet ' + ((new Date().getTime() - this.internetValidityObj.d.getTime()) / 1000));
-                        console.log(`Internet ${this.internetValidityObj.value} and ${contextData.internetObj.value}`);
                         if (this.passed30sek(this.internetValidityObj.d)
                             && this.internetValidityObj.value !== contextData.internetObj.value) {
                             if (!writtenToFile) {
                                 this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
                                     this.internetValidityObj.value, this.batteryValidityObj.percentage);
                                 writtenToFile = true;
-                                console.log('writing into file because internet changed');
                             }
                         }
                     }
@@ -295,15 +303,12 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.batteryValidityObj.percentage = contextData.batteryObj.percentage;
                         this.batteryValidityObj.d = new Date();
                     } else {
-                        console.log('2) Battery' + ((new Date().getTime() - this.batteryValidityObj.d.getTime()) / 1000));
-                        console.log(`Battery ${this.batteryValidityObj.percentage} and ${contextData.batteryObj.percentage}`);
                         if (this.passed30sek(this.batteryValidityObj.d)
                             && this.batteryValidityObj.percentage !== contextData.batteryObj.percentage) {
                             if (!writtenToFile) {
                                 this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
                                     this.internetValidityObj.value, this.batteryValidityObj.percentage);
                                 writtenToFile = true;
-                                console.log('writing into file because battery level changed');
                             }
                         }
                     }
@@ -311,8 +316,6 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.brightnessValidityObj.value = contextData.brightnessObj.value;
                         this.brightnessValidityObj.d = new Date();
                     } else {
-                        console.log('3) Brightness' + ((new Date().getTime() - this.brightnessValidityObj.d.getTime()) / 1000));
-                        console.log(`Battery ${this.brightnessValidityObj.value} and ${contextData.brightnessObj.value}`);
 
                         if (this.passed30sek(this.brightnessValidityObj.d)
                             && this.brightnessValidityObj.value !== contextData.brightnessObj.value) {
@@ -320,7 +323,6 @@ export class NewsPage implements OnInit, OnDestroy {
                                 this.dataOnContextChange(this.userActivity, this.brightnessValidityObj.value, new Date().getHours(),
                                     this.internetValidityObj.value, this.batteryValidityObj.percentage);
                                 writtenToFile = true;
-                                console.log('writing into file because Brightness changed');
                             }
                         }
                     }
@@ -364,7 +366,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
     handleResumeBackgroundEvents() {
         this.platform.pause.subscribe(() => {
-            console.log('pause');
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
             this.appInBackground = true;
@@ -416,9 +417,6 @@ export class NewsPage implements OnInit, OnDestroy {
         };
 
         this.currentTheme = theme;
-        console.log('hahahahahahahahahahha');
-        console.log(this.currentViewLayout);
-        console.log('============================');
         if (this.currentViewLayout != null) {
             this.removeColorAtribite(`.${this.currentViewLayout}-icon`);
         } else {
@@ -453,23 +451,31 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     labDataCollecting() {
-        console.log('labDataCollecting started.');
-        this.dataCollectionIntervalID = setInterval(() => {
-            this.modalController.dismiss().finally(() => {
-                clearInterval(this.dataCollectionIntervalID);
-                this.dataCollectionIntervalID = null;
-                this.openQuiz().then((data) => {
-                    if (data == null) {
+        if (this.actionCounter >= 11) {
+            console.log('counter ge 11');
+            if (this.dataCollectionIntervalID) {
+                console.log('================================ INTERVAL ALREADY STARTED ================================')
+                return;
+            }
+            console.log('================================ INTERVAL STARTED ================================')
+            this.dataCollectionIntervalID = setInterval(() => {
+                this.modalController.dismiss().finally(() => {
+                    clearInterval(this.dataCollectionIntervalID);
+                    this.dataCollectionIntervalID = null;
+                    this.openQuiz().then((data) => {
+                        if (data == null) {
+                            this.selectRandomView();
+                            this.labDataCollecting();
+                            return;
+                        }
+
+                        this.contextService.sendCurrentContextToServer(this.currentContextDescription, data, this.fullViewDescription);
                         this.selectRandomView();
                         this.labDataCollecting();
-                        return;
-                    }
-                    this.contextService.sendCurrentContextToServer(this.currentContextDescription, data, this.fullViewDescription);
-                    this.selectRandomView();
-                    this.labDataCollecting();
+                    });
                 });
-            });
-        }, 10000);
+            }, 20000);
+        }
     }
 
     dataIntervalCollecting() {
@@ -483,7 +489,6 @@ export class NewsPage implements OnInit, OnDestroy {
                 view: this.currentViewLayout
             };
             if (this.sameView(cView)) {
-                console.log('writing data into file');
                 this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
                 this.fullViewDescription.c += 1;
             }
@@ -536,7 +541,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
     displayLoadingElement() {
         return this.loadingController.create({
-            message: 'Loading...'
+            message: 'Nalaganje...'
         });
     }
 
@@ -561,7 +566,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
     showLoadingElementFor(ms) {
         return this.loadingController.create({
-            message: 'Loading...',
+            message: 'Nalaganje...',
             duration: ms
         }).then(loadingEl => {
             loadingEl.present();
@@ -689,8 +694,6 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.googleNewsApi.canSendHttpRequestOrStorage(keyForStorage)
                     .then(res => {
                         if (typeof res === 'boolean') {
-                            console.log('sending new http request search');
-                            console.log('=================================');
                             httpRequestToPreform.subscribe(news => {
                                 return this.setupNewsFeedArray(news)
                                     .then(() => {
@@ -708,8 +711,6 @@ export class NewsPage implements OnInit, OnDestroy {
                                             });
                                     });
                             }, err => {
-                                console.log('Unable to fetch data');
-                                console.log(err);
                                 loadingEl.dismiss()
                                     .then(() => {
                                         this.unableToFetchData();
@@ -718,8 +719,6 @@ export class NewsPage implements OnInit, OnDestroy {
                                     });
                             });
                         } else {
-                            console.log('got from storage cache.');
-                            console.log('=================================');
                             this.arr = [...res.n];
                             this.changeDetector.detectChanges();
                             loadingEl.dismiss();
@@ -780,7 +779,6 @@ export class NewsPage implements OnInit, OnDestroy {
             for (let i = 0; i < results.length; i++) {
                 const result = results[i];
                 if (result && result.b64 !== 'noImage') {
-                    console.log('got image from cache.');
                     const myStrB64 = 'data:image/jpg;base64,' + (this.sanitizer.bypassSecurityTrustResourceUrl(result.b64.replace(/(\r\n|\n|\r)/gm, "")) as any).changingThisBreaksApplicationSecurity;
                     if (!is9gag) {
                         res.articles[i].urlToImage = myStrB64;
@@ -867,6 +865,10 @@ export class NewsPage implements OnInit, OnDestroy {
 
     toggleView(viewType: string, htmlEL = false) {
 
+        if (htmlEL) {
+            this.actionCounterService.addAction();
+        }
+
         if (this.currentViewLayout === viewType) {
             this.setColorAtribute(`.${viewType}-icon`);
             return;
@@ -879,10 +881,11 @@ export class NewsPage implements OnInit, OnDestroy {
         this.resetDataCollection();
 
         if (this.currentViewLayout === 'xLargeCards') {
-            this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
+            //this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
             document.getElementById('content').style.display = 'none';
         }
+
         this.removeColorAtribite(`.${this.currentViewLayout}-icon`);
         this.currentViewLayout = viewType;
 
@@ -913,10 +916,7 @@ export class NewsPage implements OnInit, OnDestroy {
         this.googleNewsApi.canSendHttpRequestOrStorage(keyForStorage)
             .then(res => {
                 if (typeof res === 'boolean') {
-                    console.log('sending new http request do_refresh');
-                    console.log('=================================');
                     httpRequestToPreform.subscribe(news => {
-                        // obj.news.feed.entry
                         if (keyForStorage !== 'topHeadlinesfun') {
                             this.setupNewsFeedArray(news)
                                 .then(() => {
@@ -952,8 +952,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
                     });
                 } else {
-                    console.log('got from storage do_refresh');
-                    console.log('=================================');
                     this.arr = [...res.n];
                     this.changeDetector.detectChanges();
                     this.scrollToTop()
@@ -988,8 +986,6 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.title = obj.category;
                 this.searchQuery = '';
                 if (!obj.cache) {
-                    console.log('sent new http request popover.');
-                    console.log('==============================');
                     if (obj.category !== 'fun') {
                         this.setupNewsFeedArray(obj.news).then(() => {
                             this.googleNewsApi.storeNews(this.newsCategory, this.arr, new Date());
@@ -998,8 +994,6 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.setup9GagArray(obj);
                     }
                 } else {
-                    console.log('got from storage popover.');
-                    console.log('==============================');
                     this.arr = [...obj.news.n];
                 }
                 this.scrollToTop();
@@ -1057,14 +1051,19 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleTheme() {
+        this.actionCounterService.addAction();
         this.dataOnChangeCollection();
         this.clearAndSend(); // DEBUG
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
+            this.upperMenuButtonsColor = 'dark';
             this.fullViewDescription.theme = 'dark-theme';
+            this.changeDetector.detectChanges();
         } else {
             this.theme.setTheme('light-theme');
+            this.upperMenuButtonsColor = 'light';
             this.fullViewDescription.theme = 'light-theme';
+            this.changeDetector.detectChanges();
         }
         this.resetDataCollection();
     }
@@ -1093,6 +1092,14 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.contextSub) {
             this.contextSub.unsubscribe();
         }
+
+        if (this.indexSub) {
+            this.indexSub.unsubscribe();
+        }
+
+        if (this.actionSub) {
+            this.actionSub.unsubscribe();
+        }
     }
 
     toggleFontSize() {
@@ -1100,6 +1107,7 @@ export class NewsPage implements OnInit, OnDestroy {
             return;
         }
 
+        this.actionCounterService.addAction();
         this.clearAndSend(); // DEBUG!
         this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
@@ -1116,7 +1124,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     clearAndSend() {
-        if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+        if (this.contextService.getCurrentState() === 'LAB_SAMPLING' && this.actionCounter >= 11) {
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
             const badView = {
@@ -1131,6 +1139,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
     toggleImagesShowing() {
         this.showImages = !this.showImages;
+        this.actionCounterService.addAction();
 
         if (this.contextService.getCurrentState() === 'INTERVAL_SAMPLING') {
             this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
@@ -1156,6 +1165,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.d = new Date();
             this.fullViewDescription.c = 0;
             clearInterval(this.dataCollectionIntervalID);
+            this.dataCollectionIntervalID = null;
             this.dataIntervalCollecting();
         }
     }
@@ -1187,4 +1197,5 @@ export class NewsPage implements OnInit, OnDestroy {
             return null;
         });
     }
+
 }

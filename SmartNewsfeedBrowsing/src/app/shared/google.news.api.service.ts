@@ -9,13 +9,14 @@ const { Network } = Plugins;
 @Injectable()
 export class GoogleNewsApiService {
 
-    constructor(private http: HttpClient, private storage: Storage, private performanceService: PerformanceService) { }
-
     private apiKey = 'cc5c7c95c27a4b1890f1bd224ef9a2db';
     private apiUrl = 'https://newsapi.org/v2';
+    private serverUrl = 'http://89.212.33.56:8080/news';
+
+    constructor(private http: HttpClient, private storage: Storage, private performanceService: PerformanceService) { }
 
     getTopHeadlines() {
-        return this.http.get<any>(`${this.apiUrl}/top-headlines/?country=si&apiKey=${this.apiKey}`);
+        return this.http.get<any>(`${this.serverUrl}/home`);
     }
 
     canSendHttpRequestOrStorage(q) {
@@ -57,7 +58,7 @@ export class GoogleNewsApiService {
     }
 
     searchWithCategory(category) {
-        return this.http.get<any>(`${this.apiUrl}/top-headlines/?country=si&category=${category}&apiKey=${this.apiKey}`);
+        return this.http.get<any>(`${this.serverUrl}/${category}`);
     }
 
     getInternetStatus() {

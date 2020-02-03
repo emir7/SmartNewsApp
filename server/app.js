@@ -4,6 +4,7 @@ const logger = require('morgan');
 const app = express();
 const gagApi = require('./api/routes/gag');
 const dataCollectionApi = require('./api/routes/data');
+const newsApi = require('./api/routes/news');
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({
@@ -27,6 +28,7 @@ app.use(logger('dev'));
 
 app.use('/api/gag', gagApi);
 app.use('/data', dataCollectionApi);
+app.use('/news', newsApi);
 
 app.use(function (_, res, next) {
     res.charset = 'UTF-16'
