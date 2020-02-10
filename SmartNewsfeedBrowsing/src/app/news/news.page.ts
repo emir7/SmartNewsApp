@@ -251,7 +251,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.storage.get('actionCounter').then((val) => {
                 console.log(val + 'FROM STORAGE');
             });
-            if (currentActionCounterVal >= 11) {
+            if (currentActionCounterVal >= 25) {
                 if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
                     this.labDataCollecting();
                 }
@@ -451,7 +451,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     labDataCollecting() {
-        if (this.actionCounter >= 11) {
+        if (this.actionCounter >= 25) {
             console.log('counter ge 11');
             if (this.dataCollectionIntervalID) {
                 console.log('================================ INTERVAL ALREADY STARTED ================================')
@@ -469,7 +469,8 @@ export class NewsPage implements OnInit, OnDestroy {
                             return;
                         }
 
-                        this.contextService.sendCurrentContextToServer(this.currentContextDescription, data, this.fullViewDescription);
+                        this.contextService.sendCurrentContextToServer(this.currentContextDescription, data,
+                            JSON.parse(JSON.stringify(this.fullViewDescription)));
                         this.selectRandomView();
                         this.labDataCollecting();
                     });
@@ -874,7 +875,7 @@ export class NewsPage implements OnInit, OnDestroy {
             return;
         }
 
-        this.clearAndSend(); // DEBUG
+        this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
 
         this.dataOnChangeCollection();
         this.fullViewDescription.view = viewType;
@@ -1053,7 +1054,7 @@ export class NewsPage implements OnInit, OnDestroy {
     toggleTheme() {
         this.actionCounterService.addAction();
         this.dataOnChangeCollection();
-        this.clearAndSend(); // DEBUG
+        this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
             this.upperMenuButtonsColor = 'dark';
@@ -1108,23 +1109,26 @@ export class NewsPage implements OnInit, OnDestroy {
         }
 
         this.actionCounterService.addAction();
-        this.clearAndSend(); // DEBUG!
+        this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
         this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
+
         if (this.fontSizeDefaultB) {
             this.headlinesFontSize = this.defaultFontSize;
             this.authorFontSize = this.defaultFontSize;
             this.fullViewDescription.fontSize = 'small-font';
         } else {
-            this.headlinesFontSize = 18;
-            this.authorFontSize = 18;
+            this.headlinesFontSize = this.defaultFontSize + 6;
+            this.authorFontSize = this.defaultFontSize + 6;
             this.fullViewDescription.fontSize = 'large-font';
         }
+
+        this.changeDetector.detectChanges();
         this.resetDataCollection();
     }
 
-    clearAndSend() {
-        if (this.contextService.getCurrentState() === 'LAB_SAMPLING' && this.actionCounter >= 11) {
+    clearAndSend(currentViewDesc) {
+        if (this.contextService.getCurrentState() === 'LAB_SAMPLING' && this.actionCounter >= 25) {
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
             const badView = {
@@ -1132,7 +1136,8 @@ export class NewsPage implements OnInit, OnDestroy {
                 r: -2,
                 i: -2
             };
-            this.contextService.sendCurrentContextToServer(this.currentContextDescription, badView, this.fullViewDescription);
+            console.log(currentViewDesc);
+            this.contextService.sendCurrentContextToServer(this.currentContextDescription, badView, currentViewDesc);
             this.labDataCollecting();
         }
     }
@@ -1147,7 +1152,9 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.showimages = (!this.showImages) ? 'withImages' : 'noImages';
         } else if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
             this.fullViewDescription.showimages = (!this.showImages) ? 'withImages' : 'noImages';
-            this.clearAndSend(); // DEBUG!
+            if (this.currentViewLayout !== 'gridView') {
+                this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
+            }
         }
 
         if (this.currentViewLayout === 'gridView') {

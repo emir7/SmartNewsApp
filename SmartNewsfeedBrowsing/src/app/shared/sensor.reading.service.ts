@@ -14,7 +14,7 @@ export class SensorReadingService {
     //currentState = 'INTERVAL_SAMPLING';
     currentState = 'LAB_SAMPLING';
     //currentState = 'ON_CHANGE_SAMPLING';
-    serverUrl = 'http://89.212.33.56:8080/';
+    serverUrl = 'http://163.172.169.249:9081/';
 
     currentContext = new BehaviorSubject<ContextModel>({
         batteryObj: {
@@ -291,6 +291,10 @@ export class SensorReadingService {
                 const preferenceAnswer = qResult.p;
                 const readabiltyAnswer = qResult.r;
                 const informativnessAnswer = qResult.i;
+
+                if (fvd.view === 'gridView') { // grid view cant be with large font
+                    fvd.fontSize = 'small-font';
+                }
 
                 const contextData = `${uA};${brightness};${obj.screenBrightness};${tod};${internet};${batLevel}`;
                 const fvdData = `${fvd.showimages};${fvd.theme};${fvd.view};${fvd.fontSize}`;

@@ -55,5 +55,4 @@ app.use(function (_, res, next) {
     next();
 });
 
-
 module.exports = app;

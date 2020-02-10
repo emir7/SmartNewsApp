@@ -25,7 +25,7 @@ export class ActionCounterService {
     }
 
     setActionCounter(val) {
-        if (val < 12) {
+        if (val < 26) {
             this.storage.set('actionCounter', val).then(() => {
                 this.actionCounter.next(val);
             });

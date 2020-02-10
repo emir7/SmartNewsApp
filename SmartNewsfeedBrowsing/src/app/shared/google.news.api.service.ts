@@ -11,7 +11,7 @@ export class GoogleNewsApiService {
 
     private apiKey = 'cc5c7c95c27a4b1890f1bd224ef9a2db';
     private apiUrl = 'https://newsapi.org/v2';
-    private serverUrl = 'http://89.212.33.56:8080/news';
+    private serverUrl = 'http://163.172.169.249:9081/news';
 
     constructor(private http: HttpClient, private storage: Storage, private performanceService: PerformanceService) { }
 
@@ -34,7 +34,7 @@ export class GoogleNewsApiService {
                 if (b && obj != null) { // ce imas internet in imas cache potem preveris starost cachea
                     const currentDate = new Date();
                     const timeDiff = (currentDate.getTime() - new Date(obj.d).getTime()) / 1000;
-                    if (timeDiff > 1) { // ce so podatki stari vec kot minuto jih requestas sicer ne
+                    if (timeDiff > 60) { // ce so podatki stari vec kot minuto jih requestas sicer ne
                         return true;
                     }
                     return obj;
