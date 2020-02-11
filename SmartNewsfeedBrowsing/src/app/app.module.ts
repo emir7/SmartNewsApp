@@ -17,6 +17,7 @@ import { ThemeService } from './shared/theme.service';
 import { SensorReadingService } from './shared/sensor.reading.service';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { HomeGuard } from './shared/guards/home.guard';
 import { TutorialGuard } from './shared/guards/tutorial.guard';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -40,6 +41,7 @@ import { ActionCounterService } from './shared/action.counter.service';
     BatteryStatus,
     InAppBrowser,
     ThemeService,
+    HomeGuard,
     TutorialGuard,
     StreamingMedia,
     File,

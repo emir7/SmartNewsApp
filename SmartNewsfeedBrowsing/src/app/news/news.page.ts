@@ -16,7 +16,6 @@ import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
 import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
-import { ActionCounterService } from '../shared/action.counter.service';
 
 @Component({
     selector: 'app-news',
@@ -89,8 +88,6 @@ export class NewsPage implements OnInit, OnDestroy {
     indexSub: Subscription = null;
     upperMenuButtonsColor = '';
 
-    actionSub: Subscription = null;
-    actionCounter = 0;
 
     constructor(
         public loadingController: LoadingController,
@@ -108,17 +105,18 @@ export class NewsPage implements OnInit, OnDestroy {
         public gagsApiService: GagNewsApiService,
         public contextService: SensorReadingService,
         public toastController: ToastController,
-        public modalController: ModalController,
-        public actionCounterService: ActionCounterService) {
+        public modalController: ModalController) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
         this.isAndroid = this.platform.is('android');
+
     }
 
     ngOnInit() {
         this.selectRandomView();
         this.handleResumeBackgroundEvents();
+        this.labDataCollecting();
 
         let lEl = null;
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
@@ -200,35 +198,6 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.performanceService.setCache(val);
             }
         });
-        /*
-        this.storage.get('showImage').then((val) => {
-            if (typeof val !== 'boolean') {
-                this.showImages = true;
-            } else {
-                this.showImages = val;
-                this.performanceService.setCache(val);
-            }
-        });*/
-        /*
-        this.storage.get('authorSize').then((val) => {
-            if (typeof val !== 'number') {
-                this.authorFontSize = this.defaultFontSize;
-            } else {
-                this.authorFontSize = val;
-                this.fontService.setHeadLineFontSize(val);
-            }
-            this.changeDetector.detectChanges();
-        });
-
-        this.storage.get('headlineSize').then((val) => {
-            if (typeof val !== 'number') {
-                this.headlinesFontSize = this.defaultFontSize;
-            } else {
-                this.headlinesFontSize = val;
-                this.fontService.setHeadLineFontSize(val);
-            }
-            this.changeDetector.detectChanges();
-        });*/
 
         this.themeSub = this.theme.getTheme().subscribe((currentTheme) => {
             this.currentTheme = currentTheme;
@@ -243,19 +212,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
         this.indexSlideService.getIndexToGoBack().subscribe((currentSlidingIndex) => {
             this.currentVisibleElement = currentSlidingIndex;
-        });
-
-        this.actionSub = this.actionCounterService.getActionCounter().subscribe((currentActionCounterVal) => {
-            this.actionCounter = currentActionCounterVal;
-            console.log(this.actionCounter + '========================================================');
-            this.storage.get('actionCounter').then((val) => {
-                console.log(val + 'FROM STORAGE');
-            });
-            if (currentActionCounterVal >= 25) {
-                if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
-                    this.labDataCollecting();
-                }
-            }
         });
 
     }
@@ -451,32 +407,42 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     labDataCollecting() {
-        if (this.actionCounter >= 25) {
-            console.log('counter ge 11');
-            if (this.dataCollectionIntervalID) {
-                console.log('================================ INTERVAL ALREADY STARTED ================================')
-                return;
-            }
-            console.log('================================ INTERVAL STARTED ================================')
-            this.dataCollectionIntervalID = setInterval(() => {
-                this.modalController.dismiss().finally(() => {
-                    clearInterval(this.dataCollectionIntervalID);
-                    this.dataCollectionIntervalID = null;
-                    this.openQuiz().then((data) => {
-                        if (data == null) {
-                            this.selectRandomView();
-                            this.labDataCollecting();
-                            return;
-                        }
-
-                        this.contextService.sendCurrentContextToServer(this.currentContextDescription, data,
-                            JSON.parse(JSON.stringify(this.fullViewDescription)));
-                        this.selectRandomView();
-                        this.labDataCollecting();
-                    });
-                });
-            }, 20000);
+        if (this.dataCollectionIntervalID) {
+            console.log('================================ INTERVAL ALREADY STARTED ================================');
+            return;
         }
+
+        this.dataCollectionIntervalID = setInterval(() => {
+            this.modalController.dismiss().finally(() => {
+
+                clearInterval(this.dataCollectionIntervalID);
+
+                this.dataCollectionIntervalID = null;
+                this.fullViewDescription.c++;
+
+                this.openQuiz().then((data) => {
+                    if (data == null) {
+                        if (this.fullViewDescription.c === 2) {
+                            this.fullViewDescription.c = 0;
+                            this.selectRandomView();
+                        }
+                        this.labDataCollecting();
+                        return;
+                    }
+
+                    this.contextService.sendCurrentContextToServer(this.currentContextDescription, data,
+                        JSON.parse(JSON.stringify(this.fullViewDescription)));
+
+                    if (this.fullViewDescription.c === 2) {
+                        this.fullViewDescription.c = 0;
+                        this.selectRandomView();
+                    }
+
+                    this.labDataCollecting();
+                });
+            });
+        }, 30000);
+
     }
 
     dataIntervalCollecting() {
@@ -866,16 +832,14 @@ export class NewsPage implements OnInit, OnDestroy {
 
     toggleView(viewType: string, htmlEL = false) {
 
-        if (htmlEL) {
-            this.actionCounterService.addAction();
-        }
-
         if (this.currentViewLayout === viewType) {
             this.setColorAtribute(`.${viewType}-icon`);
             return;
         }
 
-        this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
+        // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
+
+        this.clearAndSend(); // DEBUG
 
         this.dataOnChangeCollection();
         this.fullViewDescription.view = viewType;
@@ -1052,9 +1016,9 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleTheme() {
-        this.actionCounterService.addAction();
         this.dataOnChangeCollection();
-        this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
+        // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
+        this.clearAndSend();
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
             this.upperMenuButtonsColor = 'dark';
@@ -1066,6 +1030,7 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.theme = 'light-theme';
             this.changeDetector.detectChanges();
         }
+
         this.resetDataCollection();
     }
 
@@ -1097,10 +1062,6 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.indexSub) {
             this.indexSub.unsubscribe();
         }
-
-        if (this.actionSub) {
-            this.actionSub.unsubscribe();
-        }
     }
 
     toggleFontSize() {
@@ -1108,8 +1069,8 @@ export class NewsPage implements OnInit, OnDestroy {
             return;
         }
 
-        this.actionCounterService.addAction();
-        this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
+        // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
+        this.clearAndSend();
         this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
 
@@ -1127,24 +1088,26 @@ export class NewsPage implements OnInit, OnDestroy {
         this.resetDataCollection();
     }
 
-    clearAndSend(currentViewDesc) {
-        if (this.contextService.getCurrentState() === 'LAB_SAMPLING' && this.actionCounter >= 25) {
+    // only clears and resets interval timer, no need to send data to server
+    // before it was: clearAndSend(currentViewDesc)
+    clearAndSend() {
+        if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
+            this.fullViewDescription.c = 0; // reset counter for quiz popup (same view 1min)
             clearInterval(this.dataCollectionIntervalID);
             this.dataCollectionIntervalID = null;
-            const badView = {
+            /*const badView = {
                 p: -2,
                 r: -2,
                 i: -2
             };
             console.log(currentViewDesc);
-            this.contextService.sendCurrentContextToServer(this.currentContextDescription, badView, currentViewDesc);
+            this.contextService.sendCurrentContextToServer(this.currentContextDescription, badView, currentViewDesc); */
             this.labDataCollecting();
         }
     }
 
     toggleImagesShowing() {
         this.showImages = !this.showImages;
-        this.actionCounterService.addAction();
 
         if (this.contextService.getCurrentState() === 'INTERVAL_SAMPLING') {
             this.fullViewDescription.showimages = (this.showImages) ? 'withImages' : 'noImages';
@@ -1153,7 +1116,8 @@ export class NewsPage implements OnInit, OnDestroy {
         } else if (this.contextService.getCurrentState() === 'LAB_SAMPLING') {
             this.fullViewDescription.showimages = (!this.showImages) ? 'withImages' : 'noImages';
             if (this.currentViewLayout !== 'gridView') {
-                this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
+                // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
+                this.clearAndSend();
             }
         }
 
