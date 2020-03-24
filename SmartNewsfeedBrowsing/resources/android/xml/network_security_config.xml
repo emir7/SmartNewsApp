@@ -2,5 +2,6 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
+		<domain includeSubdomains="true">http://163.172.169.249</domain>
     </domain-config>
 </network-security-config>

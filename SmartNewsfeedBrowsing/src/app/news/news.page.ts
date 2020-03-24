@@ -138,6 +138,7 @@ export class NewsPage implements OnInit, OnDestroy {
                                     });
                             }, err => {
                                 console.log('Unable to fetch data');
+                                console.log(err);
                                 loadingEl.dismiss()
                                     .then(() => {
                                         this.unableToFetchData();
@@ -678,6 +679,8 @@ export class NewsPage implements OnInit, OnDestroy {
                                             });
                                     });
                             }, err => {
+                                console.log("baabbabababababababbababa");
+                                console.log(err);
                                 loadingEl.dismiss()
                                     .then(() => {
                                         this.unableToFetchData();
