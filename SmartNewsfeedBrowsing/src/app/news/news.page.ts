@@ -87,7 +87,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
     indexSub: Subscription = null;
     upperMenuButtonsColor = '';
-
+    userInfo = null;
 
     constructor(
         public loadingController: LoadingController,
@@ -114,6 +114,12 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.storage.get('userInfo').then((userData) => {
+            console.log("user info:");
+            console.log(userData);
+            this.userInfo = userData;
+        });
+
         this.selectRandomView();
         this.handleResumeBackgroundEvents();
         this.labDataCollecting();
@@ -432,7 +438,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     }
 
                     this.contextService.sendCurrentContextToServer(this.currentContextDescription, data,
-                        JSON.parse(JSON.stringify(this.fullViewDescription)));
+                        JSON.parse(JSON.stringify(this.fullViewDescription)), this.userInfo);
 
                     if (this.fullViewDescription.c === 2) {
                         this.fullViewDescription.c = 0;
@@ -442,7 +448,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     this.labDataCollecting();
                 });
             });
-        }, 30000);
+        }, 20000);
 
     }
 
@@ -1124,7 +1130,7 @@ export class NewsPage implements OnInit, OnDestroy {
             }
         }
 
-        if (this.currentViewLayout === 'gridView') {
+        if (this.currentViewLayout === 'gridView' || this.currentViewLayout === 'miniCards') {
             this.toggleView('largeCards');
         } else {
             this.resetDataCollection();

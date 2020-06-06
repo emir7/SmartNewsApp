@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import com.image.downloader.my.MyImageDownloader;
+import com.ml.plugin.MachineLearning;
 import com.my.custom.browser.plugin.CustomChromeBrowser;
 import com.my.sensors.MySensors;
 import com.users.pa.recognition.UsersPARecognition;
@@ -25,6 +26,7 @@ public class MainActivity extends BridgeActivity {
         add(UsersPARecognition.class);
         add(MySensors.class);
         add(CustomChromeBrowser.class);
+        add(MachineLearning.class);
     }});
   }
 }

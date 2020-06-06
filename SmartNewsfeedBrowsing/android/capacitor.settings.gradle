@@ -5,6 +5,9 @@ project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/
 include ':CustomChromeBrowser'
 project(':CustomChromeBrowser').projectDir = new File('../node_modules/CustomChromeBrowser/android')
 
+include ':machine-learning'
+project(':machine-learning').projectDir = new File('../node_modules/machine-learning/android')
+
 include ':my-image-downloader'
 project(':my-image-downloader').projectDir = new File('../node_modules/my-image-downloader/android')
 

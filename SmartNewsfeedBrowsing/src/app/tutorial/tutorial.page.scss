@@ -3,6 +3,11 @@ ion-slide {
     flex-direction: column;
 }
 
+.step-zero {
+    background: #043565;
+    color: var(--ion-color-dark-contrast);
+}
+
 .main-img {
     max-width: 50vw;
     max-height: 50vh;

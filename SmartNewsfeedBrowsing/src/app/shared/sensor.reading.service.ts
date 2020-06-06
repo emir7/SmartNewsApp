@@ -279,7 +279,7 @@ export class SensorReadingService {
         return this.currentState;
     }
 
-    sendCurrentContextToServer(ctx: ContextModel, qResult, fvd: ViewDescription) {
+    sendCurrentContextToServer(ctx: ContextModel, qResult, fvd: ViewDescription, userInfo) {
         if (this.currentState === 'LAB_SAMPLING') {
             this.getScreenBrightness().then((obj) => { // sending screen brightness
                 console.log(obj.screenBrightness);
@@ -299,7 +299,7 @@ export class SensorReadingService {
                 const contextData = `${uA};${brightness};${obj.screenBrightness};${tod};${internet};${batLevel}`;
                 const fvdData = `${fvd.showimages};${fvd.theme};${fvd.view};${fvd.fontSize}`;
                 const quizResult = `${preferenceAnswer};${readabiltyAnswer};${informativnessAnswer}`;
-                const data = `${contextData};${fvdData};${quizResult}`;
+                const data = `${contextData};${fvdData};${quizResult};${userInfo.username};${userInfo.id}`;
 
                 const headers = new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' });
                 this.http.post(`${this.serverUrl}data/`, { data }, { headers }).subscribe((res) => {

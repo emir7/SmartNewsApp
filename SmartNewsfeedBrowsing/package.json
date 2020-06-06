@@ -50,6 +50,7 @@
     "cordova-plugin-video-player": "git+https://github.com/moust/cordova-plugin-videoplayer.git",
     "cordova-sqlite-storage": "^4.0.0",
     "core-js": "^2.5.4",
+    "machine-learning": "file:../machine-learning",
     "my-image-downloader": "file:../my-image-downloader",
     "my-sensors": "file:../my-sensors",
     "rxjs": "~6.5.1",
