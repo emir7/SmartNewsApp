@@ -13,36 +13,36 @@ public class ThresholdPoint {
         this.distance = distance;
     }
 
-    private double getThr() {
+    public double getThr() {
         return thr;
     }
 
-    private void setThr(double val) {
+    public void setThr(double val) {
         this.thr = val;
     }
 
-    private double getFpr() {
+    public double getFpr() {
         return fpr;
     }
 
-    private void setFpr(double val) {
+    public void setFpr(double val) {
         this.fpr = val;
     }
 
-    private double getTpr() {
+    public double getTpr() {
         return tpr;
     }
 
-    private void setTpr(double val) {
+    public void setTpr(double val) {
         this.tpr = val;
     }
 
 
-    private double getDistance() {
+    public double getDistance() {
         return distance;
     }
 
-    private void setDistance(double val) {
+    public void setDistance(double val) {
         this.distance = val;
     }
 

@@ -25,10 +25,13 @@ export class TutorialPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.machineLearningPlugin.trainClfFirstTime().then((data) => {
+
+        this.machineLearningPlugin.trainClf({
+            firstTime: true
+        }).then((data) => {
             console.log(data);
         }).catch((err) => {
-            console.log("ERROR WHILE TRAINING CLASSIFIER");
+            console.log('ERROR WHILE TRAINING CLASSIFIER');
             console.log(err);
         });
         console.log('TutorialPage ngOnInit');
@@ -49,7 +52,7 @@ export class TutorialPage implements OnInit, OnDestroy {
         };
 
         this.storage.set('userInfo', user).then(() => {
-            this.storage.set('tutorialComplete1', true).then(() => {
+            this.storage.set('tutorialComplete3', true).then(() => {
                 this.router.navigateByUrl('/news');
             });
         });

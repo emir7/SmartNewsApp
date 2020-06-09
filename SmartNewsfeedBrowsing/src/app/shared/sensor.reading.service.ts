@@ -12,9 +12,13 @@ const { Network, UsersPARecognition, MySensors, Filesystem } = Plugins;
 export class SensorReadingService {
 
     //currentState = 'INTERVAL_SAMPLING';
-    currentState = 'LAB_SAMPLING';
+    //currentState = 'LAB_SAMPLING';
     //currentState = 'ON_CHANGE_SAMPLING';
     serverUrl = 'http://163.172.169.249:9081/';
+
+    currentState = 'SMART_SAMPLING';
+    //currentState = 'LAB_SAMPLING';
+
 
     currentContext = new BehaviorSubject<ContextModel>({
         batteryObj: {
@@ -36,7 +40,7 @@ export class SensorReadingService {
             probs: [100],
             values: [3]
         },
-        validObjs: [false, false, false]
+        validObjs: [false, false, false] // user_activity, brightness, internet_status
     });
 
     userPARecognition = null;
@@ -150,7 +154,6 @@ export class SensorReadingService {
                 currentContextRec.batteryObj.percentage = obj.percentage;
                 currentContextRec.batteryObj.level = obj.level;
                 currentContextRec.batteryObj.plugged = obj.plugged;
-                currentContextRec.validObjs[0] = true;
                 this.currentContext.next(currentContextRec);
             }
         });
@@ -159,14 +162,13 @@ export class SensorReadingService {
 
     setCurrentUserActivity(obj: UserActivityModel) {
         this.getCurrentContext().pipe(take(1)).subscribe((currentContextRec) => {
-            if (currentContextRec.userActivityObj.types[0] !== obj.types[0]) {
 
-                currentContextRec.userActivityObj.types = [...obj.types];
-                currentContextRec.userActivityObj.probs = [...obj.probs];
-                currentContextRec.userActivityObj.values = [...obj.values];
+            currentContextRec.userActivityObj.types = [...obj.types];
+            currentContextRec.userActivityObj.probs = [...obj.probs];
+            currentContextRec.userActivityObj.values = [...obj.values];
+            currentContextRec.validObjs[0] = true;
+            this.currentContext.next(currentContextRec);
 
-                this.currentContext.next(currentContextRec);
-            }
         });
     }
 

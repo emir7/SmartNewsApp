@@ -5,7 +5,6 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { ThemeService } from './shared/theme.service';
 import { Subscription } from 'rxjs';
-import { SensorReadingService } from './shared/sensor.reading.service';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +23,6 @@ export class AppComponent {
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
     private themeService: ThemeService,
-    private sensorReadingService: SensorReadingService,
   ) {
 
     this.initializeApp();
@@ -33,7 +31,6 @@ export class AppComponent {
       console.log(currentTheme);
       this.theme = currentTheme;
     });
-
 
   }
 

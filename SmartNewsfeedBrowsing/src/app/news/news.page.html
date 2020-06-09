@@ -18,9 +18,10 @@
             <ion-img *ngIf="currentViewLayout !=='gridView'" class="ion-activatable" (click)="toggleFontSize()"
                 class="font-icon" style="display: inline;" src="assets/fontIcons/font-b.png">
             </ion-img>
+            <!--
             <ion-button (click)="toggleImagesShowing()">
                 <ion-icon slot="icon-only" name="images"></ion-icon>
-            </ion-button>
+            </ion-button> -->
             <ion-button (click)="toggleTheme()">
                 <ion-icon slot="icon-only" name="bulb"></ion-icon>
             </ion-button>
@@ -72,6 +73,7 @@
             (click)="toggleView('largeCards', true)">
             <ion-icon class="largeCards-icon" name="logo-buffer"></ion-icon>
         </ion-segment-button>
+        <!--
         <ion-segment-button class="seg-button" style="border-color: transparent;" (click)="toggleView('gridView', true)"
             *ngIf="showImages">
             <ion-icon class="gridView-icon" name="grid"></ion-icon>
@@ -79,7 +81,7 @@
         <ion-segment-button class="seg-button" style="border-color: transparent;"
             (click)="toggleView('miniCards', true)" *ngIf="showImages">
             <ion-icon class="miniCards-icon" name="menu"></ion-icon>
-        </ion-segment-button>
+        </ion-segment-button>-->
         <ion-segment-button class="seg-button" style="border-color: transparent;"
             (click)="toggleView('xLargeCards', true)">
             <ion-icon class="xLargeCards-icon" name="albums"></ion-icon>

@@ -16,6 +16,7 @@ import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
 import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
+import { MlService } from '../shared/ml.service';
 
 @Component({
     selector: 'app-news',
@@ -89,6 +90,10 @@ export class NewsPage implements OnInit, OnDestroy {
     upperMenuButtonsColor = '';
     userInfo = null;
 
+
+    machineLearningPlugin = null;
+    mlContextSub: Subscription;
+
     constructor(
         public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
@@ -105,24 +110,127 @@ export class NewsPage implements OnInit, OnDestroy {
         public gagsApiService: GagNewsApiService,
         public contextService: SensorReadingService,
         public toastController: ToastController,
-        public modalController: ModalController) {
+        public modalController: ModalController,
+        public mlService: MlService) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
         this.isAndroid = this.platform.is('android');
+        const { MachineLearning } = Plugins;
+
+        this.machineLearningPlugin = MachineLearning;
 
     }
 
     ngOnInit() {
+
+        this.displayLoadingElement().then(loadingEl => {
+            loadingEl.present();
+
+            this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
+                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2]) {
+                    this.machineLearningPlugin.classifierPrediction({
+                        u: ctxData.userActivityObj.types[0],
+                        e: '' + ctxData.brightnessObj.value
+                    }).then((clfPredData) => {
+                        let maxConfidence = 0;
+                        let choosenIndex = 0;
+                        for (let i = 0; i < clfPredData.a.length; i++) {
+                            if (clfPredData.a[i].p >= maxConfidence) {
+                                maxConfidence = clfPredData.a[i].p;
+                                choosenIndex = i;
+                            }
+                        }
+                        return {
+                            a: clfPredData.a,
+                            i: choosenIndex,
+                            b: clfPredData.b
+                        };
+                    }).then((obj) => {
+                        this.setDisplayView(obj.a[obj.i]);
+                        return obj;
+                    }).then((obj) => {
+                        loadingEl.dismiss();
+                        return { ucb: this.mlService.upperConfidenceBound(), obj };
+                    }).then((data) => {
+                        const allSelections = data.ucb.selections;
+                        const lastValue = allSelections[allSelections.length - 1];
+                        switch (lastValue) {
+                            case 0:
+                                this.openQuiz(this.mlService.marginalSoftmax(data.obj.a, data.obj.i));
+                                break;
+                            case 1:
+                                this.openQuiz(this.mlService.randomSelection());
+                                break;
+                            case 2:
+                                this.openQuiz(this.mlService.randomByUserActivity(ctxData.userActivityObj.types[0]));
+                                break;
+                            case 3:
+                                this.openQuiz(this.mlService.leastConfidence(data.obj.a[data.obj.i], data.obj.b));
+                                break;
+                        }
+                    });
+
+                    this.mlContextSub.unsubscribe();
+                }
+            });
+
+
+        });
+
+
+        /*
+        this.machineLearningPlugin.trainClf({
+            vals: [{
+                u: 'STILL',
+                e: 10,
+                t: 'dark-theme',
+                l: 'largeCards',
+                f: 'small-font',
+                o: 'Y'
+            }, {
+                u: 'STILL',
+                e: 11,
+                t: 'light-theme',
+                l: 'largeCards',
+                f: 'small-font',
+                o: 'N'
+            }],
+            firstTime: false
+        }).then((dataRes) => {
+            console.log("======================================");
+            console.log(dataRes);
+            this.displayPrediction(JSON.stringify(dataRes)).then(toastEl => {
+                toastEl.present();
+            });
+            console.log("-----------------------------------------");
+        });*/
+
+        document.addEventListener('reward', (data) => {
+            console.log('REWARD = ' + data);
+            console.log('I have received reward = ' + JSON.stringify(data));
+            this.displayPrediction(JSON.stringify(data)).then(toastEl => {
+                toastEl.present();
+            });
+        });
+
+        document.addEventListener('prediction', (data) => {
+            console.log('PREDICTION DATA ARRIVED!');
+            console.log(data);
+            this.displayPrediction(data).then(toastEl => {
+                toastEl.present();
+            });
+        });
+
         this.storage.get('userInfo').then((userData) => {
             console.log("user info:");
             console.log(userData);
             this.userInfo = userData;
         });
 
-        this.selectRandomView();
+        //this.selectRandomView();
         this.handleResumeBackgroundEvents();
-        this.labDataCollecting();
+        //this.labDataCollecting();
 
         let lEl = null;
         this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
@@ -217,9 +325,17 @@ export class NewsPage implements OnInit, OnDestroy {
             this.dataIntervalCollecting();
         }
 
+        if (this.contextService.getCurrentState() === 'SMART_SAMPLING') {
+            //  this.openQuiz();
+        }
+
         this.indexSlideService.getIndexToGoBack().subscribe((currentSlidingIndex) => {
             this.currentVisibleElement = currentSlidingIndex;
         });
+
+    }
+
+    startSmartSampling() {
 
     }
 
@@ -346,10 +462,10 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     selectRandomView() {
-        this.showImages = (Math.random() < 0.5) ? true : false;
+        this.showImages = true;
 
         let generatedView = '';
-        let fontSize = (Math.random() < 0.5) ? 'large-font' : 'small-font';
+        const fontSize = (Math.random() < 0.5) ? 'large-font' : 'small-font';
 
         if (fontSize === 'large-font') {
             this.headlinesFontSize = 18;
@@ -361,18 +477,13 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fontSizeDefaultB = true;
         }
 
-        generatedView = this.getView(Math.floor(Math.random() * 4), this.showImages);
-
-        if (generatedView === 'gridView') {
-            fontSize = 'small-font';
-            this.fontSizeDefaultB = true;
-        }
+        generatedView = (Math.random() < 0.5) ? 'largeCards' : 'xLargeCards';
 
         const theme = (Math.random() < 0.5) ? 'light-theme' : 'dark-theme';
         this.theme.setTheme(theme);
         this.fullViewDescription = {
             fontSize,
-            showimages: (this.showImages) ? 'withImages' : 'noImages',
+            showimages: 'withImages',
             theme,
             view: generatedView,
             c: 0,
@@ -413,12 +524,57 @@ export class NewsPage implements OnInit, OnDestroy {
         return 'largeCards';
     }
 
+    setDisplayView(data) {
+
+        return new Promise((resolve, reject) => {
+            this.showImages = true;
+
+            const generatedView = data.l;
+            const fontSize = data.f;
+
+            if (fontSize === 'large-font') {
+                this.headlinesFontSize = 18;
+                this.authorFontSize = 18;
+                this.fontSizeDefaultB = false;
+            } else {
+                this.headlinesFontSize = this.defaultFontSize;
+                this.authorFontSize = this.defaultFontSize;
+                this.fontSizeDefaultB = true;
+            }
+
+
+            const theme = data.t;
+            this.theme.setTheme(theme);
+            this.fullViewDescription = {
+                fontSize,
+                showimages: 'withImages',
+                theme,
+                view: generatedView,
+                c: 0,
+                d: new Date()
+            };
+
+            this.currentTheme = theme;
+            if (this.currentViewLayout != null) {
+                this.removeColorAtribite(`.${this.currentViewLayout}-icon`);
+            } else {
+                this.setColorAtribute(`.${generatedView}-icon`);
+            }
+            this.currentViewLayout = generatedView;
+
+            this.changeDetector.detectChanges();
+            this.toggleView(generatedView);
+            resolve();
+        });
+
+    }
+
     labDataCollecting() {
         if (this.dataCollectionIntervalID) {
             console.log('================================ INTERVAL ALREADY STARTED ================================');
             return;
         }
-
+        /*
         this.dataCollectionIntervalID = setInterval(() => {
             this.modalController.dismiss().finally(() => {
 
@@ -448,7 +604,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     this.labDataCollecting();
                 });
             });
-        }, 20000);
+        }, 20000);*/
 
     }
 
@@ -848,14 +1004,13 @@ export class NewsPage implements OnInit, OnDestroy {
 
         // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
 
-        this.clearAndSend(); // DEBUG
+        // this.clearAndSend(); // DEBUG
 
-        this.dataOnChangeCollection();
+        // this.dataOnChangeCollection();
         this.fullViewDescription.view = viewType;
-        this.resetDataCollection();
+        // this.resetDataCollection();
 
         if (this.currentViewLayout === 'xLargeCards') {
-            //this.currentVisibleElement = this.indexSlideService.getIndexToGoBack();
             this.canWatchScroll = false;
             document.getElementById('content').style.display = 'none';
         }
@@ -1071,6 +1226,10 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.indexSub) {
             this.indexSub.unsubscribe();
         }
+
+        if (this.mlContextSub) {
+            this.mlContextSub.unsubscribe();
+        }
     }
 
     toggleFontSize() {
@@ -1160,21 +1319,34 @@ export class NewsPage implements OnInit, OnDestroy {
         }
     }
 
-    openQuiz() {
-        this.quizIsOpened = true;
-        return this.modalController.create({
-            component: QuickQuizModalPage,
-            cssClass: 'quiz',
-            backdropDismiss: false
-        }).then(modalEl => {
-            modalEl.present();
-            return modalEl.onDidDismiss();
-        }).then((obj) => {
-            this.quizIsOpened = false;
-            if (obj.data) {
-                return obj.data;
-            }
-            return null;
+    openQuiz(b) {
+        if (b) {
+            this.toastController.create({
+                header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
+                position: 'top',
+                buttons: [
+                    {
+                        text: 'DA',
+                        handler: () => {
+                            console.log('Favorite clicked');
+                        }
+                    }, {
+                        text: 'NE',
+                        role: 'cancel',
+                        handler: () => {
+                            console.log('Cancel clicked');
+                        }
+                    }
+                ]
+            }).then(toastEl => {
+                toastEl.present();
+            });
+        }
+    }
+
+    displayPrediction(str) {
+        return this.toastController.create({
+            header: str
         });
     }
 

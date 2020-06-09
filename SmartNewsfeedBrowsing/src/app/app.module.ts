@@ -25,6 +25,7 @@ import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { HttpClient } from '@angular/common/http';
 import { ActionCounterService } from './shared/action.counter.service';
+import { MlService } from './shared/ml.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -37,6 +38,7 @@ import { ActionCounterService } from './shared/action.counter.service';
     PerformanceService,
     SensorReadingService,
     ActionCounterService,
+    MlService,
     Network,
     BatteryStatus,
     InAppBrowser,

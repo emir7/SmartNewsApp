@@ -6,103 +6,12 @@
     </ion-item>
     <div class="line"></div>
     <div id="quiz-content">
-        <ion-radio-group (ionChange)="gChanged($event,'p')">
-            <ion-item lines="none" style="padding-top: 15px">
-                <ion-grid style="color: black;">
-                    <ion-row id="preference-text" style="font-weight: 700;">
-                        Trenuten izgled aplikacije zadostuje vašim potrebam.
-                    </ion-row>
-                    <ion-row class="p">
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Nikakor se ne strinjam
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio></ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Ne strinjam se
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Niti-niti
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Strinjam se
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Popolnoma se strinjam
-                            </ion-row>
-                        </ion-col>
-                    </ion-row>
-                </ion-grid>
-            </ion-item>
-        </ion-radio-group>
-
-        <ion-radio-group (ionChange)="gChanged($event,'r')">
-            <ion-item lines="none" style="margin-top: 5px">
-                <ion-grid style="color: black;">
-                    <ion-row id="readability-text" style="font-weight: 700;">
-                        Trenuten način pregleda novic je tekoče berljiv.
-                    </ion-row>
-                    <ion-row class="p">
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Nikakor se ne strinjam
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio></ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Ne strinjam se
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Niti-niti
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Strinjam se
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Popolnoma se strinjam
-                            </ion-row>
-                        </ion-col>
-                    </ion-row>
-                </ion-grid>
-            </ion-item>
-        </ion-radio-group>
-
         <ion-radio-group (ionChange)="gChanged($event,'i')">
             <ion-item lines="none" style="margin-top: 5px">
                 <ion-grid style="color: black;">
                     <ion-row id="informativness-text" style="font-weight: 700;">
-                        Trenuten izgled aplikacije je informativen in omogoča hiter pregled novic.
+                        Ali ste v tem trenutku zadovoljni z izbranim načinom prikaza novic (neodvisno od njihove
+                        vsebine)?
                     </ion-row>
                     <ion-row class="p">
                         <ion-col class="ion-text-center">
@@ -110,26 +19,6 @@
                             </ion-radio>
                             <ion-row class="ion-justify-content-center">
                                 Nikakor se ne strinjam
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio></ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Ne strinjam se
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Niti-niti
-                            </ion-row>
-                        </ion-col>
-                        <ion-col class="ion-text-center">
-                            <ion-radio>
-                            </ion-radio>
-                            <ion-row class="ion-justify-content-center">
-                                Strinjam se
                             </ion-row>
                         </ion-col>
                         <ion-col class="ion-text-center">
