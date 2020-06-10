@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -103,6 +104,34 @@ public class MachineLearning extends Plugin {
         jsObject.put("cVehicle", cVehicle);
 
         call.success(jsObject);
+
+    }
+
+    @PluginMethod
+    public void banditFileExists(PluginCall call){
+        String path = getContext().getExternalFilesDir(null).getAbsoluteFile() + "/bandits/data.json";
+        File f = new File(path);
+        if(!f.exists()){
+            f.getParentFile().mkdirs();
+            try {
+                FileWriter fileWriter = new FileWriter(f);
+                fileWriter.write("");
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                JSObject jsObject = new JSObject();
+                jsObject.put("e", true);
+            }
+
+            JSObject jsObject = new JSObject();
+            jsObject.put("exists", false);
+            call.success(jsObject);
+        }else{
+            JSObject jsObject = new JSObject();
+            jsObject.put("exists", true);
+            call.success(jsObject);
+        }
 
     }
 

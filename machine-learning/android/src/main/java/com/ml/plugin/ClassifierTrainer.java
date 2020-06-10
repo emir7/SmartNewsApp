@@ -393,7 +393,7 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
 
                 if(!getPluginCall().getBoolean("firstTime")){
                     JSObject jsObject = new JSObject();
-                    jsObject.put("reward", 0);
+                    jsObject.put("reward", -1);
 
                     float prevPrec = sharedpreferences.getFloat(MODEL_PRECISION, 0);
                     Log.d("PREC", "prev_prec = "+prevPrec);

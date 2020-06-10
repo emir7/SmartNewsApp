@@ -94,6 +94,15 @@ export class NewsPage implements OnInit, OnDestroy {
     machineLearningPlugin = null;
     mlContextSub: Subscription;
 
+    mlQuizTimeout = null;
+    needUserFeedback = false;
+    reverseLogicReward = false;
+
+    topPredictedView = null;
+
+    banditData = null;
+    banditPullIndex = 0;
+
     constructor(
         public loadingController: LoadingController,
         public googleNewsApi: GoogleNewsApiService,
@@ -141,6 +150,7 @@ export class NewsPage implements OnInit, OnDestroy {
                                 choosenIndex = i;
                             }
                         }
+                        this.topPredictedView = clfPredData.a[choosenIndex];
                         return {
                             a: clfPredData.a,
                             i: choosenIndex,
@@ -153,8 +163,14 @@ export class NewsPage implements OnInit, OnDestroy {
                         loadingEl.dismiss();
                         return { ucb: this.mlService.upperConfidenceBound(), obj };
                     }).then((data) => {
+                        console.log("-------------------------");
+                        console.log(data);
+                        console.log("-------------------------");
+                        this.banditData = data.ucb;
                         const allSelections = data.ucb.selections;
                         const lastValue = allSelections[allSelections.length - 1];
+                        this.banditPullIndex = lastValue;
+
                         switch (lastValue) {
                             case 0:
                                 this.openQuiz(this.mlService.marginalSoftmax(data.obj.a, data.obj.i));
@@ -178,55 +194,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
         });
 
-
-        /*
-        this.machineLearningPlugin.trainClf({
-            vals: [{
-                u: 'STILL',
-                e: 10,
-                t: 'dark-theme',
-                l: 'largeCards',
-                f: 'small-font',
-                o: 'Y'
-            }, {
-                u: 'STILL',
-                e: 11,
-                t: 'light-theme',
-                l: 'largeCards',
-                f: 'small-font',
-                o: 'N'
-            }],
-            firstTime: false
-        }).then((dataRes) => {
-            console.log("======================================");
-            console.log(dataRes);
-            this.displayPrediction(JSON.stringify(dataRes)).then(toastEl => {
-                toastEl.present();
-            });
-            console.log("-----------------------------------------");
-        });*/
-
-        document.addEventListener('reward', (data) => {
-            console.log('REWARD = ' + data);
-            console.log('I have received reward = ' + JSON.stringify(data));
-            this.displayPrediction(JSON.stringify(data)).then(toastEl => {
-                toastEl.present();
-            });
-        });
-
-        document.addEventListener('prediction', (data) => {
-            console.log('PREDICTION DATA ARRIVED!');
-            console.log(data);
-            this.displayPrediction(data).then(toastEl => {
-                toastEl.present();
-            });
-        });
-
-        this.storage.get('userInfo').then((userData) => {
-            console.log("user info:");
-            console.log(userData);
-            this.userInfo = userData;
-        });
 
         //this.selectRandomView();
         this.handleResumeBackgroundEvents();
@@ -332,10 +299,6 @@ export class NewsPage implements OnInit, OnDestroy {
         this.indexSlideService.getIndexToGoBack().subscribe((currentSlidingIndex) => {
             this.currentVisibleElement = currentSlidingIndex;
         });
-
-    }
-
-    startSmartSampling() {
 
     }
 
@@ -841,7 +804,6 @@ export class NewsPage implements OnInit, OnDestroy {
                                             });
                                     });
                             }, err => {
-                                console.log("baabbabababababababbababa");
                                 console.log(err);
                                 loadingEl.dismiss()
                                     .then(() => {
@@ -1001,6 +963,8 @@ export class NewsPage implements OnInit, OnDestroy {
             this.setColorAtribute(`.${viewType}-icon`);
             return;
         }
+
+        this.popupQuizImmediately(htmlEL);
 
         // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
 
@@ -1179,10 +1143,10 @@ export class NewsPage implements OnInit, OnDestroy {
 
     }
 
-    toggleTheme() {
-        this.dataOnChangeCollection();
+    toggleTheme(htmlEl = false) {
+        // this.dataOnChangeCollection();
         // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
-        this.clearAndSend();
+        // this.clearAndSend();
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
             this.upperMenuButtonsColor = 'dark';
@@ -1194,8 +1158,8 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.theme = 'light-theme';
             this.changeDetector.detectChanges();
         }
-
-        this.resetDataCollection();
+        this.popupQuizImmediately(htmlEl);
+        // this.resetDataCollection();
     }
 
     ngOnDestroy() {
@@ -1232,14 +1196,14 @@ export class NewsPage implements OnInit, OnDestroy {
         }
     }
 
-    toggleFontSize() {
+    toggleFontSize(htmlEl = false) {
         if (this.currentViewLayout === 'gridView') {
             return;
         }
 
         // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG!
-        this.clearAndSend();
-        this.dataOnChangeCollection();
+        // this.clearAndSend();
+        // this.dataOnChangeCollection();
         this.fontSizeDefaultB = !this.fontSizeDefaultB;
 
         if (this.fontSizeDefaultB) {
@@ -1253,7 +1217,8 @@ export class NewsPage implements OnInit, OnDestroy {
         }
 
         this.changeDetector.detectChanges();
-        this.resetDataCollection();
+        // this.resetDataCollection();
+        this.popupQuizImmediately(htmlEl);
     }
 
     // only clears and resets interval timer, no need to send data to server
@@ -1320,28 +1285,96 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     openQuiz(b) {
+        console.log("ODLOČU SM SE DA" + b);
+        console.log("--------------------");
+
+        this.needUserFeedback = b;
         if (b) {
-            this.toastController.create({
-                header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
-                position: 'top',
-                buttons: [
-                    {
-                        text: 'DA',
-                        handler: () => {
-                            console.log('Favorite clicked');
+            this.mlQuizTimeout = setTimeout(() => {
+                this.popupQuiz();
+            }, 20000);
+        }
+    }
+
+    popupQuizImmediately(htmlEl) {
+        if (htmlEl) {
+            if (this.needUserFeedback) {
+                this.reverseLogicReward = false;
+            } else {
+                this.reverseLogicReward = true;
+            }
+
+            const timeDiff = (new Date().getTime() - this.fullViewDescription.d.getTime()) / 1000;
+            if (timeDiff <= 20) {
+                this.popupQuiz();
+            }
+        }
+
+    }
+
+    trainModelWithNewData(o) {
+        this.contextService.getCurrentContext().subscribe((ctx) => {
+            if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
+                const mlData = {
+                    u: ctx.userActivityObj.types[0],
+                    e: '' + ctx.brightnessObj.value,
+                    t: this.topPredictedView.t,
+                    l: this.topPredictedView.l,
+                    f: this.topPredictedView.f,
+                    o
+                };
+
+                this.machineLearningPlugin.trainClf({
+                    firstTime: false,
+                    vals: [mlData]
+                }).then((mlResult) => {
+                    if (this.reverseLogicReward) {
+                        if (mlResult.reward === -1) {
+                            this.giveBanditReward(1);
+                        } else {
+                            this.giveBanditReward(-1);
                         }
-                    }, {
-                        text: 'NE',
-                        role: 'cancel',
-                        handler: () => {
-                            console.log('Cancel clicked');
+                    } else {
+                        if (mlResult.reward === 1) {
+                            this.giveBanditReward(1);
+                        } else {
+                            this.giveBanditReward(-1);
                         }
                     }
-                ]
-            }).then(toastEl => {
-                toastEl.present();
-            });
-        }
+                });
+            }
+        });
+    }
+
+    giveBanditReward(reward) {
+        this.banditData.totalReward += reward;
+        this.banditData.sumOfReward[this.banditPullIndex] += reward;
+    }
+
+    popupQuiz() {
+        this.toastController.create({
+            header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
+            position: 'top',
+            buttons: [
+                {
+                    text: 'DA',
+                    handler: () => {
+                        this.trainModelWithNewData('Y');
+                    }
+                }, {
+                    text: 'NE',
+                    role: 'cancel',
+                    handler: () => {
+                        this.trainModelWithNewData('N');
+                    }
+                }
+            ]
+        }).then(toastEl => {
+            toastEl.present();
+            clearTimeout(this.mlQuizTimeout);
+            this.needUserFeedback = false;
+            this.mlQuizTimeout = null;
+        });
     }
 
     displayPrediction(str) {

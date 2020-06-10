@@ -15,14 +15,14 @@
             </div>
         </ion-title>
         <ion-buttons slot="primary">
-            <ion-img *ngIf="currentViewLayout !=='gridView'" class="ion-activatable" (click)="toggleFontSize()"
+            <ion-img *ngIf="currentViewLayout !=='gridView'" class="ion-activatable" (click)="toggleFontSize(true)"
                 class="font-icon" style="display: inline;" src="assets/fontIcons/font-b.png">
             </ion-img>
             <!--
             <ion-button (click)="toggleImagesShowing()">
                 <ion-icon slot="icon-only" name="images"></ion-icon>
             </ion-button> -->
-            <ion-button (click)="toggleTheme()">
+            <ion-button (click)="toggleTheme(true)">
                 <ion-icon slot="icon-only" name="bulb"></ion-icon>
             </ion-button>
             <ion-button (click)="openNewsOptions($event)">

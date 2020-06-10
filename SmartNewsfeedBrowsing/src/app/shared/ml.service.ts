@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Plugins, FilesystemDirectory, FilesystemEncoding } from '@capacitor/core';
 import { SensorReadingService } from './sensor.reading.service';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
 
 const { Filesystem } = Plugins;
 
@@ -27,16 +26,24 @@ export class MlService {
     }
 
     upperConfidenceBound() {
-        this.readFileContent(this.BANDIT_PATH).then((banditData) => {
-            if (banditData == null || banditData.data == null) {
-                return {
-                    selections: [],
-                    allTimePuls: 0,
-                    numberOfSelections: [0, 0, 0, 0], // [SOFTMAX, RANDOM, RANDOM_UA, CONFIDENCE]
-                    sumOfRewards: [0, 0, 0, 0]
-                };
+
+        return this.machineLearningPlugin.banditFileExists().then((retData) => {
+            console.log("Java mi je rekla");
+            console.log(retData);
+            if (!retData.e) {
+                if (retData.exists) {
+                    return this.readFileContent(this.BANDIT_PATH);
+                } else {
+                    return {
+                        selections: [],
+                        totalReward: 0,
+                        allTimePuls: 0,
+                        numberOfSelections: [0, 0, 0, 0], // [SOFTMAX, RANDOM, RANDOM_UA, CONFIDENCE]
+                        sumOfRewards: [0, 0, 0, 0]
+                    };
+                }
             } else {
-                return JSON.parse(banditData.data);
+                throw Error('Problem creating bandit file first time!');
             }
         }).then((banditData) => {
             let selectedPull = 0;
@@ -57,7 +64,7 @@ export class MlService {
                 }
             }
 
-            banditData.selections(selectedPull);
+            banditData.selections.push(selectedPull);
             banditData.numberOfSelections[selectedPull]++;
             banditData.allTimePuls++;
             return banditData;
@@ -97,12 +104,10 @@ export class MlService {
 
         const marginalDiff = 1 - (max1 - max2);
 
-        if (marginalDiff > epsilon) {
-            return true;
-        }
-
-        if (predictions[selectedIndex].p > 0.9) {
-            return Math.random() < (1 - predictions[selectedIndex].p);
+        if (marginalDiff >= epsilon) {
+            if (predictions[selectedIndex].p > 0.8) {
+                return Math.random() <= (1 - predictions[selectedIndex].p);
+            }
         }
 
         return false;
@@ -156,6 +161,26 @@ export class MlService {
         }
 
         return maxConfidentPrediction <= (decisionBoundry + 0.2);
+    }
+
+    checkIfExist() {
+        return Filesystem.readdir({
+            path: this.BANDIT_PATH,
+            directory: FilesystemDirectory.External
+        }).then(ret => {
+            return this.verifyIfExists('data.json', ret.files);
+        });
+    }
+
+    verifyIfExists(ITEM, LIST) {
+        let verification = false;
+        for (let i = 0; i < LIST.length; i++) {
+            if (LIST[i] === ITEM) {
+                verification = true;
+                break;
+            }
+        }
+        return verification;
     }
 
 
