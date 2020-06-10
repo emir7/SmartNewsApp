@@ -104,7 +104,7 @@ export class MlService {
 
         const marginalDiff = 1 - (max1 - max2);
 
-        if (marginalDiff >= epsilon) {
+        if (marginalDiff <= epsilon) {
             if (predictions[selectedIndex].p > 0.8) {
                 return Math.random() <= (1 - predictions[selectedIndex].p);
             }
@@ -162,26 +162,4 @@ export class MlService {
 
         return maxConfidentPrediction <= (decisionBoundry + 0.2);
     }
-
-    checkIfExist() {
-        return Filesystem.readdir({
-            path: this.BANDIT_PATH,
-            directory: FilesystemDirectory.External
-        }).then(ret => {
-            return this.verifyIfExists('data.json', ret.files);
-        });
-    }
-
-    verifyIfExists(ITEM, LIST) {
-        let verification = false;
-        for (let i = 0; i < LIST.length; i++) {
-            if (LIST[i] === ITEM) {
-                verification = true;
-                break;
-            }
-        }
-        return verification;
-    }
-
-
 }
