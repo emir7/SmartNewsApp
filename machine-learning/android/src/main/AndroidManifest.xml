@@ -1,5 +1,14 @@
 
   <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.ml.plugin.machinelearning">
+
+    <application>
+      <service android:name="com.ml.plugin.ClassifierTrainer2" android:exported="true"
+          android:stopWithTask="false">
+        <intent-filter>
+          <action android:name="MojaAkcija123"/>
+        </intent-filter>
+      </service>
+    </application>
   </manifest>
   

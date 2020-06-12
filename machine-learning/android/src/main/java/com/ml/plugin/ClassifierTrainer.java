@@ -59,7 +59,7 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
         delegate = asyncResponse;//Assigning call back interfacethrough constructor
     }
 
-    public RandomForest trainClassifier(){
+    public synchronized RandomForest trainClassifier(){
         RandomForest rf = null;
         if(getPluginCall().getBoolean("firstTime")){
             Instances dataset = createDatasetFromScratch();
@@ -75,19 +75,13 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
 
             rf = trainClfWithData(trainset, true);
         }else{
+            Log.d("EO_ME", "STVAR NI FIRST TIME");
             JSArray newTrainingInstances = pluginCall.getArray("vals");
             Instances instances = constructDatasetHeader();
             instances.setClassIndex(instances.numAttributes()-1);
             for(int i = 0; i < newTrainingInstances.length(); i++){
                 Instance instance = new DenseInstance(6);
                 try {
-                    Log.d("EO_ME", "u = "+ newTrainingInstances.getJSONObject(i).getString("u"));
-                    Log.d("EO_ME", "e = "+ newTrainingInstances.getJSONObject(i).getString("e"));
-                    Log.d("EO_ME", "t = "+ newTrainingInstances.getJSONObject(i).getString("t"));
-                    Log.d("EO_ME", "l = "+ newTrainingInstances.getJSONObject(i).getString("l"));
-                    Log.d("EO_ME", "f = "+ newTrainingInstances.getJSONObject(i).getString("f"));
-                    Log.d("EO_ME", "o = "+ newTrainingInstances.getJSONObject(i).getString("o"));
-
                     instance.setValue(instances.attribute("u"), newTrainingInstances.getJSONObject(i).getString("u")); // user activity
                     instance.setValue(instances.attribute("e"), Double.parseDouble(newTrainingInstances.getJSONObject(i).getString("e"))); // env brightness
                     instance.setValue(instances.attribute("t"), newTrainingInstances.getJSONObject(i).getString("t")); // theme
@@ -99,7 +93,7 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
                     e.printStackTrace();
                 }
             }
-
+            Log.d("EO_ME", "treniram model s toliko novih instanc "+instances.numInstances());
             rf = trainClfWithData(instances, false);
         }
 
@@ -132,9 +126,10 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
     }
 
     public RandomForest buildRF(Instances data){
+        Log.d("EO_ME", "treniram rf s toliko instanc "+data.numInstances());
         RandomForest forest = null;
         forest = new RandomForest();
-        forest.setNumTrees(100);
+        forest.setNumTrees(50);
         try {
             forest.buildClassifier(data);
         } catch (Exception e) {
@@ -145,15 +140,17 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
 
     public RandomForest trainClfWithData(Instances newInstances, boolean firstTime){
         RandomForest forest;
-        Log.d("EO_ME", ""+firstTime);
         if(firstTime){
             forest = buildRF(newInstances);
         }else{
+            Log.d("EO_ME", "first time je drugic false, appendam v trenining berem iz iz treninga");
             String trainPath = getCtx().getExternalFilesDir(null).getAbsolutePath() + "/Dataset/dataTrain.csv";
             Instances instances = readDatasetFromFile(trainPath);
+            Log.d("EO_ME", "st prebranih instanc po dodajanju je "+instances.numInstances());
             writeDataToFile(trainPath, newInstances, true);
             instances.addAll(newInstances);
             trainset = instances;
+            Log.d("EO_ME", "st prebranih instanc po dodajanju je2 "+trainset.numInstances());
             String testPath = getCtx().getExternalFilesDir(null).getAbsolutePath() + "/Dataset/dataTest.csv";
             testset = readDatasetFromFile(testPath);
             forest = buildRF(trainset);
@@ -373,20 +370,24 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
                 }
             }
         }
-
+        Log.d("EO_ME", "PRECISION = "+ tp / (tp + fp));
         return tp / (tp + fp);
     }
 
     @Override
     protected JSObject doInBackground(Void... voids) {
+        Log.d("EO_ME", "I HAVE SURVIVED1");
+
+        Log.d("EO_ME", "I HAVE SURVIVED");
         RandomForest rf = trainClassifier();
         serializeModel(rf);
-
+        Log.d("EO_ME", "vrnu sm forest, sm ga tud serializiru caka me precision");
         Evaluation eval = null;
         try {
             eval = new Evaluation(trainset);
             eval.evaluateModel(rf, testset);
 
+            Log.d("EO_ME", "AUC = "+eval.areaUnderROC(1));
             ThresholdPoint thresholdPoint = getThreshold(eval);
             try {
                 double precision = calculatePrecision(testset, rf, thresholdPoint.getThr());
@@ -396,12 +397,10 @@ public class ClassifierTrainer extends AsyncTask<Void, Void, JSObject> {
                     jsObject.put("reward", -1);
 
                     float prevPrec = sharedpreferences.getFloat(MODEL_PRECISION, 0);
-                    Log.d("PREC", "prev_prec = "+prevPrec);
-                    Log.d("PREC", "precision = "+precision);
                     if(precision > prevPrec){
                         jsObject.put("reward", 1);
                     }
-
+                    Log.d("EO_ME", "vracam reward");
                     this.sharedpreferences.edit().putFloat(MODEL_PRECISION, (float)precision)
                             .apply();
                     return jsObject;

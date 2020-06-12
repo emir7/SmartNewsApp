@@ -17,6 +17,7 @@ import { ContextModel, ViewDescription } from '../shared/models/context/contextM
 import { ModalController } from '@ionic/angular';
 import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
 import { MlService } from '../shared/ml.service';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'app-news',
@@ -132,12 +133,24 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-
+        setTimeout(() => {
+            this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
+                this.contextService.setValidObjs([true, true, true]);
+            });
+        }, 10000);
         this.displayLoadingElement().then(loadingEl => {
             loadingEl.present();
+            console.log("IZVAJAM SE1");
 
             this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
-                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2]) {
+                console.log("IZVAJAM SE2");
+                let globalObj = null;
+                console.log(ctxData);
+
+                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && this.mlContextSub) {
+                    console.log(ctxData);
+                    this.mlContextSub.unsubscribe();
+                    console.log("IZVAJAM SE3");
                     this.machineLearningPlugin.classifierPrediction({
                         u: ctxData.userActivityObj.types[0],
                         e: '' + ctxData.brightnessObj.value
@@ -157,23 +170,33 @@ export class NewsPage implements OnInit, OnDestroy {
                             b: clfPredData.b
                         };
                     }).then((obj) => {
+                        globalObj = obj;
+                        console.log("prediction");
+                        console.log(obj);
                         this.setDisplayView(obj.a[obj.i]);
                         return obj;
-                    }).then((obj) => {
+                    }).then((_) => {
                         loadingEl.dismiss();
-                        return { ucb: this.mlService.upperConfidenceBound(), obj };
+                        return this.mlService.upperConfidenceBound();
                     }).then((data) => {
                         console.log("-------------------------");
                         console.log(data);
                         console.log("-------------------------");
-                        this.banditData = data.ucb;
-                        const allSelections = data.ucb.selections;
+                        const allSelections = data.selections;
+                        console.log("haduken");
+                        console.log(allSelections);
+                        console.log("haduken");
+
                         const lastValue = allSelections[allSelections.length - 1];
                         this.banditPullIndex = lastValue;
+                        this.banditData = data;
 
+                        this.openQuiz(true);
+
+                        /*
                         switch (lastValue) {
                             case 0:
-                                this.openQuiz(this.mlService.marginalSoftmax(data.obj.a, data.obj.i));
+                                this.openQuiz(this.mlService.marginalSoftmax(globalObj.a, globalObj.i));
                                 break;
                             case 1:
                                 this.openQuiz(this.mlService.randomSelection());
@@ -182,65 +205,25 @@ export class NewsPage implements OnInit, OnDestroy {
                                 this.openQuiz(this.mlService.randomByUserActivity(ctxData.userActivityObj.types[0]));
                                 break;
                             case 3:
-                                this.openQuiz(this.mlService.leastConfidence(data.obj.a[data.obj.i], data.obj.b));
+                                this.openQuiz(this.mlService.leastConfidence(globalObj.a[globalObj.i], globalObj.b));
                                 break;
-                        }
+                        }*/
+
+                        this.fetchInitNews();
+
                     });
 
-                    this.mlContextSub.unsubscribe();
                 }
             });
 
 
         });
 
-
         //this.selectRandomView();
         this.handleResumeBackgroundEvents();
         //this.labDataCollecting();
 
-        let lEl = null;
-        this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
-            .then(res => {
-                if (typeof res === 'boolean') {
-                    this.displayLoadingElement()
-                        .then(loadingEl => {
-                            lEl = loadingEl;
-                            loadingEl.present();
-                            document.getElementById('content').style.display = 'none';
-                            this.googleNewsApi.getTopHeadlines().subscribe(news => {
-                                this.setupNewsFeedArray(news)
-                                    .then(() => {
-                                        this.googleNewsApi.storeNews('topHeadlines', this.arr, new Date());
-                                        loadingEl.dismiss();
-                                        document.getElementById('content').style.display = 'block';
-                                    }).catch(err => {
-                                        console.log(err);
-                                    });
-                            }, err => {
-                                console.log('Unable to fetch data');
-                                console.log(err);
-                                loadingEl.dismiss()
-                                    .then(() => {
-                                        this.unableToFetchData();
-                                    }).catch(errorClosingLoadingEl => {
-                                        console.log(errorClosingLoadingEl);
-                                    });
-                            });
-                        });
-                } else {
-                    this.arr = [...res.n];
-                    this.changeDetector.detectChanges();
-                }
-            }).catch(err => {
-                lEl.dismiss()
-                    .then(() => {
-                        this.unableToFetchData();
-                    }).catch(errorClosingLoadingEl => {
-                        console.log(errorClosingLoadingEl);
-                    });
 
-            });
 
 
         this.authorFontSizeSub = this.fontService.getAuthorFontSize()
@@ -300,6 +283,51 @@ export class NewsPage implements OnInit, OnDestroy {
             this.currentVisibleElement = currentSlidingIndex;
         });
 
+    }
+
+    fetchInitNews() {
+        let lEl = null;
+        this.googleNewsApi.canSendHttpRequestOrStorage('topHeadlines')
+            .then(res => {
+                if (typeof res === 'boolean') {
+                    this.displayLoadingElement()
+                        .then(loadingEl => {
+                            lEl = loadingEl;
+                            loadingEl.present();
+                            document.getElementById('content').style.display = 'none';
+                            this.googleNewsApi.getTopHeadlines().subscribe(news => {
+                                this.setupNewsFeedArray(news)
+                                    .then(() => {
+                                        this.googleNewsApi.storeNews('topHeadlines', this.arr, new Date());
+                                        loadingEl.dismiss();
+                                        document.getElementById('content').style.display = 'block';
+                                    }).catch(err => {
+                                        console.log(err);
+                                    });
+                            }, err => {
+                                console.log('Unable to fetch data');
+                                console.log(err);
+                                loadingEl.dismiss()
+                                    .then(() => {
+                                        this.unableToFetchData();
+                                    }).catch(errorClosingLoadingEl => {
+                                        console.log(errorClosingLoadingEl);
+                                    });
+                            });
+                        });
+                } else {
+                    this.arr = [...res.n];
+                    this.changeDetector.detectChanges();
+                }
+            }).catch(err => {
+                lEl.dismiss()
+                    .then(() => {
+                        this.unableToFetchData();
+                    }).catch(errorClosingLoadingEl => {
+                        console.log(errorClosingLoadingEl);
+                    });
+
+            });
     }
 
     initContextSubscriber() {
@@ -1194,6 +1222,7 @@ export class NewsPage implements OnInit, OnDestroy {
         if (this.mlContextSub) {
             this.mlContextSub.unsubscribe();
         }
+
     }
 
     toggleFontSize(htmlEl = false) {
@@ -1292,7 +1321,7 @@ export class NewsPage implements OnInit, OnDestroy {
         if (b) {
             this.mlQuizTimeout = setTimeout(() => {
                 this.popupQuiz();
-            }, 20000);
+            }, 5000);
         }
     }
 
@@ -1313,8 +1342,14 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     trainModelWithNewData(o) {
-        this.contextService.getCurrentContext().subscribe((ctx) => {
+        this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
+            console.log("EO ME");
+            console.log(o);
+            console.log(JSON.stringify(o));
+            console.log("...................");
             if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
+                console.log("EO ME1");
+
                 const mlData = {
                     u: ctx.userActivityObj.types[0],
                     e: '' + ctx.brightnessObj.value,
@@ -1323,11 +1358,15 @@ export class NewsPage implements OnInit, OnDestroy {
                     f: this.topPredictedView.f,
                     o
                 };
-
+                this.mlDebug(JSON.stringify(mlData));
                 this.machineLearningPlugin.trainClf({
                     firstTime: false,
                     vals: [mlData]
                 }).then((mlResult) => {
+                    console.log("Natreniru z novimi podatki in vračam nazaj");
+                    console.log(mlResult);
+                    console.log(".........................");
+                    this.vracamRez(JSON.stringify(mlResult));
                     if (this.reverseLogicReward) {
                         if (mlResult.reward === -1) {
                             this.giveBanditReward(1);
@@ -1346,15 +1385,17 @@ export class NewsPage implements OnInit, OnDestroy {
         });
     }
 
+
     giveBanditReward(reward) {
         this.banditData.totalReward += reward;
         this.banditData.sumOfReward[this.banditPullIndex] += reward;
+        this.mlService.writeBanditsToFile(this.banditData);
     }
 
     popupQuiz() {
         this.toastController.create({
             header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
-            position: 'top',
+            position: 'bottom',
             buttons: [
                 {
                     text: 'DA',
@@ -1363,7 +1404,6 @@ export class NewsPage implements OnInit, OnDestroy {
                     }
                 }, {
                     text: 'NE',
-                    role: 'cancel',
                     handler: () => {
                         this.trainModelWithNewData('N');
                     }
@@ -1374,6 +1414,24 @@ export class NewsPage implements OnInit, OnDestroy {
             clearTimeout(this.mlQuizTimeout);
             this.needUserFeedback = false;
             this.mlQuizTimeout = null;
+        });
+    }
+
+    mlDebug(d) {
+        this.toastController.create({
+            header: d,
+            position: 'top'
+        }).then(toastEl => {
+            toastEl.present();
+        });
+    }
+
+    vracamRez(d) {
+        this.toastController.create({
+            header: d,
+            position: 'bottom',
+        }).then(toastEl => {
+            toastEl.present();
         });
     }
 

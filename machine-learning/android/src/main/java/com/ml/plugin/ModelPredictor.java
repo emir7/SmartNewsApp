@@ -10,6 +10,7 @@ import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,7 +39,6 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
         this.ctx = ctx;
         sharedpreferences = getCtx().getSharedPreferences("si.fri.diploma", Context.MODE_PRIVATE);
         this.setDecisionBoundry(sharedpreferences.getFloat("boundry", 0.5f));
-        Log.d("boundry", ""+this.getDecisionBoundry());
         this.call = call;
         this.plugin = plugin;
         this.delegate = delegate;
@@ -49,6 +49,7 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
         RandomForest rf = null;
         try {
             FileInputStream streamIn = new FileInputStream(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/Model/model");
+            File f = new File(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/Model/model");
             objectinputstream = new ObjectInputStream(streamIn);
             rf = (RandomForest) objectinputstream.readObject();
         } catch (Exception e) {
@@ -153,7 +154,6 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
                         instance.setValue(attributes.get(2), theme);
                         instance.setValue(attributes.get(3), layout);
                         instance.setValue(attributes.get(4), fontSize);
-
                         dataset.add(instance);
                         double result [] = rf.distributionForInstance(dataset.lastInstance());
                         jsArray.put(i, new ModelOutput(theme, layout, fontSize, result[1]).converToJSObject());

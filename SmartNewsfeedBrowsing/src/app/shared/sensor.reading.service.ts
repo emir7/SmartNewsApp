@@ -183,6 +183,13 @@ export class SensorReadingService {
         });
     }
 
+    setValidObjs(validObjsArr) {
+        this.getCurrentContext().pipe(take(1)).subscribe((currentContextRec) => {
+            currentContextRec.validObjs = [...validObjsArr];
+            this.currentContext.next(currentContextRec);
+        });
+    }
+
     getScreenBrightness() {
         return this.mySensors.getScreenBrightness();
     }

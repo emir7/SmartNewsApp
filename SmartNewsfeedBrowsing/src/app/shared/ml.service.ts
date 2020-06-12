@@ -26,6 +26,7 @@ export class MlService {
     }
 
     upperConfidenceBound() {
+        console.log("KLIČEM SE");
 
         return this.machineLearningPlugin.banditFileExists().then((retData) => {
             console.log("Java mi je rekla");
@@ -46,6 +47,14 @@ export class MlService {
                 throw Error('Problem creating bandit file first time!');
             }
         }).then((banditData) => {
+            console.log(banditData);
+            console.log(banditData);
+            console.log(JSON.stringify(banditData));
+            console.log("..................................");
+
+            if (banditData.data != null) {
+                banditData = JSON.parse(banditData.data);
+            }
             let selectedPull = 0;
             let maxUpperBound = 0;
             for (let i = 0; i < banditData.numberOfSelections.length; i++) {
@@ -78,6 +87,10 @@ export class MlService {
     }
 
     writeBanditsToFile(banditData) {
+        console.log(".....................");
+        console.log(banditData);
+        console.log(JSON.stringify(banditData));
+        console.log(".....................");
         return Filesystem.writeFile({
             path: this.BANDIT_PATH,
             data: JSON.stringify(banditData),
@@ -104,7 +117,9 @@ export class MlService {
 
         const marginalDiff = 1 - (max1 - max2);
 
-        if (marginalDiff <= epsilon) {
+        if (marginalDiff >= epsilon) {
+            return true;
+        } else {
             if (predictions[selectedIndex].p > 0.8) {
                 return Math.random() <= (1 - predictions[selectedIndex].p);
             }

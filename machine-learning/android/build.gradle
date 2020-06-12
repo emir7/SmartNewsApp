@@ -44,6 +44,7 @@ repositories {
 
 
 dependencies {
+    implementation "android.arch.work:work-runtime:1.0.1"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
