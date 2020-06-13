@@ -15,7 +15,6 @@ import { GagNewsApiService } from '../shared/gag.news.api.service';
 import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
-import { QuickQuizModalPage } from './quickQuiz/quick.quiz.page';
 import { MlService } from '../shared/ml.service';
 import { take } from 'rxjs/operators';
 
@@ -97,12 +96,16 @@ export class NewsPage implements OnInit, OnDestroy {
 
     mlQuizTimeout = null;
     needUserFeedback = false;
-    reverseLogicReward = false;
 
     topPredictedView = null;
 
     banditData = null;
     banditPullIndex = 0;
+
+    lastPredictionDate: Date;
+
+    firstTimeInNews = false;
+    userChangeViewTimeout = null;
 
     constructor(
         public loadingController: LoadingController,
@@ -138,86 +141,8 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.contextService.setValidObjs([true, true, true]);
             });
         }, 10000);
-        this.displayLoadingElement().then(loadingEl => {
-            loadingEl.present();
-            console.log("IZVAJAM SE1");
 
-            this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
-                console.log("IZVAJAM SE2");
-                let globalObj = null;
-                console.log(ctxData);
-
-                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && this.mlContextSub) {
-                    console.log(ctxData);
-                    this.mlContextSub.unsubscribe();
-                    console.log("IZVAJAM SE3");
-                    this.machineLearningPlugin.classifierPrediction({
-                        u: ctxData.userActivityObj.types[0],
-                        e: '' + ctxData.brightnessObj.value
-                    }).then((clfPredData) => {
-                        let maxConfidence = 0;
-                        let choosenIndex = 0;
-                        for (let i = 0; i < clfPredData.a.length; i++) {
-                            if (clfPredData.a[i].p >= maxConfidence) {
-                                maxConfidence = clfPredData.a[i].p;
-                                choosenIndex = i;
-                            }
-                        }
-                        this.topPredictedView = clfPredData.a[choosenIndex];
-                        return {
-                            a: clfPredData.a,
-                            i: choosenIndex,
-                            b: clfPredData.b
-                        };
-                    }).then((obj) => {
-                        globalObj = obj;
-                        console.log("prediction");
-                        console.log(obj);
-                        this.setDisplayView(obj.a[obj.i]);
-                        return obj;
-                    }).then((_) => {
-                        loadingEl.dismiss();
-                        return this.mlService.upperConfidenceBound();
-                    }).then((data) => {
-                        console.log("-------------------------");
-                        console.log(data);
-                        console.log("-------------------------");
-                        const allSelections = data.selections;
-                        console.log("haduken");
-                        console.log(allSelections);
-                        console.log("haduken");
-
-                        const lastValue = allSelections[allSelections.length - 1];
-                        this.banditPullIndex = lastValue;
-                        this.banditData = data;
-
-                        this.openQuiz(true);
-
-                        /*
-                        switch (lastValue) {
-                            case 0:
-                                this.openQuiz(this.mlService.marginalSoftmax(globalObj.a, globalObj.i));
-                                break;
-                            case 1:
-                                this.openQuiz(this.mlService.randomSelection());
-                                break;
-                            case 2:
-                                this.openQuiz(this.mlService.randomByUserActivity(ctxData.userActivityObj.types[0]));
-                                break;
-                            case 3:
-                                this.openQuiz(this.mlService.leastConfidence(globalObj.a[globalObj.i], globalObj.b));
-                                break;
-                        }*/
-
-                        this.fetchInitNews();
-
-                    });
-
-                }
-            });
-
-
-        });
+        this.subscribeToMLContext();
 
         //this.selectRandomView();
         this.handleResumeBackgroundEvents();
@@ -406,6 +331,99 @@ export class NewsPage implements OnInit, OnDestroy {
         }
     }
 
+    subscribeToMLContext() {
+        this.displayLoadingElement().then(loadingEl => {
+            loadingEl.present();
+            console.log("IZVAJAM SE1");
+
+            this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
+                console.log("IZVAJAM SE2");
+                let globalObj = null;
+                console.log(ctxData);
+
+                let timerB = false;
+                if (this.lastPredictionDate == null) {
+                    timerB = true;
+                }
+
+                if (this.lastPredictionDate != null) {
+                    const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
+                    timerB = timeDiff >= 2 * 60; // change to 5
+                }
+
+                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB) {
+                    console.log(ctxData);
+                    this.lastPredictionDate = new Date();
+                    console.log("IZVAJAM SE3");
+                    this.machineLearningPlugin.classifierPrediction({
+                        u: ctxData.userActivityObj.types[0],
+                        e: '' + ctxData.brightnessObj.value
+                    }).then((clfPredData) => {
+                        let maxConfidence = 0;
+                        let choosenIndex = 0;
+                        for (let i = 0; i < clfPredData.a.length; i++) {
+                            if (clfPredData.a[i].p >= maxConfidence) {
+                                maxConfidence = clfPredData.a[i].p;
+                                choosenIndex = i;
+                            }
+                        }
+                        this.topPredictedView = clfPredData.a[choosenIndex];
+                        return {
+                            a: clfPredData.a,
+                            i: choosenIndex,
+                            b: clfPredData.b
+                        };
+                    }).then((obj) => {
+                        globalObj = obj;
+                        console.log("prediction");
+                        console.log(obj);
+                        this.setDisplayView(obj.a[obj.i]);
+                        return obj;
+                    }).then((_) => {
+                        loadingEl.dismiss();
+                        return this.mlService.upperConfidenceBound();
+                    }).then((data) => {
+                        console.log("-------------------------");
+                        console.log(data);
+                        console.log("-------------------------");
+                        const allSelections = data.selections;
+                        console.log("haduken");
+                        console.log(allSelections);
+                        console.log("haduken");
+
+                        const lastValue = allSelections[allSelections.length - 1];
+                        this.banditPullIndex = lastValue;
+                        this.banditData = data;
+
+                        switch (lastValue) {
+                            case 0:
+                                this.openQuiz(this.mlService.marginalSoftmax(globalObj.a, globalObj.i));
+                                break;
+                            case 1:
+                                this.openQuiz(this.mlService.randomSelection());
+                                break;
+                            case 2:
+                                this.openQuiz(this.mlService.randomByUserActivity(ctxData.userActivityObj.types[0]));
+                                break;
+                            case 3:
+                                this.openQuiz(this.mlService.leastConfidence(globalObj.a[globalObj.i], globalObj.b));
+                                break;
+                        }
+                        if (!this.firstTimeInNews) {
+                            this.fetchInitNews();
+                            this.firstTimeInNews = true;
+                        }
+
+
+                    });
+
+                }
+            });
+
+
+        });
+    }
+
     updatePreviousValues() {
         this.userActivity = this.currentContextDescription.userActivityObj.types[0];
 
@@ -436,19 +454,25 @@ export class NewsPage implements OnInit, OnDestroy {
 
     handleResumeBackgroundEvents() {
         this.platform.pause.subscribe(() => {
-            clearInterval(this.dataCollectionIntervalID);
-            this.dataCollectionIntervalID = null;
-            this.appInBackground = true;
-            if (!this.userInBrowser) {
-                this.dataOnChangeCollection();
+            if (this.mlContextSub) {
+                this.mlContextSub.unsubscribe();
             }
+            console.log("----------PAUSING APP!----------");
+
+            clearTimeout(this.mlQuizTimeout);
+            this.mlQuizTimeout = null;
+            clearTimeout(this.userChangeViewTimeout);
+            this.userChangeViewTimeout = null;
+            this.lastPredictionDate = null;
         });
 
         this.platform.resume.subscribe(() => {
-            this.appInBackground = false;
-            this.fullViewDescription.d = new Date();
-            this.resetDataCollection();
-            this.resetDataLabCollection();
+            console.log("----------RESUMING APP!----------");
+
+            if (!this.mlContextSub) {
+                this.subscribeToMLContext();
+            }
+
         });
     }
 
@@ -565,37 +589,6 @@ export class NewsPage implements OnInit, OnDestroy {
             console.log('================================ INTERVAL ALREADY STARTED ================================');
             return;
         }
-        /*
-        this.dataCollectionIntervalID = setInterval(() => {
-            this.modalController.dismiss().finally(() => {
-
-                clearInterval(this.dataCollectionIntervalID);
-
-                this.dataCollectionIntervalID = null;
-                this.fullViewDescription.c++;
-
-                this.openQuiz().then((data) => {
-                    if (data == null) {
-                        if (this.fullViewDescription.c === 2) {
-                            this.fullViewDescription.c = 0;
-                            this.selectRandomView();
-                        }
-                        this.labDataCollecting();
-                        return;
-                    }
-
-                    this.contextService.sendCurrentContextToServer(this.currentContextDescription, data,
-                        JSON.parse(JSON.stringify(this.fullViewDescription)), this.userInfo);
-
-                    if (this.fullViewDescription.c === 2) {
-                        this.fullViewDescription.c = 0;
-                        this.selectRandomView();
-                    }
-
-                    this.labDataCollecting();
-                });
-            });
-        }, 20000);*/
 
     }
 
@@ -639,15 +632,22 @@ export class NewsPage implements OnInit, OnDestroy {
 
     inBrowser($event) {
         if ($event === 'inBrowser') {
-            clearInterval(this.dataCollectionIntervalID);
-            this.dataCollectionIntervalID = null;
-            this.contextService.writeToFile(this.fullViewDescription, this.currentContextDescription);
-            this.userInBrowser = true;
+            if (this.mlContextSub) {
+                this.mlContextSub.unsubscribe();
+            }
+            this.lastPredictionDate = null;
+            clearTimeout(this.mlQuizTimeout);
+            clearTimeout(this.userChangeViewTimeout);
+            this.mlQuizTimeout = null;
+            this.userChangeViewTimeout = null;
         } else {
-            this.userInBrowser = false;
-            this.resetDataCollection();
-            this.resetDataLabCollection();
+
+            if (!this.mlContextSub) {
+                this.subscribeToMLContext();
+            }
         }
+
+
     }
 
     unableToFetchData() {
@@ -1314,26 +1314,34 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     openQuiz(b) {
-        console.log("ODLOČU SM SE DA" + b);
-        console.log("--------------------");
 
-        this.needUserFeedback = b;
-        if (b) {
-            this.mlQuizTimeout = setTimeout(() => {
-                this.popupQuiz();
-            }, 5000);
+        if (typeof b === 'boolean') {
+            this.needUserFeedback = b;
+            console.log("ODLOČU SM SE DA" + b);
+            console.log("--------------------");
+            if (b) {
+                this.mlQuizTimeout = setTimeout(() => {
+                    this.popupQuiz();
+                }, 20000);
+            }
+        } else {
+            b.then((val) => {
+                this.needUserFeedback = val;
+                console.log("ODLOČU SM SE DA" + val);
+                console.log("--------------------");
+                if (val) {
+                    this.mlQuizTimeout = setTimeout(() => {
+                        this.popupImmQuiz();
+                    }, 20000);
+                }
+            });
         }
+
     }
 
     popupQuizImmediately(htmlEl) {
         if (htmlEl) {
-            if (this.needUserFeedback) {
-                this.reverseLogicReward = false;
-            } else {
-                this.reverseLogicReward = true;
-            }
-
-            const timeDiff = (new Date().getTime() - this.fullViewDescription.d.getTime()) / 1000;
+            const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
             if (timeDiff <= 20) {
                 this.popupQuiz();
             }
@@ -1343,56 +1351,21 @@ export class NewsPage implements OnInit, OnDestroy {
 
     trainModelWithNewData(o) {
         this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
-            console.log("EO ME");
-            console.log(o);
-            console.log(JSON.stringify(o));
-            console.log("...................");
             if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
-                console.log("EO ME1");
-
-                const mlData = {
-                    u: ctx.userActivityObj.types[0],
-                    e: '' + ctx.brightnessObj.value,
-                    t: this.topPredictedView.t,
-                    l: this.topPredictedView.l,
-                    f: this.topPredictedView.f,
-                    o
-                };
+                const mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};${o}`;
                 this.mlDebug(JSON.stringify(mlData));
                 this.machineLearningPlugin.trainClf({
                     firstTime: false,
-                    vals: [mlData]
-                }).then((mlResult) => {
-                    console.log("Natreniru z novimi podatki in vračam nazaj");
-                    console.log(mlResult);
-                    console.log(".........................");
-                    this.vracamRez(JSON.stringify(mlResult));
-                    if (this.reverseLogicReward) {
-                        if (mlResult.reward === -1) {
-                            this.giveBanditReward(1);
-                        } else {
-                            this.giveBanditReward(-1);
-                        }
-                    } else {
-                        if (mlResult.reward === 1) {
-                            this.giveBanditReward(1);
-                        } else {
-                            this.giveBanditReward(-1);
-                        }
-                    }
+                    newData: mlData,
+                    banditDecidedToAsk: this.needUserFeedback,
+                    banditPull: this.banditPullIndex
                 });
+                this.needUserFeedback = false;
             }
         });
     }
 
-
-    giveBanditReward(reward) {
-        this.banditData.totalReward += reward;
-        this.banditData.sumOfReward[this.banditPullIndex] += reward;
-        this.mlService.writeBanditsToFile(this.banditData);
-    }
-
-    popupQuiz() {
+    popupImmQuiz() {
         this.toastController.create({
             header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
             position: 'bottom',
@@ -1411,25 +1384,53 @@ export class NewsPage implements OnInit, OnDestroy {
             ]
         }).then(toastEl => {
             toastEl.present();
+
             clearTimeout(this.mlQuizTimeout);
-            this.needUserFeedback = false;
             this.mlQuizTimeout = null;
+            clearTimeout(this.userChangeViewTimeout);
+            this.userChangeViewTimeout = null;
         });
+    }
+
+    popupQuiz() {
+        if (this.userChangeViewTimeout) {
+            clearTimeout(this.userChangeViewTimeout);
+            this.userChangeViewTimeout = null;
+        }
+
+        this.userChangeViewTimeout = setTimeout(() => {
+            this.toastController.create({
+                header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
+                position: 'bottom',
+                buttons: [
+                    {
+                        text: 'DA',
+                        handler: () => {
+                            this.trainModelWithNewData('Y');
+                        }
+                    }, {
+                        text: 'NE',
+                        handler: () => {
+                            this.trainModelWithNewData('N');
+                        }
+                    }
+                ]
+            }).then(toastEl => {
+                toastEl.present();
+
+                clearTimeout(this.mlQuizTimeout);
+                this.mlQuizTimeout = null;
+                clearTimeout(this.userChangeViewTimeout);
+                this.userChangeViewTimeout = null;
+            });
+        }, 5000);
+
     }
 
     mlDebug(d) {
         this.toastController.create({
             header: d,
             position: 'top'
-        }).then(toastEl => {
-            toastEl.present();
-        });
-    }
-
-    vracamRez(d) {
-        this.toastController.create({
-            header: d,
-            position: 'bottom',
         }).then(toastEl => {
             toastEl.present();
         });

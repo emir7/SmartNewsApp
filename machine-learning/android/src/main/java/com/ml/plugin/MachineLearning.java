@@ -59,11 +59,11 @@ public class MachineLearning extends Plugin {
             Data.Builder dataBuilder = new Data.Builder();
 
             dataBuilder.putBoolean("isFirstTime", call.getBoolean("firstTime"));
-
             if(call.getBoolean("firstTime")){
                 SetInitializer setInitializer = new SetInitializer(getContext());
                 setInitializer.createDatasetFromScratch(getContext().getExternalFilesDir(null).getAbsolutePath()+"/Dataset/fullset.csv");
             }else{
+                dataBuilder.putStringArray("newData", call.getString("newData").split(";"));
                 dataBuilder.putBoolean("banditDecidedToAsk", call.getBoolean("banditDecidedToAsk"));
                 dataBuilder.putInt("banditPull", call.getInt("banditPull"));
             }
@@ -82,10 +82,7 @@ public class MachineLearning extends Plugin {
 
         }
 
-
-
     }
-
 
     private boolean isWorkScheduled(String tag) {
         WorkManager instance = WorkManager.getInstance();

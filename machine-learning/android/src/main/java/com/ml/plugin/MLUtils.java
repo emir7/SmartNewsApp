@@ -228,6 +228,7 @@ public class MLUtils {
         try{
             fileWriter = new FileWriter(f);
             fileWriter.write(banditData);
+            Log.d("EO_ME", "uspesno sm dou nagrado");
         }catch (Exception e){
             Log.e("EO_ME", "there was an error while updating bandits!");
             Log.e("EO_ME", e.toString());

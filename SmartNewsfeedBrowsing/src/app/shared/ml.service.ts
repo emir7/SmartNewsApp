@@ -100,6 +100,7 @@ export class MlService {
     }
 
     marginalSoftmax(predictions, selectedIndex) {
+        return true;
         let s = 0;
         const epsilon = 0.5;
         for (const predData of predictions) {
@@ -129,10 +130,13 @@ export class MlService {
     }
 
     randomSelection() {
+        return true;
         return Math.random() < 0.5;
     }
 
     randomByUserActivity(ua) {
+        return true;
+
         return this.countUserActivityOccurances().then((occurancesData) => {
             const cStill = occurancesData.cStill;
             const cFoot = occurancesData.cFoot;
@@ -171,6 +175,8 @@ export class MlService {
     }
 
     leastConfidence(maxConfidentPrediction, decisionBoundry) {
+        return true;
+
         if (decisionBoundry > 0.7) {
             return maxConfidentPrediction < decisionBoundry;
         }

@@ -56,9 +56,15 @@ public class ClassifierTrainer2 extends Worker {
         modelPath = getApplicationContext().getExternalFilesDir(null).getAbsolutePath() + "/Model/model";
         banditPath = getApplicationContext().getExternalFilesDir(null).getAbsoluteFile() + "/bandits/data.json";
 
-        isFirstTime = getInputData().getBoolean("firstTime", true);
+        isFirstTime = getInputData().getBoolean("isFirstTime", true);
         banditDecidedToAsk = getInputData().getBoolean("banditDecidedToAsk", true);
         banditPull = getInputData().getInt("banditPull", 0);
+        passedInstance = getInputData().getStringArray("newData");
+
+        Log.d("EO_ME", "banditDecidedToAsk "+banditDecidedToAsk);
+        Log.d("EO_ME", "banditPull "+banditPull);
+
+
     }
 
     @NonNull
@@ -85,7 +91,9 @@ public class ClassifierTrainer2 extends Worker {
                         .apply();
                 Log.d("EO_ME", "ratal mi je do konca pridt z usm 11");
                 Log.d("EO_ME", "precision = " + precision);
-                Log.d("EOP_ME", optimalThresholdPoint.toString());
+                Log.d("EO_ME", optimalThresholdPoint.toString());
+                float prevPrec = sharedpreferences.getFloat(MODEL_PRECISION, 0);
+                Log.d("EO_ME", "v fajl sm zapisu "+prevPrec);
                 this.sharedpreferences.edit().putBoolean("started", false).apply();
                 return Result.success();
             } else {
@@ -93,40 +101,68 @@ public class ClassifierTrainer2 extends Worker {
                 String jsonBanditString = MLUtils.readBanditFile(getBanditPath());
                 JSONObject jsonObject = new JSONObject(jsonBanditString);
 
+                Log.d("EO_ME", "prev_prec was "+prevPrec);
+                Log.d("EO_ME", "current prec is "+precision);
                 if (banditDecidedToAsk) {
                     if (precision > prevPrec) {
+                        // nagrada
+                        Log.d("EO_ME", "pass1");
                         jsonObject.put("totalReward", jsonObject.getInt("totalReward") + 1);
-                        String sumOfRewardsAsString = jsonObject.getString("sumOfReward");
-                        int[] sumOfReward = stringToArr(sumOfRewardsAsString);
-                        sumOfReward[banditPull]++;
-                        jsonObject.put("sumOfReward", Arrays.toString(sumOfReward));
+                        Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+                        String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+                        Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+                        int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+                        Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
+                        sumOfRewards[banditPull]++;
+                        Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+                        jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
                     } else {
+                        Log.d("EO_ME", "pass2");
+                        // kazn
                         jsonObject.put("totalReward", jsonObject.getInt("totalReward") - 1);
-                        String sumOfRewardsAsString = jsonObject.getString("sumOfReward");
-                        int[] sumOfReward = stringToArr(sumOfRewardsAsString);
-                        sumOfReward[banditPull]--;
-                        jsonObject.put("sumOfReward", Arrays.toString(sumOfReward));
+                        Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+                        String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+                        Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+                        int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+                        Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
+                        sumOfRewards[banditPull]--;
+                        Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+                        jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
                     }
                 } else {
                     if (precision < prevPrec) {
+                        // nagrada
+                        Log.d("EO_ME", "pass3");
                         jsonObject.put("totalReward", jsonObject.getInt("totalReward") + 1);
-                        String sumOfRewardsAsString = jsonObject.getString("sumOfReward");
-                        int[] sumOfReward = stringToArr(sumOfRewardsAsString);
-                        sumOfReward[banditPull]++;
-                        jsonObject.put("sumOfReward", Arrays.toString(sumOfReward));
+                        Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+                        String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+                        Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+                        int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+                        Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
+                        sumOfRewards[banditPull]++;
+                        Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+                        jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
                     } else {
+                        // kazn
+                        Log.d("EO_ME", "pass4");
                         jsonObject.put("totalReward", jsonObject.getInt("totalReward") - 1);
-                        String sumOfRewardsAsString = jsonObject.getString("sumOfReward");
-                        int[] sumOfReward = stringToArr(sumOfRewardsAsString);
-                        sumOfReward[banditPull]--;
-                        jsonObject.put("sumOfReward", Arrays.toString(sumOfReward));
+                        Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+                        String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+                        Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+                        int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+                        Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
+                        sumOfRewards[banditPull]--;
+                        Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+                        jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
                     }
                 }
 
                 MLUtils.writeToBanditFile(getBanditPath(), jsonObject.toString());
                 Log.d("EO_ME", "ratal mi je do konca pridt z usm");
+                Log.d("EO_ME", jsonObject.toString());
                 this.sharedpreferences.edit().putBoolean("started", false).apply();
-
+                this.sharedpreferences.edit().putFloat(MODEL_PRECISION, (float) precision)
+                        .apply();
                 return Result.success();
             }
 
@@ -140,10 +176,13 @@ public class ClassifierTrainer2 extends Worker {
     }
 
     public int[] stringToArr(String string) {
-        String[] strings = string.replace("[", "").replace("]", "").split(", ");
+        String[] strings = string.replace("[", "")
+                .replace("]", "")
+                .replaceAll(" ", "")
+                .split(",");
         int[] result = new int[strings.length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = Integer.parseInt(strings[i]);
+            result[i] = Integer.parseInt(strings[i].trim());
         }
         return result;
     }
@@ -173,13 +212,13 @@ public class ClassifierTrainer2 extends Worker {
             instances.setClassIndex(instances.numAttributes() - 1); // 2) Povemo kateri index je class
             Instance instance = new DenseInstance(6); // 3) Kreiramo prazno instanco
 
-            for (int i = 0; i < instances.numAttributes(); i++) { // 4) ji dodamo atribute
-                if (i == 1) { // 5) Edini field ki je double
-                    instance.setValue(i, Double.parseDouble(getPassedInstance()[i]));
-                } else { // 6) Vsi ostali fieldi so string
-                    instance.setValue(i, getPassedInstance()[i]);
-                }
-            }
+            instance.setValue(instances.attribute("u"), getPassedInstance()[0]); // user activity
+            instance.setValue(instances.attribute("e"), Double.parseDouble(getPassedInstance()[1])); // env brightness
+            instance.setValue(instances.attribute("t"), getPassedInstance()[2]); // theme
+            instance.setValue(instances.attribute("l"), getPassedInstance()[3]); // layout
+            instance.setValue(instances.attribute("f"), getPassedInstance()[4]); // font size
+            instance.setValue(instances.attribute("o"), getPassedInstance()[5]); // output
+
             instances.add(instance); // 7) Instanco dodamo
             Log.d("EO_ME", "treniram model s toliko novih instanc " + instances.numInstances());
             randomForest = trainClfWithData(instances); // 7) Model treniramo
@@ -193,6 +232,7 @@ public class ClassifierTrainer2 extends Worker {
         Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
         Log.d("EO_ME", "st prebranih instanc po dodajanju je " + instances.numInstances());
         instances.addAll(newInstances);  // 2) Dodamo nove instance
+        MLUtils.writeDataToFile(getTrainingPath(), newInstances, true); // Appendamo instance v fajl
         setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
         setTestset(MLUtils.readDatasetFromFile(getTestingPath())); // 4) Nastavimo testset ki je vedno isti iz datoteke
         return MLUtils.buildRF(getTrainset()); // 6) Model vrnemo in pošljemo v serialzacijo
