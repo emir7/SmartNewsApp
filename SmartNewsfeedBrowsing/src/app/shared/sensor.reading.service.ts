@@ -174,12 +174,10 @@ export class SensorReadingService {
 
     setCurrentBrighness(obj: BrightnessModel) {
         this.getCurrentContext().pipe(take(1)).subscribe((currentContextRec) => {
-            if (!this.timeWatch && currentContextRec.brightnessObj.value !== obj.value) {
-                currentContextRec.brightnessObj.value = obj.value;
-                currentContextRec.brightnessObj.level = obj.level;
-                currentContextRec.validObjs[1] = true;
-                this.currentContext.next(currentContextRec);
-            }
+            currentContextRec.brightnessObj.value = obj.value;
+            currentContextRec.brightnessObj.level = obj.level;
+            currentContextRec.validObjs[1] = true;
+            this.currentContext.next(currentContextRec);
         });
     }
 

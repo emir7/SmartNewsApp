@@ -105,7 +105,8 @@ export class NewsPage implements OnInit, OnDestroy {
     lastPredictionDate: Date;
 
     firstTimeInNews = false;
-    userChangeViewTimeout = null;
+
+    cancelLearning = false;
 
     constructor(
         public loadingController: LoadingController,
@@ -351,7 +352,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     timerB = timeDiff >= 2 * 60; // change to 5
                 }
 
-                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB) {
+                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
                     console.log(ctxData);
                     this.lastPredictionDate = new Date();
                     console.log("IZVAJAM SE3");
@@ -454,22 +455,26 @@ export class NewsPage implements OnInit, OnDestroy {
 
     handleResumeBackgroundEvents() {
         this.platform.pause.subscribe(() => {
+            this.dismissAllQuizs();
+
+
             if (this.mlContextSub) {
+                console.log('brisem subscription');
                 this.mlContextSub.unsubscribe();
             }
             console.log("----------PAUSING APP!----------");
+            console.log('brisem timeoute');
 
             clearTimeout(this.mlQuizTimeout);
             this.mlQuizTimeout = null;
-            clearTimeout(this.userChangeViewTimeout);
-            this.userChangeViewTimeout = null;
             this.lastPredictionDate = null;
         });
 
         this.platform.resume.subscribe(() => {
             console.log("----------RESUMING APP!----------");
 
-            if (!this.mlContextSub) {
+            if (!this.mlContextSub || this.mlContextSub.closed) {
+                console.log('vracam subscription');
                 this.subscribeToMLContext();
             }
 
@@ -632,17 +637,22 @@ export class NewsPage implements OnInit, OnDestroy {
 
     inBrowser($event) {
         if ($event === 'inBrowser') {
+            this.dismissAllQuizs();
+
+
             if (this.mlContextSub) {
+                console.log('sou sm v browser, zato brisem subscription');
                 this.mlContextSub.unsubscribe();
             }
+            console.log('sou sm v browser, zato brisem timeoute in use');
             this.lastPredictionDate = null;
             clearTimeout(this.mlQuizTimeout);
-            clearTimeout(this.userChangeViewTimeout);
             this.mlQuizTimeout = null;
-            this.userChangeViewTimeout = null;
         } else {
+            console.log('sou sm iz browserja nazaj v app');
 
-            if (!this.mlContextSub) {
+            if (!this.mlContextSub || this.mlContextSub.closed) {
+                console.log('sou sm iz browserja nazaj v app in vracam subscription!');
                 this.subscribeToMLContext();
             }
         }
@@ -1175,6 +1185,8 @@ export class NewsPage implements OnInit, OnDestroy {
         // this.dataOnChangeCollection();
         // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
         // this.clearAndSend();
+        this.popupQuizImmediately(htmlEl);
+
         if (this.currentTheme === 'light-theme') {
             this.theme.setTheme('dark-theme');
             this.upperMenuButtonsColor = 'dark';
@@ -1186,7 +1198,6 @@ export class NewsPage implements OnInit, OnDestroy {
             this.fullViewDescription.theme = 'light-theme';
             this.changeDetector.detectChanges();
         }
-        this.popupQuizImmediately(htmlEl);
         // this.resetDataCollection();
     }
 
@@ -1226,6 +1237,8 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     toggleFontSize(htmlEl = false) {
+        this.popupQuizImmediately(htmlEl);
+
         if (this.currentViewLayout === 'gridView') {
             return;
         }
@@ -1247,7 +1260,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
         this.changeDetector.detectChanges();
         // this.resetDataCollection();
-        this.popupQuizImmediately(htmlEl);
     }
 
     // only clears and resets interval timer, no need to send data to server
@@ -1321,8 +1333,10 @@ export class NewsPage implements OnInit, OnDestroy {
             console.log("--------------------");
             if (b) {
                 this.mlQuizTimeout = setTimeout(() => {
-                    this.popupQuiz();
+                    this.popupImmQuiz();
                 }, 20000);
+            } else {
+                this.detectZeroReward();
             }
         } else {
             b.then((val) => {
@@ -1333,17 +1347,39 @@ export class NewsPage implements OnInit, OnDestroy {
                     this.mlQuizTimeout = setTimeout(() => {
                         this.popupImmQuiz();
                     }, 20000);
+                } else {
+                    this.detectZeroReward();
                 }
             });
         }
 
     }
 
+    detectZeroReward() {
+        this.dismissAllQuizs();
+
+        this.mlQuizTimeout = setTimeout(() => {
+            this.machineLearningPlugin.sendZeroReward().then(() => {
+                console.log('Zero reward passed OK');
+            }).catch(err => {
+                console.log('Zero reward didnt pass');
+            });
+
+            clearTimeout(this.mlQuizTimeout);
+            this.mlQuizTimeout = null;
+
+        }, 20000);
+    }
+
     popupQuizImmediately(htmlEl) {
         if (htmlEl) {
             const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
-            if (timeDiff <= 20) {
-                this.popupQuiz();
+            console.log('MINILO JE TOLIKO SEKUND --->' + timeDiff + ' <---------------------------------');
+            if (timeDiff <= 20 || this.mlQuizTimeout) {
+                console.log('MORAM DT TAKOJ UPRASANJE');
+                this.popupImmAlert();
+            } else {
+                console.log('NE RABM DT TAKOJ UPRASANJE');
             }
         }
 
@@ -1359,13 +1395,21 @@ export class NewsPage implements OnInit, OnDestroy {
                     newData: mlData,
                     banditDecidedToAsk: this.needUserFeedback,
                     banditPull: this.banditPullIndex
+                }).then((mlReturnedData) => {
+                    if (mlReturnedData != null && mlReturnedData.s === 'busy') {
+                        this.cancelLearning = true;
+                    }
                 });
                 this.needUserFeedback = false;
+                clearTimeout(this.mlQuizTimeout);
+                this.mlQuizTimeout = null;
             }
         });
     }
 
     popupImmQuiz() {
+        this.dismissAllQuizs();
+
         this.toastController.create({
             header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
             position: 'bottom',
@@ -1384,53 +1428,58 @@ export class NewsPage implements OnInit, OnDestroy {
             ]
         }).then(toastEl => {
             toastEl.present();
-
             clearTimeout(this.mlQuizTimeout);
             this.mlQuizTimeout = null;
-            clearTimeout(this.userChangeViewTimeout);
-            this.userChangeViewTimeout = null;
         });
     }
 
-    popupQuiz() {
-        if (this.userChangeViewTimeout) {
-            clearTimeout(this.userChangeViewTimeout);
-            this.userChangeViewTimeout = null;
-        }
+    popupImmAlert() {
+        clearTimeout(this.mlQuizTimeout);
+        this.mlQuizTimeout = null;
 
-        this.userChangeViewTimeout = setTimeout(() => {
-            this.toastController.create({
-                header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
-                position: 'bottom',
-                buttons: [
-                    {
-                        text: 'DA',
-                        handler: () => {
-                            this.trainModelWithNewData('Y');
-                        }
-                    }, {
-                        text: 'NE',
-                        handler: () => {
-                            this.trainModelWithNewData('N');
-                        }
-                    }
-                ]
-            }).then(toastEl => {
-                toastEl.present();
+        this.dismissAllQuizs();
 
-                clearTimeout(this.mlQuizTimeout);
-                this.mlQuizTimeout = null;
-                clearTimeout(this.userChangeViewTimeout);
-                this.userChangeViewTimeout = null;
-            });
-        }, 5000);
-
+        this.alertController.create({
+            header: 'Ali ste bili zadovoljni s predhodnim prikazom novic?',
+            backdropDismiss: false,
+            buttons: [{
+                text: 'DA',
+                handler: () => {
+                    this.trainModelWithNewData('Y');
+                }
+            }, {
+                text: 'NE',
+                handler: () => {
+                    this.trainModelWithNewData('N');
+                }
+            }]
+        }).then((alertEl) => {
+            alertEl.present();
+        });
     }
+
+    dismissAllQuizs() {
+        this.toastController.dismiss().then(() => {
+            console.log('dismissed toast');
+        }).catch(err => {
+            console.log('error while dissmising toast controller');
+            console.log(err);
+        });
+
+        this.alertController.dismiss().then(() => {
+            console.log('dismissed alert controller');
+        }).catch(err => {
+            console.log('error while dissmising alert controller');
+            console.log(err);
+        });
+    }
+
 
     mlDebug(d) {
         this.toastController.create({
             header: d,
-            position: 'top'
+            position: 'top',
+            duration: 2000
         }).then(toastEl => {
             toastEl.present();
         });

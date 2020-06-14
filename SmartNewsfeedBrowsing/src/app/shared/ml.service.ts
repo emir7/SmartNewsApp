@@ -37,6 +37,7 @@ export class MlService {
                 } else {
                     return {
                         selections: [],
+                        regret: 0,
                         totalReward: 0,
                         allTimePuls: 0,
                         numberOfSelections: [0, 0, 0, 0], // [SOFTMAX, RANDOM, RANDOM_UA, CONFIDENCE]
@@ -55,14 +56,21 @@ export class MlService {
             if (banditData.data != null) {
                 banditData = JSON.parse(banditData.data);
             }
+
+            if (typeof banditData.sumOfRewards === 'string') {
+                banditData.sumOfRewards = JSON.parse(banditData.sumOfRewards);
+            }
+
             let selectedPull = 0;
             let maxUpperBound = 0;
-            for (let i = 0; i < banditData.numberOfSelections.length; i++) {
+            for (let i = 0; i < 4; i++) {
                 let upperBound = 0;
                 if (banditData.numberOfSelections[i] > 0) {
-                    const avgReward = banditData.sumOfRewards[i] / banditData.numberOfSelections[i];
+                    const avgReward = banditData.sumOfRewards[i] / banditData.numberOfSelections[i]; // 0
                     const delta = Math.sqrt(2 * Math.log(banditData.allTimePuls + 1) / banditData.numberOfSelections[i]);
                     upperBound = avgReward + delta;
+                    console.log('UPPERBOUND = ' + upperBound);
+                    console.log('.=.=.=.=.=.=.=.=.=.=.=.=');
                 } else {
                     upperBound = Number.POSITIVE_INFINITY;
                 }
@@ -100,42 +108,47 @@ export class MlService {
     }
 
     marginalSoftmax(predictions, selectedIndex) {
-        return true;
-        let s = 0;
-        const epsilon = 0.5;
-        for (const predData of predictions) {
-            s += Math.exp(predData.p);
-        }
-
-        const results = [];
-        for (const predData of predictions) {
-            results.push(predData.p / s);
-        }
-
-        results.sort();
-        const max1 = results[results.length - 1];
-        const max2 = results[results.length - 2];
-
-        const marginalDiff = 1 - (max1 - max2);
-
-        if (marginalDiff >= epsilon) {
-            return true;
-        } else {
-            if (predictions[selectedIndex].p > 0.8) {
-                return Math.random() <= (1 - predictions[selectedIndex].p);
-            }
-        }
-
         return false;
+        return new Promise((resolve, reject) => {
+            let s = 0;
+            const epsilon = 0.5;
+            for (const predData of predictions) {
+                s += Math.exp(predData.p);
+            }
+
+            const results = [];
+            for (const predData of predictions) {
+                results.push(predData.p / s);
+            }
+
+            results.sort();
+            const max1 = results[results.length - 1];
+            const max2 = results[results.length - 2];
+
+            const marginalDiff = 1 - (max1 - max2);
+
+            if (marginalDiff >= epsilon) {
+                resolve(true);
+            } else {
+                if (predictions[selectedIndex].p > 0.8) {
+                    resolve(Math.random() <= (1 - predictions[selectedIndex].p));
+                }
+            }
+
+            resolve(false);
+        });
+
     }
 
     randomSelection() {
-        return true;
-        return Math.random() < 0.5;
+        return false;
+        return new Promise((resolve, reject) => {
+            resolve(Math.random() < 0.5);
+        });
     }
 
     randomByUserActivity(ua) {
-        return true;
+        return false;
 
         return this.countUserActivityOccurances().then((occurancesData) => {
             const cStill = occurancesData.cStill;
@@ -175,12 +188,14 @@ export class MlService {
     }
 
     leastConfidence(maxConfidentPrediction, decisionBoundry) {
-        return true;
+        return false;
+        return new Promise((resolve, reject) => {
+            if (decisionBoundry > 0.7) {
+                resolve(maxConfidentPrediction < decisionBoundry);
+            }
 
-        if (decisionBoundry > 0.7) {
-            return maxConfidentPrediction < decisionBoundry;
-        }
+            resolve(maxConfidentPrediction <= (decisionBoundry + 0.2));
+        });
 
-        return maxConfidentPrediction <= (decisionBoundry + 0.2);
     }
 }

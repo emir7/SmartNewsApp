@@ -46,13 +46,13 @@ public class MachineLearning extends Plugin {
     public void trainClf(final PluginCall call){
 
         if(isWorkScheduled("classifierTrainerML")){
-            Log.d("EO_ME", "ne treniram");
+            Log.d("EO_ME", "ne treniram ker sm busy");
             // nemors sprasevt zdej nc
             JSObject ret = new JSObject();
             ret.put("s", "busy");
             call.success(ret);
         }else{
-            Log.d("EO_ME", "treniram");
+            Log.d("EO_ME", "treniram ker sm free");
             JSObject ret = new JSObject();
             ret.put("s", "free");
             call.success(ret);
@@ -82,6 +82,13 @@ public class MachineLearning extends Plugin {
 
         }
 
+    }
+
+    @PluginMethod
+    public void sendZeroReward(PluginCall call){
+        Log.d("EO_ME", "posiljam na server zero reward");
+        call.resolve();
+        //call.reject("Problem while sending request to the server!");
     }
 
     private boolean isWorkScheduled(String tag) {
