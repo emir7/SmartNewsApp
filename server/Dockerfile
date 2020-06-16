@@ -4,5 +4,4 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 9081
-RUN pwd
 CMD ["npm", "start"]

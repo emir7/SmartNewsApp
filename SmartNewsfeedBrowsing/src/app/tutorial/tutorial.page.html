@@ -1,11 +1,11 @@
 <ion-content>
 
-    <ion-slides pager="true" #ionSlides>
+    <ion-slides pager="true" #ionSlidesx>
         <ion-slide class="step-zero">
             <h3>Pred samim začetkom vas prosim, da vnesete vaše uporabniško ime</h3>
             <ion-item style="margin-top: 20px;">
                 <ion-label position="floating">Uporabniško ime</ion-label>
-                <ion-input #username></ion-input>
+                <ion-input #username [(ngModel)]="userData" (ionBlur)="usernameBlured()"></ion-input>
             </ion-item>
         </ion-slide>
 

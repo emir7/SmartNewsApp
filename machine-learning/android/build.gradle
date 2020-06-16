@@ -44,6 +44,7 @@ repositories {
 
 
 dependencies {
+    implementation "com.squareup.okhttp3:okhttp:4.7.2"
     implementation "android.arch.work:work-runtime:1.0.1"
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')

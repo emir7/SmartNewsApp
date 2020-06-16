@@ -137,9 +137,16 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+
+        this.storage.get('userInfo').then((userDatRet) => {
+            this.userInfo = userDatRet;
+        });
+
         setTimeout(() => {
             this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
-                this.contextService.setValidObjs([true, true, true]);
+                if (!ctx.validObjs[0] || !ctx.validObjs[1] || !ctx.validObjs[2]) {
+                    this.contextService.setValidObjs([true, true, true]);
+                }
             });
         }, 10000);
 
@@ -148,9 +155,6 @@ export class NewsPage implements OnInit, OnDestroy {
         //this.selectRandomView();
         this.handleResumeBackgroundEvents();
         //this.labDataCollecting();
-
-
-
 
         this.authorFontSizeSub = this.fontService.getAuthorFontSize()
             .subscribe(currentFontSizeValue => {
@@ -360,6 +364,7 @@ export class NewsPage implements OnInit, OnDestroy {
                         u: ctxData.userActivityObj.types[0],
                         e: '' + ctxData.brightnessObj.value
                     }).then((clfPredData) => {
+
                         let maxConfidence = 0;
                         let choosenIndex = 0;
                         for (let i = 0; i < clfPredData.a.length; i++) {
@@ -410,12 +415,25 @@ export class NewsPage implements OnInit, OnDestroy {
                                 this.openQuiz(this.mlService.leastConfidence(globalObj.a[globalObj.i], globalObj.b));
                                 break;
                         }
+
                         if (!this.firstTimeInNews) {
                             this.fetchInitNews();
                             this.firstTimeInNews = true;
                         }
 
 
+                    }).catch(err => {
+                        this.cancelLearning = true;
+                        loadingEl.dismiss();
+                        if (!this.firstTimeInNews) {
+                            this.fetchInitNews();
+                            this.firstTimeInNews = true;
+                        }
+
+                        this.selectRandomView();
+
+                        console.log(err);
+                        console.log('Error while predicting and calculating bandit');
                     });
 
                 }
@@ -1359,10 +1377,25 @@ export class NewsPage implements OnInit, OnDestroy {
         this.dismissAllQuizs();
 
         this.mlQuizTimeout = setTimeout(() => {
-            this.machineLearningPlugin.sendZeroReward().then(() => {
-                console.log('Zero reward passed OK');
-            }).catch(err => {
-                console.log('Zero reward didnt pass');
+
+            this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
+                if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
+                    const mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};?`;
+
+                    this.machineLearningPlugin.sendZeroReward({
+                        firstTime: false,
+                        username: this.userInfo.username + this.userInfo.id,
+                        banditPull: this.banditPullIndex,
+                        predictionDATA: mlData,
+                        banditDecidedToAsk: false
+                    }).then(() => {
+                        console.log('Zero reward passed OK');
+                    }).catch(err => {
+                        console.log('Zero reward didnt pass');
+                        console.log(err);
+                    });
+
+                }
             });
 
             clearTimeout(this.mlQuizTimeout);
@@ -1372,7 +1405,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     popupQuizImmediately(htmlEl) {
-        if (htmlEl) {
+        if (htmlEl && !this.cancelLearning) {
             const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
             console.log('MINILO JE TOLIKO SEKUND --->' + timeDiff + ' <---------------------------------');
             if (timeDiff <= 20 || this.mlQuizTimeout) {
@@ -1394,8 +1427,12 @@ export class NewsPage implements OnInit, OnDestroy {
                     firstTime: false,
                     newData: mlData,
                     banditDecidedToAsk: this.needUserFeedback,
-                    banditPull: this.banditPullIndex
+                    banditPull: this.banditPullIndex,
+                    username: this.userInfo.username + this.userInfo.id,
+                    predictionDATA: mlData
                 }).then((mlReturnedData) => {
+                    console.log(mlReturnedData);
+                    console.log('.........................');
                     if (mlReturnedData != null && mlReturnedData.s === 'busy') {
                         this.cancelLearning = true;
                     }
@@ -1428,15 +1465,10 @@ export class NewsPage implements OnInit, OnDestroy {
             ]
         }).then(toastEl => {
             toastEl.present();
-            clearTimeout(this.mlQuizTimeout);
-            this.mlQuizTimeout = null;
         });
     }
 
     popupImmAlert() {
-        clearTimeout(this.mlQuizTimeout);
-        this.mlQuizTimeout = null;
-
         this.dismissAllQuizs();
 
         this.alertController.create({

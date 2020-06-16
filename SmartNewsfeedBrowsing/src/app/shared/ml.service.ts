@@ -8,7 +8,7 @@ const { Filesystem } = Plugins;
 @Injectable()
 export class MlService {
 
-    private BANDIT_PATH = 'bandits/data.json';
+    private BANDIT_PATH = 'banditsDEV/data.json';
     machineLearningPlugin = null;
     modelPredictions = new BehaviorSubject(null);
 
@@ -27,6 +27,7 @@ export class MlService {
 
     upperConfidenceBound() {
         console.log("KLIČEM SE");
+        let retObject = null;
 
         return this.machineLearningPlugin.banditFileExists().then((retData) => {
             console.log("Java mi je rekla");
@@ -39,7 +40,7 @@ export class MlService {
                         selections: [],
                         regret: 0,
                         totalReward: 0,
-                        allTimePuls: 0,
+                        allTimePulls: 0,
                         numberOfSelections: [0, 0, 0, 0], // [SOFTMAX, RANDOM, RANDOM_UA, CONFIDENCE]
                         sumOfRewards: [0, 0, 0, 0]
                     };
@@ -67,7 +68,7 @@ export class MlService {
                 let upperBound = 0;
                 if (banditData.numberOfSelections[i] > 0) {
                     const avgReward = banditData.sumOfRewards[i] / banditData.numberOfSelections[i]; // 0
-                    const delta = Math.sqrt(2 * Math.log(banditData.allTimePuls + 1) / banditData.numberOfSelections[i]);
+                    const delta = Math.sqrt(2 * Math.log(banditData.allTimePulls + 1) / banditData.numberOfSelections[i]);
                     upperBound = avgReward + delta;
                     console.log('UPPERBOUND = ' + upperBound);
                     console.log('.=.=.=.=.=.=.=.=.=.=.=.=');
@@ -83,11 +84,13 @@ export class MlService {
 
             banditData.selections.push(selectedPull);
             banditData.numberOfSelections[selectedPull]++;
-            banditData.allTimePuls++;
+            banditData.allTimePulls++;
             return banditData;
         }).then((updatedBanditData) => {
-            this.writeBanditsToFile(updatedBanditData);
-            return updatedBanditData;
+            retObject = updatedBanditData;
+            return this.writeBanditsToFile(updatedBanditData);
+        }).then(() => {
+            return retObject;
         }).catch(err => {
             console.log('Bandit Error');
             console.log(err);

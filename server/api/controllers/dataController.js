@@ -21,5 +21,12 @@ module.exports.saveData = (req, res) => {
             m: 'NOK'
         });
     }
+};
 
+module.exports.getData = (req, res) => {
+  fs.readFile(`${__dirname}/data.csv`, 'utf8', function(err, contents) {
+      res.status(200).send({
+  		data: contents
+  	});
+  });
 };

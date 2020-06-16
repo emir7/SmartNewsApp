@@ -1,5 +1,7 @@
 package com.ml.plugin;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
@@ -17,13 +19,15 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.ml.plugin.data.api.sender.Sender;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,21 +36,14 @@ import weka.core.converters.CSVLoader;
 
 @NativePlugin()
 public class MachineLearning extends Plugin {
-
-    public void trenirajPonovno(){
-        Log.d("EO_ME", "dou sm  builderja");
-        OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(NekWorker.class);
-
-        WorkManager
-                .getInstance()
-                .enqueue(builder.build());
-    }
+    private SharedPreferences sharedpreferences;
+    SharedPreferences.Editor editor;
 
     @PluginMethod()
     public void trainClf(final PluginCall call){
 
-        if(isWorkScheduled("classifierTrainerML")){
-            Log.d("EO_ME", "ne treniram ker sm busy");
+        if(isWorkScheduled()){
+            Log.d("EO_ME", "NE treniram ker sm busy");
             // nemors sprasevt zdej nc
             JSObject ret = new JSObject();
             ret.put("s", "busy");
@@ -57,15 +54,18 @@ public class MachineLearning extends Plugin {
             ret.put("s", "free");
             call.success(ret);
             Data.Builder dataBuilder = new Data.Builder();
-
+            this.sharedpreferences.edit().putBoolean("working", true).apply();
             dataBuilder.putBoolean("isFirstTime", call.getBoolean("firstTime"));
+            dataBuilder.putString("username", call.getString("username"));
+
             if(call.getBoolean("firstTime")){
                 SetInitializer setInitializer = new SetInitializer(getContext());
-                setInitializer.createDatasetFromScratch(getContext().getExternalFilesDir(null).getAbsolutePath()+"/Dataset/fullset.csv");
+                setInitializer.createDatasetFromScratch(getContext().getExternalFilesDir(null).getAbsolutePath()+"/DatasetDEV/fullset.csv");
             }else{
                 dataBuilder.putStringArray("newData", call.getString("newData").split(";"));
                 dataBuilder.putBoolean("banditDecidedToAsk", call.getBoolean("banditDecidedToAsk"));
                 dataBuilder.putInt("banditPull", call.getInt("banditPull"));
+                dataBuilder.putString("predictionDATA", call.getString("predictionDATA"));
             }
 
             // lahko me sprasujes zdej
@@ -87,52 +87,82 @@ public class MachineLearning extends Plugin {
     @PluginMethod
     public void sendZeroReward(PluginCall call){
         Log.d("EO_ME", "posiljam na server zero reward");
+
+        String username = call.getString("username");
+        String predictionDATA = call.getString("predictionDATA");
+        int banditPull = call.getInt("banditPull");
+        sendDataAPI(username, predictionDATA, banditPull);
         call.resolve();
         //call.reject("Problem while sending request to the server!");
     }
 
-    private boolean isWorkScheduled(String tag) {
-        WorkManager instance = WorkManager.getInstance();
-        ListenableFuture<List<WorkInfo>> statuses = instance.getWorkInfosByTag(tag);
+    private void sendDataAPI(String username, String predictionDATA, int banditPull){
+        Sender sender = Sender.getInstance();
+        JSONObject jsonBody = new JSONObject();
+
         try {
-            boolean running = false;
-            List<WorkInfo> workInfoList = statuses.get();
-            for (WorkInfo workInfo : workInfoList) {
-                WorkInfo.State state = workInfo.getState();
-                running = state == WorkInfo.State.RUNNING | state == WorkInfo.State.ENQUEUED;
+            String banditPath = getContext().getExternalFilesDir(null).getAbsoluteFile() + "/banditsDEV/data.json";
+            String jsonBanditString = MLUtils.readBanditFile(banditPath);
+            if(jsonBanditString == null){
+                return;
             }
-            return running;
-        } catch (ExecutionException e) {
+            JSONObject banditData = new JSONObject(jsonBanditString);
+
+            jsonBody.put("validID", "idjasoiadsjoiadsjdosaijadsojasdosadikjdsaoijsdaoisdaj");
+            jsonBody.put("firstTime", false);
+            jsonBody.put("username", username);
+            jsonBody.put("dataModel", "same;as;before");
+            jsonBody.put("predictionDATA", predictionDATA);
+
+            int currentNumberOfPulls = banditData.getInt("allTimePulls");
+            int regret = banditData.getInt("regret");
+            int totalReward = banditData.getInt("totalReward");
+
+            jsonBody.put("banditCSV", currentNumberOfPulls+";"+banditPull+";"+"false;"+regret+";"+totalReward);
+            jsonBody.put("banditJSON", banditData);
+            sender.sendPostRequest("http://163.172.169.249:9082/phase1/metrics", jsonBody.toString());
+        } catch (JSONException e) {
             e.printStackTrace();
-            return false;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return false;
         }
+    }
+
+    private boolean isWorkScheduled() {
+        sharedpreferences = getContext().getSharedPreferences("si.fri.diploma", Context.MODE_PRIVATE);
+
+        Log.d("EO_ME", " === isWorkScheduled");
+        Log.d("EO_ME", "working bool je "+sharedpreferences.getBoolean("working", false));
+        return sharedpreferences.getBoolean("working", false);
     }
 
 
     @PluginMethod
     public void classifierPrediction(final PluginCall call){
-        ModelPredictor modelPredictor = new ModelPredictor(getContext(), call, this, new AsyncResponse() {
-            @Override
-            public void processFinish(JSObject output) {
+        Log.d("EO_ME", "klasifikacija se pokliče");
+        if(!isWorkScheduled()){
+            ModelPredictor modelPredictor = new ModelPredictor(getContext(), call, this, new AsyncResponse() {
+                @Override
+                public void processFinish(JSObject output) {
 
-                if(output != null){
-                    call.success(output);
-                }else{
-                    JSObject ret = new JSObject();
-                    ret.put("s", "ok");
-                    call.success(ret);
+                    if(output != null){
+                        Log.d("EO_ME", "tole vračam clientu "+output.toString());
+                        call.success(output);
+                    }else{
+                        Log.d("EO_ME", "ERROR VRAČAM CLIENTU");
+                        call.reject("Error while training model");
+                    }
+
                 }
-            }
-        });
+            });
 
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
-            modelPredictor.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } else {
-            modelPredictor.execute();
+            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+                modelPredictor.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                modelPredictor.execute();
+            }
+        }else{
+            call.reject("Error while predicting IM BUSY WITH MODEL TRAININGA");
         }
+
 
     }
 

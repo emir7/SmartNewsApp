@@ -1,5 +1,4 @@
-import { OnInit, OnDestroy, Component, ViewChild } from '@angular/core';
-import { IonSlides, IonInput } from '@ionic/angular';
+import { OnInit, OnDestroy, Component } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { Router } from '@angular/router';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,29 +11,44 @@ import { Plugins } from '@capacitor/core';
 })
 
 
+
 export class TutorialPage implements OnInit, OnDestroy {
 
-    @ViewChild('ionSlides', { static: false }) ionSlides: IonSlides;
-    @ViewChild('username', { static: false }) username: IonInput;
-
+    ionSlides = null;
+    userData = '';
     machineLearningPlugin = null;
+
+    uuidData = '';
 
     constructor(private storage: Storage, private router: Router) {
         const { MachineLearning } = Plugins;
         this.machineLearningPlugin = MachineLearning;
     }
 
-    ngOnInit() {
+    usernameBlured() {
+        if (this.userData.length > 0) {
+            const transformedUsername = this.userData.replace(/[^a-z0-9]+/gi, '');
+            this.ionSlides.lockSwipeToNext(false)
+                .then(() => {
+                    return this.storeUserData(transformedUsername);
+                }).then(() => {
+                    return this.machineLearningPlugin.trainClf({
+                        username: transformedUsername + this.uuidData,
+                        firstTime: true
+                    });
+                }).then((mlReturn) => {
+                    console.log(mlReturn);
+                }).catch(err => {
+                    console.log('there was an error while training first time');
+                    console.log(err);
+                });
 
-        this.machineLearningPlugin.trainClf({
-            firstTime: true
-        }).then((data) => {
-            console.log(data);
-        }).catch((err) => {
-            console.log('ERROR WHILE TRAINING CLASSIFIER');
-            console.log(err);
-        });
-        console.log('TutorialPage ngOnInit');
+        }
+    }
+
+    ngOnInit() {
+        this.ionSlides = document.querySelector('ion-slides');
+        this.ionSlides.lockSwipeToNext(true);
     }
 
     ngOnDestroy() {
@@ -46,15 +60,18 @@ export class TutorialPage implements OnInit, OnDestroy {
     }
 
     finish() {
+        this.router.navigateByUrl('/news');
+    }
+
+    storeUserData(username) {
+        this.uuidData = uuidv4();
         const user = {
-            username: this.username.value,
-            id: uuidv4()
+            username,
+            id: this.uuidData
         };
 
-        this.storage.set('userInfo', user).then(() => {
-            this.storage.set('tutorialComplete3', true).then(() => {
-                this.router.navigateByUrl('/news');
-            });
+        return this.storage.set('userInfo', user).then(() => {
+            return this.storage.set('tutorialComplete4', true);
         });
     }
 

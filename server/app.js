@@ -7,6 +7,8 @@ const dataCollectionApi = require('./api/routes/data');
 const newsApi = require('./api/routes/news');
 const bodyParser = require('body-parser');
 
+const phase1 = require('./api/routes/phase1');
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -29,6 +31,7 @@ app.use(logger('dev'));
 app.use('/api/gag', gagApi);
 app.use('/data', dataCollectionApi);
 app.use('/news', newsApi);
+app.use('/phase1', phase1);
 
 app.use(function (_, res, next) {
     res.charset = 'UTF-16'

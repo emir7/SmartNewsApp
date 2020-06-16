@@ -2,6 +2,9 @@ package com.ml.plugin;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import weka.classifiers.Evaluation;
@@ -37,6 +41,75 @@ public class MLUtils {
         Log.d("EO_ME", "passu sm cez z modelom");
         return forest;
     }
+
+    public static JSONObject punishBandit(String banditPath, int banditPull){
+        // kazn
+        String jsonBanditString = readBanditFile(banditPath);
+        JSONObject jsonObject = null;
+        try{
+            jsonObject = new JSONObject(jsonBanditString);
+            jsonObject.put("totalReward", jsonObject.getInt("totalReward") - 1);
+            jsonObject.put("regret", jsonObject.getInt("regret") + 1);
+
+            Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+            String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+            Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+            int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+            Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
+            sumOfRewards[banditPull]--;
+            Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+            jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
+            writeToBanditFile(banditPath, jsonObject.toString());
+            Log.d("EO_ME", "Sledec objekt pisem v datoteko" + jsonObject.toString());
+        }catch (JSONException e){
+            e.printStackTrace();
+            Log.d("EO_ME", "error while punishing bandit");
+            Log.e("EO_ME", e.toString());
+        }
+
+        return jsonObject;
+    }
+
+    public static JSONObject giveBanditReward(String banditPath, int banditPull){
+        // nagrada
+        String jsonBanditString = readBanditFile(banditPath);
+        JSONObject jsonObject = null;
+        try {
+            Log.d("EO_ME", "I AM GIVING BANDIT REWARD");
+            jsonObject = new JSONObject(jsonBanditString);
+            Log.d("EO_ME", "pass1");
+            jsonObject.put("totalReward", jsonObject.getInt("totalReward") + 1);
+            Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+            String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+            Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+            int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+            Log.d("EO_ME", "sumOfRewards "+ Arrays.toString(sumOfRewards));
+            sumOfRewards[banditPull]++;
+            Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+            jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
+            Log.d("EO_ME", "Sledec objekt pisem v datoteko" + jsonObject.toString());
+            writeToBanditFile(banditPath, jsonObject.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d("EO_ME", "error while giving bandit reward");
+            Log.e("EO_ME", e.toString());
+        }
+
+        return jsonObject;
+    }
+
+    public static int[] stringToArr(String string) {
+        String[] strings = string.replace("[", "")
+                .replace("]", "")
+                .replaceAll(" ", "")
+                .split(",");
+        int[] result = new int[strings.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = Integer.parseInt(strings[i].trim());
+        }
+        return result;
+    }
+
 
     public static void writeDataToFile(String path, Instances newData, boolean append) {
         FileWriter fileWriter = null;
@@ -178,9 +251,13 @@ public class MLUtils {
         return optimalThresholdPoint;
     }
 
-    public static double calculatePrecision(Instances test, RandomForest forest, double decisionBoundry) throws Exception {
+    public static double [] calculatePrecision(Instances test, RandomForest forest, double decisionBoundry) throws Exception {
         double tp = 0;
         double fp = 0;
+
+        double fn = 0;
+        double tn = 0;
+
         for(int i = 0; i < test.size(); i++) {
             double forestPrediction [] = forest.distributionForInstance(test.get(i));
             double prediction = 0;
@@ -195,9 +272,21 @@ public class MLUtils {
                     fp++;
                 }
             }
+
+            if(prediction == 0){
+                if(test.get(i).value(test.numAttributes() - 1) == 0){
+                    tn++;
+                }else{
+                    fn++;
+                }
+            }
         }
 
-        return tp / (tp + fp);
+        double precision = tp / (tp + fp);
+        double recall = tp / (tp + fn);
+        double accuracy =  (tp + tn) / (tp + fp + fn + tn);
+        double fMeasure = (2 * precision * recall) / (precision + recall);
+        return new double[]{precision, recall, accuracy, fMeasure};
     }
 
     public static Instances[] splitDataset(Instances dataset){

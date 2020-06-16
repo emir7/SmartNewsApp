@@ -11,7 +11,7 @@ export class GoogleNewsApiService {
 
     private apiKey = 'cc5c7c95c27a4b1890f1bd224ef9a2db';
     private apiUrl = 'https://newsapi.org/v2';
-    private serverUrl = 'http://163.172.169.249:9081/news';
+    private serverUrl = 'http://163.172.169.249:9082/news';
 
     constructor(private http: HttpClient, private storage: Storage, private performanceService: PerformanceService) { }
 

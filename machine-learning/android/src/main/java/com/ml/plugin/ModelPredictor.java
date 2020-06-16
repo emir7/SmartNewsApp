@@ -48,12 +48,13 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
         ObjectInputStream objectinputstream = null;
         RandomForest rf = null;
         try {
-            FileInputStream streamIn = new FileInputStream(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/Model/model");
-            File f = new File(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/Model/model");
+            FileInputStream streamIn = new FileInputStream(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model");
             objectinputstream = new ObjectInputStream(streamIn);
             rf = (RandomForest) objectinputstream.readObject();
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d("EO_ME", "ERROR OCCURED WHILE GETTING MODEL");
+            Log.d("EO_ME", e.toString());
         } finally {
             if(objectinputstream != null){
                 try {
@@ -132,6 +133,9 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
     @Override
     protected JSObject doInBackground(Void... voids) {
         RandomForest rf = getModel();
+        if(rf == null){
+            return null;
+        }
         String [] possibleThemes = new String[]{"light-theme", "dark-theme"};
         String [] possibleLayouts = new String[]{"xLargeCards", "largeCards"};
         String [] possibleFontSizes = new String[]{"small-font", "large-font"};
