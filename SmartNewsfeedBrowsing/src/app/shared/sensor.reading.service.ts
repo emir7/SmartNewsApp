@@ -5,6 +5,7 @@ import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 import { ContextModel, InternetStatusModel, UserActivityModel, BatteryStatusModel, BrightnessModel, ViewDescription } from './models/context/contextModel';
 import { take } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
 
 const { Network, UsersPARecognition, MySensors, Filesystem } = Plugins;
 
@@ -14,11 +15,12 @@ export class SensorReadingService {
     //currentState = 'INTERVAL_SAMPLING';
     //currentState = 'LAB_SAMPLING';
     //currentState = 'ON_CHANGE_SAMPLING';
-    serverUrl = 'http://163.172.169.249:9081/';
+    serverUrl = 'http://163.172.169.249:9082/';
 
     currentState = 'SMART_SAMPLING';
+    daysPassed = 0;
     //currentState = 'LAB_SAMPLING';
-
+    modelSelected = 0;
 
     currentContext = new BehaviorSubject<ContextModel>({
         batteryObj: {
@@ -49,7 +51,7 @@ export class SensorReadingService {
     timeWatch = false;
     currentTime = 0;
 
-    constructor(private batteryStatus: BatteryStatus, private http: HttpClient) {
+    constructor(private batteryStatus: BatteryStatus, private http: HttpClient, private storage: Storage) {
 
         this.userPARecognition = UsersPARecognition;
         this.mySensors = MySensors;

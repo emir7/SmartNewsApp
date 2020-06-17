@@ -186,8 +186,12 @@ public class ClassifierTrainer2 extends Worker {
             jsonBody.put("validID", "idjasoiadsjoiadsjdosaijadsojasdosadikjdsaoijsdaoisdaj");
             jsonBody.put("firstTime", false);
             jsonBody.put("username", username);
-            jsonBody.put("dataModel", metrics[0]+";"+metrics[1]+";"+metrics[2]+";"+metrics[3]);
+
+            float decisionBoundry = sharedpreferences.getFloat(MODEL_DECISION_BOUNDRY, -1);
+
+            jsonBody.put("dataModel", metrics[0]+";"+metrics[1]+";"+metrics[2]+";"+metrics[3]+";"+decisionBoundry);
             jsonBody.put("predictionDATA", predictionDATA);
+
 
             int currentNumberOfPulls = banditData.getInt("allTimePulls");
             int regret = banditData.getInt("regret");

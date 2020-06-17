@@ -26,6 +26,7 @@ import { File } from '@ionic-native/file/ngx';
 import { HttpClient } from '@angular/common/http';
 import { ActionCounterService } from './shared/action.counter.service';
 import { MlService } from './shared/ml.service';
+import { LabAPIService } from './shared/lab.testing.api.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -38,6 +39,7 @@ import { MlService } from './shared/ml.service';
     PerformanceService,
     SensorReadingService,
     ActionCounterService,
+    LabAPIService,
     MlService,
     Network,
     BatteryStatus,

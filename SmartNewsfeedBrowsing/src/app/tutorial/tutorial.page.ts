@@ -10,8 +10,6 @@ import { Plugins } from '@capacitor/core';
     styleUrls: ['tutorial.page.scss'],
 })
 
-
-
 export class TutorialPage implements OnInit, OnDestroy {
 
     ionSlides = null;
@@ -38,6 +36,9 @@ export class TutorialPage implements OnInit, OnDestroy {
                     });
                 }).then((mlReturn) => {
                     console.log(mlReturn);
+                }).then(() => {
+                    this.storage.set('dateOfInstall', new Date().getTime());
+                    this.storage.set('selectedModel', -1);
                 }).catch(err => {
                     console.log('there was an error while training first time');
                     console.log(err);

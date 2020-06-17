@@ -2,8 +2,6 @@ package com.ml.plugin;
 
 import com.getcapacitor.JSObject;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ModelOutput {
 

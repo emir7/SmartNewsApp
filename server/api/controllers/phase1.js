@@ -6,34 +6,34 @@ function checkIfFolderExists(fileDirDestination) {
 }
 
 function initFilesFirstTime(filePathModel, filePathBanditCSV, filePathBanditJSON, dataModel, predictionPathCSV) {
-    fs.writeFileSync(filePathModel, "PRECISION;RECALL;ACCURACY;F-SCORE\n");
+    fs.writeFileSync(filePathModel, "PRECISION;RECALL;ACCURACY;F-SCORE;THRESHOLD\n");
     fs.appendFileSync(filePathModel, dataModel + "\n");
     fs.writeFileSync(filePathBanditCSV, "TRIAL_INDEX;BANIDT_INDEX;BANDIT_DECISION;REGRET;TOTAL_REWARD\n");
     fs.writeFileSync(filePathBanditJSON, "");
-    fs.writeFileSync(predictionPathCSV, "USER_ACTIVITY;ENV_BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;OUTPUT\n");
+    fs.writeFileSync(predictionPathCSV, "USER_ACTIVITY;ENV_BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;PROB;OUTPUT\n");
 }
 
 function appendDataToFiles(filePathModel, filePathBanditCSV, filePathBanditJSON, modelData, banditCSVData, banditJSON, predictionPathCSV, predictionData) {
-    if(modelData === "same;as;before"){
-      appendLastLineToFile(filePathModel);
-    }else{
-      fs.appendFileSync(filePathModel, modelData + "\n");
+    if (modelData === "same;as;before") {
+        appendLastLineToFile(filePathModel);
+    } else {
+        fs.appendFileSync(filePathModel, modelData + "\n");
     }
-    
+
     fs.appendFileSync(filePathBanditCSV, banditCSVData + "\n");
     fs.writeFileSync(filePathBanditJSON, JSON.stringify(banditJSON) + "\n");
     fs.appendFileSync(predictionPathCSV, predictionData + "\n");
 }
 
-function appendLastLineToFile(filePath){
-  const data = fs.readFileSync(filePath, {
-    encoding: 'utf-8'
-  });
-  
-  const splitedArr = data.split("\n");
-  const lastLine = splitedArr[splitedArr.length - 2];
-  
-  fs.appendFileSync(filePath, lastLine + "\n");
+function appendLastLineToFile(filePath) {
+    const data = fs.readFileSync(filePath, {
+        encoding: 'utf-8'
+    });
+
+    const splitedArr = data.split("\n");
+    const lastLine = splitedArr[splitedArr.length - 2];
+
+    fs.appendFileSync(filePath, lastLine + "\n");
 }
 
 module.exports.writeMetrics = (req, res) => {
@@ -69,15 +69,15 @@ module.exports.writeMetrics = (req, res) => {
             }
         } else {
             const username = req.body.username;
-            
-            console.log('USERNAME = '+username);
-            
+
+            console.log('USERNAME = ' + username);
+
             const dataModel = req.body.dataModel;
             const dataBanditCSV = req.body.banditCSV;
             const dataBanditJSON = req.body.banditJSON;
             const predictionData = req.body.predictionDATA;
-            
-            console.log("PRED_DATA: "+predictionData);
+
+            console.log("PRED_DATA: " + predictionData);
 
             const fileDirDestination = path.join(__dirname, '..', '..', 'phase1', username);
             const filePathModel = path.join(__dirname, '..', '..', 'phase1', username, 'model.csv');

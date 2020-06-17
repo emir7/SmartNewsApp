@@ -111,8 +111,8 @@ export class MlService {
     }
 
     marginalSoftmax(predictions, selectedIndex) {
-        return false;
         return new Promise((resolve, reject) => {
+            resolve(false);
             let s = 0;
             const epsilon = 0.5;
             for (const predData of predictions) {
@@ -144,16 +144,16 @@ export class MlService {
     }
 
     randomSelection() {
-        return false;
         return new Promise((resolve, reject) => {
+            resolve(false);
             resolve(Math.random() < 0.5);
         });
     }
 
     randomByUserActivity(ua) {
-        return false;
 
         return this.countUserActivityOccurances().then((occurancesData) => {
+            return false;
             const cStill = occurancesData.cStill;
             const cFoot = occurancesData.cFoot;
             const cVehicle = occurancesData.cVehicle;
@@ -191,8 +191,8 @@ export class MlService {
     }
 
     leastConfidence(maxConfidentPrediction, decisionBoundry) {
-        return false;
         return new Promise((resolve, reject) => {
+            resolve(false);
             if (decisionBoundry > 0.7) {
                 resolve(maxConfidentPrediction < decisionBoundry);
             }

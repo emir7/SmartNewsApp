@@ -17,6 +17,7 @@ import { ContextModel, ViewDescription } from '../shared/models/context/contextM
 import { ModalController } from '@ionic/angular';
 import { MlService } from '../shared/ml.service';
 import { take } from 'rxjs/operators';
+import { LabAPIService } from '../shared/lab.testing.api.service';
 
 @Component({
     selector: 'app-news',
@@ -107,6 +108,11 @@ export class NewsPage implements OnInit, OnDestroy {
     firstTimeInNews = false;
 
     cancelLearning = false;
+    modelDecisionBoundry = -1;
+
+    modelSelected = 0;
+
+    samplingType = '';
 
     constructor(
         public loadingController: LoadingController,
@@ -125,7 +131,8 @@ export class NewsPage implements OnInit, OnDestroy {
         public contextService: SensorReadingService,
         public toastController: ToastController,
         public modalController: ModalController,
-        public mlService: MlService) {
+        public mlService: MlService,
+        public labApiService: LabAPIService) {
 
         const { MyImageDownloader } = Plugins;
         this.myImageDownloader = MyImageDownloader;
@@ -150,7 +157,18 @@ export class NewsPage implements OnInit, OnDestroy {
             });
         }, 10000);
 
-        this.subscribeToMLContext();
+
+        this.phaseController().then((samplingType) => {
+            console.log('samplingType is ' + samplingType);
+            this.samplingType = samplingType;
+            if (samplingType === 'SMART_SAMPLING') {
+                this.subscribeToMLContext();
+            } else {
+                this.initLabSampling();
+            }
+        });
+
+
 
         //this.selectRandomView();
         this.handleResumeBackgroundEvents();
@@ -212,6 +230,52 @@ export class NewsPage implements OnInit, OnDestroy {
         this.indexSlideService.getIndexToGoBack().subscribe((currentSlidingIndex) => {
             this.currentVisibleElement = currentSlidingIndex;
         });
+
+    }
+
+    phaseController() {
+
+        return this.storage.get('dateOfInstall').then((t) => {
+            const timeDiff = (new Date().getTime() - new Date(t).getTime()) / (1000 * 60 * 60 * 24);
+            if (Math.floor(timeDiff) < 14) {
+                return Promise.all([this.storage.get('selectedModel'), this.storage.get('selectedModelDate')]);
+                // return null;
+            } else {
+                return Promise.all([this.storage.get('selectedModel'), this.storage.get('selectedModelDate')]);
+            }
+        }).then((objResult) => {
+            if (objResult == null) {
+                return 'SMART_SAMPLING';
+            } else {
+                const lastSelectedModel = objResult[0];
+                const modelT = objResult[1];
+
+                if (lastSelectedModel == null || lastSelectedModel === -1) {
+                    this.modelSelected = 0;
+                    this.storage.set('selectedModel', 0);
+                    this.storage.set('selectedModelDate', new Date().getTime());
+                } else {
+                    const timeDiffM = (new Date().getTime() - new Date(modelT).getTime()) / (1000 * 60 * 60);
+
+                    if (Math.floor(timeDiffM) >= 24) {
+                        if (modelT === 0) {
+                            this.modelSelected = 1;
+                        } else if (modelT === 1) {
+                            this.modelSelected = 0;
+                        }
+
+                        this.storage.set('selectedModel', this.modelSelected);
+                        this.storage.set('selectedModelDate', new Date().getTime());
+
+                    }
+
+                }
+
+                return 'LAB_SAMPLING';
+
+            }
+        });
+
 
     }
 
@@ -337,6 +401,8 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     subscribeToMLContext() {
+        console.log('initing smart sampling');
+
         this.displayLoadingElement().then(loadingEl => {
             loadingEl.present();
             console.log("IZVAJAM SE1");
@@ -374,6 +440,7 @@ export class NewsPage implements OnInit, OnDestroy {
                             }
                         }
                         this.topPredictedView = clfPredData.a[choosenIndex];
+                        this.modelDecisionBoundry = clfPredData.b;
                         return {
                             a: clfPredData.a,
                             i: choosenIndex,
@@ -443,6 +510,132 @@ export class NewsPage implements OnInit, OnDestroy {
         });
     }
 
+    initLabSampling() {
+        console.log('initing lab sampling');
+        this.displayLoadingElement()
+            .then(loadingEl => {
+                loadingEl.present();
+
+                this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
+
+                    let timerB = false;
+
+                    if (this.lastPredictionDate == null) {
+                        timerB = true;
+                    }
+
+                    if (this.lastPredictionDate != null) {
+                        const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
+                        timerB = timeDiff >= 2 * 60; // change to 5
+                    }
+
+                    if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
+                        this.lastPredictionDate = new Date();
+
+                        if (this.contextService.modelSelected === 0) {
+                            this.machineLearningPlugin.classifierPrediction({
+                                u: ctxData.userActivityObj.types[0],
+                                e: '' + ctxData.brightnessObj.value
+                            }).then((clfPredData) => {
+                                let maxConfidence = 0;
+                                let choosenIndex = 0;
+                                for (let i = 0; i < clfPredData.a.length; i++) {
+                                    if (clfPredData.a[i].p >= maxConfidence) {
+                                        maxConfidence = clfPredData.a[i].p;
+                                        choosenIndex = i;
+                                    }
+                                }
+
+                                if (!this.firstTimeInNews) {
+                                    this.fetchInitNews();
+                                    this.firstTimeInNews = true;
+                                }
+
+                                this.topPredictedView = clfPredData.a[choosenIndex];
+                                this.setDisplayView(this.topPredictedView);
+
+                                this.modelDecisionBoundry = clfPredData.b;
+                                loadingEl.dismiss();
+                                this.setLabTestingTimer();
+
+                            }).catch((err) => {
+                                if (!this.firstTimeInNews) {
+                                    this.fetchInitNews();
+                                    this.firstTimeInNews = true;
+                                }
+
+                                loadingEl.dismiss();
+                                this.selectRandomView();
+                                this.setDisplayView(this.topPredictedView);
+
+                                console.log(err);
+                            });
+                        } else {
+                            if (!this.firstTimeInNews) {
+                                this.fetchInitNews();
+                                this.firstTimeInNews = true;
+                            }
+
+                            this.selectRandomView();
+                            this.setDisplayView(this.topPredictedView);
+                            loadingEl.dismiss();
+
+                            this.setLabTestingTimer();
+                        }
+
+                    }
+
+                });
+
+            });
+    }
+
+    setLabTestingTimer() {
+        this.mlQuizTimeout = setTimeout(() => {
+            this.sendMetricsToServer('?');
+        }, 20000);
+    }
+
+    sendMetricsToServer(o) {
+
+        this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
+            if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
+
+                let mlData = `${this.contextService.modelSelected};${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
+                mlData += `${this.topPredictedView.t};${this.topPredictedView.l};`;
+                mlData += `${this.topPredictedView.f};${this.modelDecisionBoundry};${this.topPredictedView.p};${o}`;
+
+                const username = this.userInfo.username + this.userInfo.id;
+                this.labApiService.postData(username, mlData);
+
+                clearTimeout(this.mlQuizTimeout);
+                this.mlQuizTimeout = null;
+            }
+        });
+    }
+
+    labTestingQuizAlert() {
+        this.dismissAllQuizs();
+
+        this.alertController.create({
+            header: 'Ali ste bili zadovoljni s predhodnim prikazom novic?',
+            backdropDismiss: false,
+            buttons: [{
+                text: 'DA',
+                handler: () => {
+                    this.sendMetricsToServer('Y');
+                }
+            }, {
+                text: 'NE',
+                handler: () => {
+                    this.sendMetricsToServer('N');
+                }
+            }]
+        }).then((alertEl) => {
+            alertEl.present();
+        });
+    }
+
     updatePreviousValues() {
         this.userActivity = this.currentContextDescription.userActivityObj.types[0];
 
@@ -493,7 +686,12 @@ export class NewsPage implements OnInit, OnDestroy {
 
             if (!this.mlContextSub || this.mlContextSub.closed) {
                 console.log('vracam subscription');
-                this.subscribeToMLContext();
+                // RESUB
+                if (this.samplingType === 'SMART_SAMPLING') {
+                    this.subscribeToMLContext();
+                } else if (this.samplingType === 'LAB_SAMPLING') {
+                    this.initLabSampling();
+                }
             }
 
         });
@@ -536,6 +734,14 @@ export class NewsPage implements OnInit, OnDestroy {
         }
         this.currentViewLayout = generatedView;
         this.changeDetector.detectChanges();
+
+        this.topPredictedView = {
+            t: this.fullViewDescription.theme,
+            f: this.fullViewDescription.fontSize,
+            l: this.fullViewDescription.view,
+            p: -1
+        };
+
         this.toggleView(generatedView);
     }
 
@@ -671,7 +877,13 @@ export class NewsPage implements OnInit, OnDestroy {
 
             if (!this.mlContextSub || this.mlContextSub.closed) {
                 console.log('sou sm iz browserja nazaj v app in vracam subscription!');
-                this.subscribeToMLContext();
+                // RESUB
+                if (this.samplingType === 'SMART_SAMPLING') {
+                    this.subscribeToMLContext();
+                } else if (this.samplingType === 'LAB_SAMPLING') {
+                    this.initLabSampling();
+                }
+
             }
         }
 
@@ -1022,6 +1234,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
         this.popupQuizImmediately(htmlEL);
 
+
         // before: this.clearAndSend(JSON.parse(JSON.stringify(this.fullViewDescription))); // DEBUG
 
         // this.clearAndSend(); // DEBUG
@@ -1345,31 +1558,18 @@ export class NewsPage implements OnInit, OnDestroy {
 
     openQuiz(b) {
 
-        if (typeof b === 'boolean') {
-            this.needUserFeedback = b;
-            console.log("ODLOČU SM SE DA" + b);
-            console.log("--------------------");
-            if (b) {
+        b.then((val) => {
+            this.needUserFeedback = val;
+            console.log('ODLOČU SM SE DA' + val);
+            console.log('--------------------');
+            if (val) {
                 this.mlQuizTimeout = setTimeout(() => {
                     this.popupImmQuiz();
                 }, 20000);
             } else {
                 this.detectZeroReward();
             }
-        } else {
-            b.then((val) => {
-                this.needUserFeedback = val;
-                console.log("ODLOČU SM SE DA" + val);
-                console.log("--------------------");
-                if (val) {
-                    this.mlQuizTimeout = setTimeout(() => {
-                        this.popupImmQuiz();
-                    }, 20000);
-                } else {
-                    this.detectZeroReward();
-                }
-            });
-        }
+        });
 
     }
 
@@ -1380,7 +1580,10 @@ export class NewsPage implements OnInit, OnDestroy {
 
             this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
                 if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
-                    const mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};?`;
+                    // USER_ACTIVITY; BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;P;?
+                    let mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
+                    mlData += `${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};`;
+                    mlData += `${this.modelDecisionBoundry};${this.topPredictedView.p};?`;
 
                     this.machineLearningPlugin.sendZeroReward({
                         firstTime: false,
@@ -1410,18 +1613,24 @@ export class NewsPage implements OnInit, OnDestroy {
             console.log('MINILO JE TOLIKO SEKUND --->' + timeDiff + ' <---------------------------------');
             if (timeDiff <= 20 || this.mlQuizTimeout) {
                 console.log('MORAM DT TAKOJ UPRASANJE');
-                this.popupImmAlert();
+                if (this.samplingType === 'SMART_SAMPLING') {
+                    this.popupImmAlert();
+                } else {
+                    this.labTestingQuizAlert();
+                }
             } else {
                 console.log('NE RABM DT TAKOJ UPRASANJE');
             }
         }
-
     }
 
     trainModelWithNewData(o) {
         this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
             if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
-                const mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};${o}`;
+                // USER_ACTIVITY; BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;P;OUTPUT
+                let mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
+                mlData += `${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};`;
+                mlData += `${this.modelDecisionBoundry};${this.topPredictedView.p};${o}`;
                 this.mlDebug(JSON.stringify(mlData));
                 this.machineLearningPlugin.trainClf({
                     firstTime: false,
