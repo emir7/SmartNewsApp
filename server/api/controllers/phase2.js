@@ -7,7 +7,7 @@ function checkIfFolderExists(fileDirDestination) {
 }
 
 function initFileAppendData(predictionPathCSV, actualData) {
-    fs.writeFileSync(predictionPathCSV, "USER_ACTIVITY;ENV_BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;PROB;OUTPUT\n");
+    fs.writeFileSync(predictionPathCSV, "ALGO;USER_ACTIVITY;ENV_BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;PROB;OUTPUT\n");
     appendData(predictionPathCSV, actualData);
 }
 

@@ -166,10 +166,9 @@ public class MachineLearning extends Plugin {
 
     @PluginMethod
     public void countByUA(PluginCall call){
-        String testPath = getContext().getExternalFilesDir(null).getAbsolutePath() + "/Dataset/dataTrain.csv";
+        Log.d("EO_ME", "STEJEM");
+        String testPath = getContext().getExternalFilesDir(null).getAbsolutePath() + "/DatasetDEV/dataTrain.csv";
         Instances currentDataset = readDatasetFromFile(testPath);
-        Log.d("VALS", ""+currentDataset.attribute("u").numValues());
-        Log.d("VALS", ""+currentDataset.attribute("u"));
 
         int cStill = 0;
         int cFoot = 0;
@@ -184,10 +183,12 @@ public class MachineLearning extends Plugin {
             }
         }
 
+
         JSObject jsObject = new JSObject();
         jsObject.put("cStill", cStill);
         jsObject.put("cFoot", cFoot);
         jsObject.put("cVehicle", cVehicle);
+        Log.d("EO_ME", jsObject.toString());
 
         call.success(jsObject);
 

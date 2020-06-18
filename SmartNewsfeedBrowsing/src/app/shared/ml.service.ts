@@ -26,7 +26,6 @@ export class MlService {
     }
 
     upperConfidenceBound() {
-        console.log("KLIČEM SE");
         let retObject = null;
 
         return this.machineLearningPlugin.banditFileExists().then((retData) => {
@@ -49,10 +48,7 @@ export class MlService {
                 throw Error('Problem creating bandit file first time!');
             }
         }).then((banditData) => {
-            console.log(banditData);
-            console.log(banditData);
-            console.log(JSON.stringify(banditData));
-            console.log("..................................");
+
 
             if (banditData.data != null) {
                 banditData = JSON.parse(banditData.data);
@@ -67,7 +63,7 @@ export class MlService {
             for (let i = 0; i < 4; i++) {
                 let upperBound = 0;
                 if (banditData.numberOfSelections[i] > 0) {
-                    const avgReward = banditData.sumOfRewards[i] / banditData.numberOfSelections[i]; // 0
+                    const avgReward = banditData.sumOfRewards[i] / banditData.numberOfSelections[i];
                     const delta = Math.sqrt(2 * Math.log(banditData.allTimePulls + 1) / banditData.numberOfSelections[i]);
                     upperBound = avgReward + delta;
                     console.log('UPPERBOUND = ' + upperBound);
@@ -110,18 +106,21 @@ export class MlService {
         });
     }
 
-    marginalSoftmax(predictions, selectedIndex) {
+    marginalSoftmax(predictions, selectedIndex, boundary) {
         return new Promise((resolve, reject) => {
-            resolve(false);
+            if (predictions[selectedIndex].p < boundary) {
+                return resolve(true);
+            }
+
             let s = 0;
-            const epsilon = 0.5;
+            const epsilon = 0.8;
             for (const predData of predictions) {
                 s += Math.exp(predData.p);
             }
 
             const results = [];
             for (const predData of predictions) {
-                results.push(predData.p / s);
+                results.push(Math.exp(predData.p) / s);
             }
 
             results.sort();
@@ -129,31 +128,36 @@ export class MlService {
             const max2 = results[results.length - 2];
 
             const marginalDiff = 1 - (max1 - max2);
+            console.log(`marginalDiff = ${marginalDiff}`);
+            console.log(results);
+            console.log(`maxPred = ${predictions[selectedIndex].p} boundary = ${boundary}`);
+            console.log('...............................................===================........................');
 
             if (marginalDiff >= epsilon) {
-                resolve(true);
+                // če je razlika manjša kot 0.2 (glej 0.8) to pomen da rabmo vprašalnik
+                return resolve(Math.random() <= (1 - predictions[selectedIndex].p));
             } else {
-                if (predictions[selectedIndex].p > 0.8) {
-                    resolve(Math.random() <= (1 - predictions[selectedIndex].p));
-                }
+                // če je razlika večja kot 0.2 (glej 0.8) to pomen da NE rabmo vprašalnik
+                return resolve(false);
             }
 
-            resolve(false);
         });
 
     }
 
     randomSelection() {
         return new Promise((resolve, reject) => {
-            resolve(false);
-            resolve(Math.random() < 0.5);
+            return resolve(true);
         });
     }
 
     randomByUserActivity(ua) {
 
         return this.countUserActivityOccurances().then((occurancesData) => {
-            return false;
+
+            console.log('Prestete vrednosti so sledece: ');
+            console.log(occurancesData);
+            console.log('.....................');
             const cStill = occurancesData.cStill;
             const cFoot = occurancesData.cFoot;
             const cVehicle = occurancesData.cVehicle;
@@ -166,6 +170,7 @@ export class MlService {
             const vehicleProbability = stillProbability * inVehicleCoef;
             const footProbability = stillProbability * onFootCoef;
 
+            console.log(`STILL = ${stillProbability}, IN_VEHICLE = ${vehicleProbability}, ON_FOOT = ${footProbability}`);
 
             if (ua === 'STILL') {
                 return Math.random() <= stillProbability;
@@ -192,12 +197,12 @@ export class MlService {
 
     leastConfidence(maxConfidentPrediction, decisionBoundry) {
         return new Promise((resolve, reject) => {
-            resolve(false);
+            console.log(`maxConfidentPrediction = ${maxConfidentPrediction} decisionBoundry = ${decisionBoundry}`)
             if (decisionBoundry > 0.7) {
-                resolve(maxConfidentPrediction < decisionBoundry);
+                return resolve(maxConfidentPrediction < decisionBoundry);
             }
 
-            resolve(maxConfidentPrediction <= (decisionBoundry + 0.2));
+            return resolve(maxConfidentPrediction <= (decisionBoundry + 0.2));
         });
 
     }

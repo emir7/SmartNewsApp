@@ -152,6 +152,7 @@ export class NewsPage implements OnInit, OnDestroy {
         setTimeout(() => {
             this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
                 if (!ctx.validObjs[0] || !ctx.validObjs[1] || !ctx.validObjs[2]) {
+                    this.mlDebug('SETAM VEREDNOSTI, KER NISM DOBU NČ OD GOOGLE ACTIVITY RECOG');
                     this.contextService.setValidObjs([true, true, true]);
                 }
             });
@@ -237,9 +238,9 @@ export class NewsPage implements OnInit, OnDestroy {
 
         return this.storage.get('dateOfInstall').then((t) => {
             const timeDiff = (new Date().getTime() - new Date(t).getTime()) / (1000 * 60 * 60 * 24);
+            console.log('DNEVI od installacije ===== ' + timeDiff);
             if (Math.floor(timeDiff) < 14) {
-                return Promise.all([this.storage.get('selectedModel'), this.storage.get('selectedModelDate')]);
-                // return null;
+                return null;
             } else {
                 return Promise.all([this.storage.get('selectedModel'), this.storage.get('selectedModelDate')]);
             }
@@ -256,11 +257,13 @@ export class NewsPage implements OnInit, OnDestroy {
                     this.storage.set('selectedModelDate', new Date().getTime());
                 } else {
                     const timeDiffM = (new Date().getTime() - new Date(modelT).getTime()) / (1000 * 60 * 60);
-
+                    console.log('DNEVI od modelaaaaaaa ===== ' + timeDiffM);
+                    console.log('ZADNI ČAS MODEL JE ' + modelT);
+                    console.log('ZADNI UPORABLJENI MODEL JE ' + lastSelectedModel);
                     if (Math.floor(timeDiffM) >= 24) {
-                        if (modelT === 0) {
+                        if (lastSelectedModel === 0) {
                             this.modelSelected = 1;
-                        } else if (modelT === 1) {
+                        } else if (lastSelectedModel === 1) {
                             this.modelSelected = 0;
                         }
 
@@ -419,12 +422,13 @@ export class NewsPage implements OnInit, OnDestroy {
 
                 if (this.lastPredictionDate != null) {
                     const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
-                    timerB = timeDiff >= 2 * 60; // change to 5
+                    timerB = timeDiff >= 1 * 60; // change to 5
                 }
 
                 if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
                     console.log(ctxData);
                     this.lastPredictionDate = new Date();
+                    this.dismissAllQuizs();
                     console.log("IZVAJAM SE3");
                     this.machineLearningPlugin.classifierPrediction({
                         u: ctxData.userActivityObj.types[0],
@@ -450,7 +454,6 @@ export class NewsPage implements OnInit, OnDestroy {
                         globalObj = obj;
                         console.log("prediction");
                         console.log(obj);
-                        this.setDisplayView(obj.a[obj.i]);
                         return obj;
                     }).then((_) => {
                         loadingEl.dismiss();
@@ -470,7 +473,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
                         switch (lastValue) {
                             case 0:
-                                this.openQuiz(this.mlService.marginalSoftmax(globalObj.a, globalObj.i));
+                                this.openQuiz(this.mlService.marginalSoftmax(globalObj.a, globalObj.i, globalObj.b));
                                 break;
                             case 1:
                                 this.openQuiz(this.mlService.randomSelection());
@@ -488,6 +491,7 @@ export class NewsPage implements OnInit, OnDestroy {
                             this.firstTimeInNews = true;
                         }
 
+                        this.setDisplayView(this.topPredictedView);
 
                     }).catch(err => {
                         this.cancelLearning = true;
@@ -532,7 +536,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
                         this.lastPredictionDate = new Date();
 
-                        if (this.contextService.modelSelected === 0) {
+                        if (this.modelSelected === 0) {
                             this.machineLearningPlugin.classifierPrediction({
                                 u: ctxData.userActivityObj.types[0],
                                 e: '' + ctxData.brightnessObj.value
@@ -593,6 +597,7 @@ export class NewsPage implements OnInit, OnDestroy {
     setLabTestingTimer() {
         this.mlQuizTimeout = setTimeout(() => {
             this.sendMetricsToServer('?');
+            console.log('WAHAHAHAHAHAHA');
         }, 20000);
     }
 
@@ -601,7 +606,7 @@ export class NewsPage implements OnInit, OnDestroy {
         this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
             if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
 
-                let mlData = `${this.contextService.modelSelected};${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
+                let mlData = `${this.modelSelected};${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
                 mlData += `${this.topPredictedView.t};${this.topPredictedView.l};`;
                 mlData += `${this.topPredictedView.f};${this.modelDecisionBoundry};${this.topPredictedView.p};${o}`;
 
@@ -612,10 +617,17 @@ export class NewsPage implements OnInit, OnDestroy {
                 this.mlQuizTimeout = null;
             }
         });
+
+
     }
 
     labTestingQuizAlert() {
         this.dismissAllQuizs();
+
+        console.log('clearam timeeeeeeeout.....');
+
+        clearTimeout(this.mlQuizTimeout);
+        this.mlQuizTimeout = null;
 
         this.alertController.create({
             header: 'Ali ste bili zadovoljni s predhodnim prikazom novic?',
@@ -683,6 +695,8 @@ export class NewsPage implements OnInit, OnDestroy {
 
         this.platform.resume.subscribe(() => {
             console.log("----------RESUMING APP!----------");
+
+            this.dismissAllQuizs();
 
             if (!this.mlContextSub || this.mlContextSub.closed) {
                 console.log('vracam subscription');
@@ -1131,6 +1145,9 @@ export class NewsPage implements OnInit, OnDestroy {
         } else {
             for (const el of res) {
                 const imgUrl = this.extract9gagImage(el);
+                if (imgUrl == null) {
+                    continue;
+                }
                 if (el.urlToImage) {
                     urlRequestsPromise.push(this.myImageDownloader.getImage({ name: this.getImageNameByUrl(imgUrl) }));
                 }
@@ -1368,9 +1385,13 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     extract9gagImage(el) {
+        console.log(el);
         const domNode = document.createElement('div');
         domNode.innerHTML = el.description;
-        return domNode.querySelector('img').src;
+        if (domNode.querySelector('img') && domNode.querySelector('img').src) {
+            return domNode.querySelector('img').src;
+        }
+        return null;
     }
 
     setup9GagArray(obj) {
@@ -1380,6 +1401,9 @@ export class NewsPage implements OnInit, OnDestroy {
         return this.configureImageCaching(obj.news.rss.channel.item, true).then((imagesNeedToCache) => {
             for (const el of obj.news.rss.channel.item) {
                 const urlToImage = this.extract9gagImage(el);
+                if (urlToImage == null) {
+                    continue;
+                }
                 const val = {
                     title: el.title.replace(/&#039;/g, "'"),
                     author: '',
@@ -1562,6 +1586,12 @@ export class NewsPage implements OnInit, OnDestroy {
             this.needUserFeedback = val;
             console.log('ODLOČU SM SE DA' + val);
             console.log('--------------------');
+            this.mlDebug('BANDIT SAID: ' + val + ' PULL = ' + this.banditPullIndex);
+            if (this.mlQuizTimeout) {
+                clearTimeout(this.mlQuizTimeout);
+                this.mlQuizTimeout = null;
+                this.dismissAllQuizs();
+            }
             if (val) {
                 this.mlQuizTimeout = setTimeout(() => {
                     this.popupImmQuiz();
@@ -1647,8 +1677,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     }
                 });
                 this.needUserFeedback = false;
-                clearTimeout(this.mlQuizTimeout);
-                this.mlQuizTimeout = null;
+
             }
         });
     }
@@ -1656,9 +1685,11 @@ export class NewsPage implements OnInit, OnDestroy {
     popupImmQuiz() {
         this.dismissAllQuizs();
 
-        this.toastController.create({
+        clearTimeout(this.mlQuizTimeout);
+        this.mlQuizTimeout = null;
+
+        this.alertController.create({
             header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
-            position: 'bottom',
             buttons: [
                 {
                     text: 'DA',
@@ -1672,13 +1703,17 @@ export class NewsPage implements OnInit, OnDestroy {
                     }
                 }
             ]
-        }).then(toastEl => {
-            toastEl.present();
+        }).then((alertEl) => {
+            alertEl.present();
         });
+
     }
 
     popupImmAlert() {
         this.dismissAllQuizs();
+
+        clearTimeout(this.mlQuizTimeout);
+        this.mlQuizTimeout = null;
 
         this.alertController.create({
             header: 'Ali ste bili zadovoljni s predhodnim prikazom novic?',
@@ -1720,7 +1755,8 @@ export class NewsPage implements OnInit, OnDestroy {
         this.toastController.create({
             header: d,
             position: 'top',
-            duration: 2000
+            duration: 5000,
+            color: 'light'
         }).then(toastEl => {
             toastEl.present();
         });
@@ -1731,5 +1767,6 @@ export class NewsPage implements OnInit, OnDestroy {
             header: str
         });
     }
+
 
 }

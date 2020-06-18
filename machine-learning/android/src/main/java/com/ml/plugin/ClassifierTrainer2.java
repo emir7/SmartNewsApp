@@ -170,7 +170,10 @@ public class ClassifierTrainer2 extends Worker {
             jsonBody.put("validID", "idjasoiadsjoiadsjdosaijadsojasdosadikjdsaoijsdaoisdaj");
             jsonBody.put("firstTime", true);
             jsonBody.put("username", username);
-            jsonBody.put("dataModel", metrics[0]+";"+metrics[1]+";"+metrics[2]+";"+metrics[3]);
+
+            float decisionBoundry = sharedpreferences.getFloat(MODEL_DECISION_BOUNDRY, -1);
+            jsonBody.put("dataModel", metrics[0]+";"+metrics[1]+";"+metrics[2]+";"+metrics[3]+";"+decisionBoundry);
+
             sender.sendPostRequest("http://163.172.169.249:9082/phase1/metrics", jsonBody.toString());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -237,7 +240,8 @@ public class ClassifierTrainer2 extends Worker {
             instance.setValue(instances.attribute("t"), getPassedInstance()[2]); // theme
             instance.setValue(instances.attribute("l"), getPassedInstance()[3]); // layout
             instance.setValue(instances.attribute("f"), getPassedInstance()[4]); // font size
-            instance.setValue(instances.attribute("o"), getPassedInstance()[5]); // output
+            // na indeksu 5 in 6 so boundary in probability
+            instance.setValue(instances.attribute("o"), getPassedInstance()[7]); // output
 
             instances.add(instance); // 7) Instanco dodamo
             Log.d("EO_ME", "treniram model s toliko novih instanc " + instances.numInstances());
