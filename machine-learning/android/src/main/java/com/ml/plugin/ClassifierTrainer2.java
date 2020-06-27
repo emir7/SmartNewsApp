@@ -14,6 +14,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.Arrays;
+
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.core.DenseInstance;
@@ -77,79 +82,113 @@ public class ClassifierTrainer2 extends Worker {
     @Override
     public Result doWork() {
         RandomForest randomForest = trainClassifier();
+
         MLUtils.serializeModel(randomForest, getModelPath());
         Log.d("EO_ME", "ratal mi je serializacijo izvesti");
 
         this.sharedpreferences.edit().putBoolean("working", true).apply();
 
-        Evaluation eval = null;
         try {
-            eval = new Evaluation(getTrainset()); // Rabimo za threshold
-            eval.evaluateModel(randomForest, getTestset());
-
-            ThresholdPoint optimalThresholdPoint = MLUtils.getThreshold(eval); // Izracunamo threshold
-            this.sharedpreferences.edit().putFloat(MODEL_DECISION_BOUNDRY, (float) optimalThresholdPoint.getThr())
-                    .apply(); // zapisemo threshold
-
-            double [] metrics = MLUtils.calculatePrecision(getTestset(), randomForest, optimalThresholdPoint.getThr()); // prever če se da brez tega iz evala ze
-
-            double precision = metrics[0];
-            double recall = metrics[1];
-            double accuracy = metrics[2];
-            double fMeasure = metrics[3];
-
-            Log.d("EO_ME", "Metrics: Precision = "+precision + " Recall = "+recall + " Acc = "+accuracy + " F = "+fMeasure);
+            this.sharedpreferences.edit().putFloat(MODEL_DECISION_BOUNDRY, 0.5f).apply(); // zapisemo threshold
 
             if (getIsFirstTime()) {
-                this.sharedpreferences.edit().putFloat(MODEL_PRECISION, (float) precision)
-                        .apply();
-                Log.d("EO_ME", "ratal mi je do konca pridt z usm 11");
-                Log.d("EO_ME", "precision = " + precision);
-                Log.d("EO_ME", optimalThresholdPoint.toString());
-                float prevPrec = sharedpreferences.getFloat(MODEL_PRECISION, 0);
-                Log.d("EO_ME", "v fajl sm zapisu "+prevPrec);
                 this.sharedpreferences.edit().putBoolean("started", false).apply();
-
-                sendPostRequestFirstTime(username, metrics);
                 Log.d("EO_ME", "WORKING BOOL DAJEM NA FALSE");
+                sendPostRequestFirstTime(username);
+
                 this.sharedpreferences.edit().putBoolean("working", false).apply();
                 return Result.success();
             } else {
-                float prevPrec = sharedpreferences.getFloat(MODEL_PRECISION, 0);
+                Log.d("predDATA", predictionDATA);
                 JSONObject jsonObject = null;
-                Log.d("EO_ME", "prev_prec was "+prevPrec);
-                Log.d("EO_ME", "current prec is "+precision);
+
+                float outcomeProbablityY = sharedpreferences.getFloat("maxProbability", 0);
+                float outcomeProbabilityN = 1 - outcomeProbablityY;
+
+                float [] oldPrediction = new float[]{outcomeProbabilityN, outcomeProbablityY};
+
+                Instance lastInstance = getTrainset().lastInstance();
+                int groundTruthIndex = (int)lastInstance.value(getTrainset().numAttributes()-1);
+
+                double [] newPredictionProbs = randomForest.distributionForInstance(lastInstance);
+
+                float newPredictionP = (float) newPredictionProbs[groundTruthIndex];
+                float oldPredictionP = oldPrediction[groundTruthIndex];
+
+                int oldPredictionClass = 0;
+                if(outcomeProbablityY > outcomeProbabilityN){
+                    oldPredictionClass = 1;
+                }
+
+                int newPredictionClass = 0;
+                if(newPredictionProbs[1] > newPredictionProbs[0]){
+                    newPredictionClass = 1;
+                }
+
+                Log.d("EO_ME", "ground_truth = "+groundTruthIndex);
+                Log.d("EO_ME", "ucasih: "+ Arrays.toString(oldPrediction) + " govoru sm "+oldPredictionClass);
+                Log.d("EO_ME", "zdej: "+ Arrays.toString(newPredictionProbs) + " zdej govorim "+newPredictionClass);
+
+                float directionVector = newPredictionP - oldPredictionP;
+
                 if (banditDecidedToAsk) {
+                    // preverimo ali gremo v pravi smeri
                     Log.d("EO_ME", "BANDIT DECIDED TO ASK");
-                    if (precision > prevPrec) {
-                        Log.d("EO_ME", "BANDIT DECIDED TO ASK IM GIVING HIM A REWARD FOR BETTER PRECISION");
-                        jsonObject = MLUtils.giveBanditReward(getBanditPath(), banditPull);
-                    } else {
-                        Log.d("EO_ME", "BANDIT DECIDED TO ASK IM GIVING HIM PUNISHMENT FOR WORSE PRECISION");
-                        jsonObject = MLUtils.punishBandit(getBanditPath(), banditPull);
+
+                    float reward = directionVector;
+
+                    if (directionVector > 0) {
+                        if(oldPredictionClass != newPredictionClass && newPredictionClass == groundTruthIndex){
+                            Log.d("EO_ME", "TIME FOR BIG REWARD");
+                            reward += 1;
+                        }
+                        Log.d("EO_ME", "BANDIT DECIDED TO ASK IM GIVING HIM A REWARD FOR BETTER PRECISION "+reward);
+                        jsonObject = MLUtils.giveBanditReward(getBanditPath(), banditPull, reward);
+                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk);
+                    } else if(directionVector < 0){
+                        if(oldPredictionClass != newPredictionClass && newPredictionClass != groundTruthIndex){
+                            Log.d("EO_ME", "TIME FOR BIG PUNISHMENT");
+                            reward -= 1;
+                        }
+                        Log.d("EO_ME", "BANDIT DECIDED TO ASK IM GIVING HIM PUNISHMENT FOR WORSE PRECISION "+reward);
+                        jsonObject = MLUtils.punishBandit(getBanditPath(), banditPull, reward);
+                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk);
+                    }else{
+                        sendZeroReward(username, predictionDATA, banditPull);
                     }
                 } else {
                     Log.d("EO_ME", "BANDIT HAS NOT DECIDED TO ASK TIME FOR REVERSE LOGIC");
-                    if (precision < prevPrec) {
+                    // ce gre v napacni smer nagrada, ker je meu bandit prou da tega ne rab
+                    float reward = directionVector;
+                    if (directionVector < 0) {
+                        if(oldPredictionClass != newPredictionClass && newPredictionClass != groundTruthIndex){
+                            Log.d("EO_ME", "TIME FOR BIG REWARD");
+                            reward-=1;
+                        }
                         // nagrada
-                        Log.d("EO_ME", "bandit decided not to ask and he was right. Precision now is even worse");
-                        jsonObject = MLUtils.giveBanditReward(getBanditPath(), banditPull);
-                    } else {
+                        Log.d("EO_ME", "bandit decided not to ask and he was right. Precision now is even worse "+reward);
+                        jsonObject = MLUtils.giveBanditReward(getBanditPath(), banditPull, -reward);
+                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk);
+
+                    } else if(directionVector > 0){
+                        if(oldPredictionClass != newPredictionClass && newPredictionClass == groundTruthIndex){
+                            Log.d("EO_ME", "TIME FOR BIG PUNISHMENT");
+                            reward+=1;
+                        }
                         // kazn
-                        Log.d("EO_ME", "bandit decided not to ask and he was WRONG. Precision is now grater, we need to punish him");
-                        jsonObject = MLUtils.punishBandit(getBanditPath(), banditPull);
+                        Log.d("EO_ME", "bandit decided not to ask and he was WRONG. Precision is now grater, we need to punish him "+reward);
+                        jsonObject = MLUtils.punishBandit(getBanditPath(), banditPull, -reward);
+                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk);
+                    }else{
+                        sendZeroReward(username, predictionDATA, banditPull);
                     }
+
                 }
 
-                Log.d("EO_ME", "predictionDATA "+predictionDATA);
-                sendPostRequestNotFirstTime(username, metrics, jsonObject, predictionDATA, banditPull, banditDecidedToAsk);
-                Log.d("EO_ME", "ratal mi je do konca pridt z usm");
 
                 this.sharedpreferences.edit().putBoolean("working", false).apply();
                 Log.d("EO_ME", "WORKING BOOL DAJEM NA FALSE");
 
-                this.sharedpreferences.edit().putFloat(MODEL_PRECISION, (float) precision)
-                        .apply();
                 return Result.success();
             }
 
@@ -162,7 +201,40 @@ public class ClassifierTrainer2 extends Worker {
 
     }
 
-    private void sendPostRequestFirstTime(String username, double [] metrics){
+
+    private void sendZeroReward(String username, String predictionDATA, int banditPull){
+        Sender sender = Sender.getInstance();
+        JSONObject jsonBody = new JSONObject();
+
+        try {
+            String jsonBanditString = MLUtils.readBanditFile(banditPath);
+            if(jsonBanditString == null){
+                return;
+            }
+            JSONObject banditData = new JSONObject(jsonBanditString);
+
+            jsonBody.put("validID", "idjasoiadsjoiadsjdosaijadsojasdosadikjdsaoijsdaoisdaj");
+            jsonBody.put("firstTime", false);
+            jsonBody.put("username", username);
+            jsonBody.put("dataModel", "none;");
+            jsonBody.put("predictionDATA", predictionDATA);
+
+            Log.d("EO_ME", banditData.toString());
+            int currentNumberOfPulls = banditData.getInt("allTimePulls");
+            int regret = banditData.getInt("regret");
+            double totalReward = banditData.getDouble("totalReward");
+
+            jsonBody.put("banditCSV", currentNumberOfPulls+";"+banditPull+";"+"false;"+regret+";"+totalReward);
+            jsonBody.put("banditJSON", banditData);
+            sender.sendPostRequest("http://93.103.215.63:9082/phase1/metrics", jsonBody.toString());
+        } catch (JSONException e) {
+            Log.e("EO_ME", "...................");
+            e.printStackTrace();
+        }
+    }
+
+
+    private void sendPostRequestFirstTime(String username){
         Sender sender = Sender.getInstance();
         JSONObject jsonBody = new JSONObject();
 
@@ -171,17 +243,16 @@ public class ClassifierTrainer2 extends Worker {
             jsonBody.put("firstTime", true);
             jsonBody.put("username", username);
 
-            float decisionBoundry = sharedpreferences.getFloat(MODEL_DECISION_BOUNDRY, -1);
-            jsonBody.put("dataModel", metrics[0]+";"+metrics[1]+";"+metrics[2]+";"+metrics[3]+";"+decisionBoundry);
+            jsonBody.put("dataModel", "none");
 
-            sender.sendPostRequest("http://163.172.169.249:9082/phase1/metrics", jsonBody.toString());
+            sender.sendPostRequest("http://93.103.215.63:9082/phase1/metrics", jsonBody.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
     }
 
-    private void sendPostRequestNotFirstTime(String username, double [] metrics, JSONObject banditData, String predictionDATA, int banditPull, boolean banditDecidedToAsk){
+    private void sendPostRequestNotFirstTime(String username, JSONObject banditData, String predictionDATA, int banditPull, boolean banditDecidedToAsk){
         Sender sender = Sender.getInstance();
         JSONObject jsonBody = new JSONObject();
 
@@ -192,18 +263,18 @@ public class ClassifierTrainer2 extends Worker {
 
             float decisionBoundry = sharedpreferences.getFloat(MODEL_DECISION_BOUNDRY, -1);
 
-            jsonBody.put("dataModel", metrics[0]+";"+metrics[1]+";"+metrics[2]+";"+metrics[3]+";"+decisionBoundry);
+            jsonBody.put("dataModel", "none");
             jsonBody.put("predictionDATA", predictionDATA);
 
 
             int currentNumberOfPulls = banditData.getInt("allTimePulls");
             int regret = banditData.getInt("regret");
-            int totalReward = banditData.getInt("totalReward");
+            double totalReward = banditData.getDouble("totalReward");
 
             jsonBody.put("banditCSV", currentNumberOfPulls+";"+banditPull+";"+banditDecidedToAsk+";"+regret+";"+totalReward);
             jsonBody.put("banditJSON", banditData);
 
-            sender.sendPostRequest("http://163.172.169.249:9082/phase1/metrics", jsonBody.toString());
+            sender.sendPostRequest("http://93.103.215.63:9082/phase1/metrics", jsonBody.toString());
 
         }catch (JSONException e){
             Log.e("EO_ME", "there was an error while creating jsonobject");
@@ -217,16 +288,9 @@ public class ClassifierTrainer2 extends Worker {
         if (getIsFirstTime()) {
             Log.d("EO_ME", "STVAR JE FIRST TIME");
             Instances dataset = MLUtils.readDatasetFromFile(getFullDatasetPath()); // 1) Ker prvic treniram preberem vse iz fajla kar imam
-
-            Log.d("EO_ME", "NUM INSTANCES IN full SET" + dataset.numInstances());
-            Instances[] splitedDataset = MLUtils.splitDataset(dataset); // 2) Splitam na train in test set
-            setTrainset(splitedDataset[0]); // 3) Nastavim trainset
-            setTestset(splitedDataset[1]); // 4) Nastavim testset
-
+            setTrainset(dataset);
             Log.d("EO_ME", "NUM INSTANCES IN TRAIN SET" + getTrainset().numInstances());
-            Log.d("EO_ME", "NUM INSTANCES IN TEST SET" + getTestset().numInstances());
-            MLUtils.writeDataToFile(getTrainingPath(), getTrainset(), false); // 5) Zacnem s pisanjem train seta
-            MLUtils.writeDataToFile(getTestingPath(), getTestset(), false); // 6) Zacnem s pisanjem testseta
+            MLUtils.writeDataToFile(getTrainingPath(), getTrainset(), false); // 5) Zacnem s pisanjem train seta (FULL DATASET)
             randomForest = MLUtils.buildRF(getTrainset()); // 7) Natreniramo model
             Log.d("EO_ME", "STVAR JE FIRST TIME11");
         } else {
@@ -246,19 +310,21 @@ public class ClassifierTrainer2 extends Worker {
             instances.add(instance); // 7) Instanco dodamo
             Log.d("EO_ME", "treniram model s toliko novih instanc " + instances.numInstances());
             randomForest = trainClfWithData(instances); // 7) Model treniramo
+
         }
 
         return randomForest; //8) model vrnemo
     }
 
     public RandomForest trainClfWithData(Instances newInstances) {
+
         Log.d("EO_ME", "first time je drugic false, appendam v trenining berem iz iz treninga");
         Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
         Log.d("EO_ME", "st prebranih instanc po dodajanju je " + instances.numInstances());
+
         instances.addAll(newInstances);  // 2) Dodamo nove instance
         MLUtils.writeDataToFile(getTrainingPath(), newInstances, true); // Appendamo instance v fajl
         setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
-        setTestset(MLUtils.readDatasetFromFile(getTestingPath())); // 4) Nastavimo testset ki je vedno isti iz datoteke
         return MLUtils.buildRF(getTrainset()); // 6) Model vrnemo in pošljemo v serialzacijo
     }
 

@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
@@ -147,6 +148,8 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
         int i = 0;
         JSObject response = new JSObject();
 
+
+        double maxProbability = 0;
         for(String theme : possibleThemes){
             for(String layout : possibleLayouts){
                 for(String fontSize: possibleFontSizes){
@@ -159,7 +162,16 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
                         instance.setValue(attributes.get(4), fontSize);
                         dataset.add(instance);
                         double result [] = rf.distributionForInstance(dataset.lastInstance());
-                        jsArray.put(i, new ModelOutput(theme, layout, fontSize, result[1]).converToJSObject());
+
+                        Log.d("EO_ME1", "UA = "+userActivity + " envb = "+envBrightness + " THEME = "+theme + " FONTSIZE = "+fontSize + " LAYOUT = "+layout +" probs = "+ Arrays.toString(result));
+
+                        ModelOutput modelOutput = new ModelOutput(theme, layout, fontSize, result[1]);
+
+                        if(modelOutput.getProbability() > maxProbability){
+                            maxProbability = modelOutput.getProbability();
+                        }
+
+                        jsArray.put(i, modelOutput.converToJSObject());
                         i++;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -167,6 +179,14 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
                 }
             }
         }
+
+
+        // zapisemo max probab outcome v shared prefe
+        Log.d("EO_ME", "maxProbability = "+maxProbability);
+        Log.d("EO_ME", jsArray.toString());
+        Log.d("EO_ME", userActivity + " env b "+envBrightness);
+
+        sharedpreferences.edit().putFloat("maxProbability",(float)maxProbability).apply();
 
         try {
             response.put("a", jsArray);

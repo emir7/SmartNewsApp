@@ -38,16 +38,19 @@ export class MlService {
                     return {
                         selections: [],
                         regret: 0,
-                        totalReward: 0,
+                        totalReward: 0.0,
                         allTimePulls: 0,
                         numberOfSelections: [0, 0, 0, 0], // [SOFTMAX, RANDOM, RANDOM_UA, CONFIDENCE]
-                        sumOfRewards: [0, 0, 0, 0]
+                        sumOfRewards: [0.0, 0.0, 0.0, 0.0]
                     };
                 }
             } else {
                 throw Error('Problem creating bandit file first time!');
             }
         }).then((banditData) => {
+
+            console.log("LOOK AT ME");
+            console.log(banditData);
 
 
             if (banditData.data != null) {
@@ -56,6 +59,18 @@ export class MlService {
 
             if (typeof banditData.sumOfRewards === 'string') {
                 banditData.sumOfRewards = JSON.parse(banditData.sumOfRewards);
+            }
+
+            if (typeof banditData.numberOfSelections === 'string') {
+                banditData.numberOfSelections = JSON.parse(banditData.numberOfSelections);
+            }
+
+            if (typeof banditData.selections === 'string') {
+                banditData.selections = JSON.parse(banditData.selections);
+            }
+
+            if (banditData.selections.length === 0) {
+                this.writeBanditsToFile(banditData);
             }
 
             let selectedPull = 0;
@@ -84,7 +99,6 @@ export class MlService {
             return banditData;
         }).then((updatedBanditData) => {
             retObject = updatedBanditData;
-            return this.writeBanditsToFile(updatedBanditData);
         }).then(() => {
             return retObject;
         }).catch(err => {

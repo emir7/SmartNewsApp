@@ -24,8 +24,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -58,7 +60,9 @@ public class MachineLearning extends Plugin {
 
             if(call.getBoolean("firstTime")){
                 SetInitializer setInitializer = new SetInitializer(getContext());
-                setInitializer.createDatasetFromScratch(getContext().getExternalFilesDir(null).getAbsolutePath()+"/DatasetDEV/fullset.csv");
+                String fullDSpath = getContext().getExternalFilesDir(null).getAbsolutePath()+"/DatasetDEV/fullset.csv";
+                String banditPath = getContext().getExternalFilesDir(null).getAbsolutePath()+"/banditsDEV/data.json";
+                setInitializer.createDatasetFromScratch(fullDSpath, banditPath);
             }else{
                 dataBuilder.putStringArray("newData", call.getString("newData").split(";"));
                 dataBuilder.putBoolean("banditDecidedToAsk", call.getBoolean("banditDecidedToAsk"));
@@ -86,9 +90,11 @@ public class MachineLearning extends Plugin {
     public void sendZeroReward(PluginCall call){
         Log.d("EO_ME", "posiljam na server zero reward");
 
+
         String username = call.getString("username");
         String predictionDATA = call.getString("predictionDATA");
         int banditPull = call.getInt("banditPull");
+
         sendDataAPI(username, predictionDATA, banditPull);
         call.resolve();
         //call.reject("Problem while sending request to the server!");
@@ -114,11 +120,11 @@ public class MachineLearning extends Plugin {
 
             int currentNumberOfPulls = banditData.getInt("allTimePulls");
             int regret = banditData.getInt("regret");
-            int totalReward = banditData.getInt("totalReward");
+            double totalReward = banditData.getDouble("totalReward");
 
             jsonBody.put("banditCSV", currentNumberOfPulls+";"+banditPull+";"+"false;"+regret+";"+totalReward);
             jsonBody.put("banditJSON", banditData);
-            sender.sendPostRequest("http://163.172.169.249:9082/phase1/metrics", jsonBody.toString());
+            sender.sendPostRequest("http://93.103.215.63:9082/phase1/metrics", jsonBody.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -196,29 +202,35 @@ public class MachineLearning extends Plugin {
 
     @PluginMethod
     public void banditFileExists(PluginCall call){
-        String path = getContext().getExternalFilesDir(null).getAbsoluteFile() + "/bandits/data.json";
+        String path = getContext().getExternalFilesDir(null).getAbsoluteFile() + "/banditsDEV/data.json";
         File f = new File(path);
-        if(!f.exists()){
-            f.getParentFile().mkdirs();
-            try {
-                FileWriter fileWriter = new FileWriter(f);
-                fileWriter.write("");
-                fileWriter.flush();
-                fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        Log.d("EO_ME", "BANDIT FILE = "+f.exists());
+        Scanner sc = null;
+        try {
+            sc = new Scanner(f);
+            String bString = sc.next();
+            if(bString.equals("NONE")){
                 JSObject jsObject = new JSObject();
-                jsObject.put("e", true);
+                jsObject.put("exists", false);
+                jsObject.put("e", false);
+                call.success(jsObject);
+            }else{
+                JSObject jsObject = new JSObject();
+                jsObject.put("exists", true);
+                jsObject.put("e", false);
+                call.success(jsObject);
             }
-
+        } catch (FileNotFoundException e) {
             JSObject jsObject = new JSObject();
-            jsObject.put("exists", false);
+            jsObject.put("e", true);
             call.success(jsObject);
-        }else{
-            JSObject jsObject = new JSObject();
-            jsObject.put("exists", true);
-            call.success(jsObject);
+            e.printStackTrace();
+        }finally {
+            if(sc != null){
+                sc.close();
+            }
         }
+
 
     }
 
@@ -237,10 +249,5 @@ public class MachineLearning extends Plugin {
         return data;
     }
 
-    @Override
-    protected void handleOnDestroy() {
-        Log.d("EO_ME", "on_destroy se je poklicu11");
-        //trenirajPonovno();
-        super.handleOnDestroy();
-    }
+
 }

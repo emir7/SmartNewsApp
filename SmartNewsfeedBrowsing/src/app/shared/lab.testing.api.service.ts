@@ -9,7 +9,7 @@ export class LabAPIService {
     postData(username, predictionDATA) {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' });
 
-        this.http.post('http://163.172.169.249:9082/phase2/data', {
+        this.http.post('http://93.103.215.63:9082/phase2/data', {
             username, predictionDATA
             , validID: 'idjasoiadsjoiadsjdosaijadsojasdosadikjdsaoijsdaoisdaj'
         }, { headers }).subscribe((res) => {

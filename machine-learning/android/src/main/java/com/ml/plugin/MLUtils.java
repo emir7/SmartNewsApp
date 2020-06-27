@@ -28,6 +28,7 @@ public class MLUtils {
         Log.d("EO_ME", "treniram rf s toliko instanc "+data.numInstances());
         RandomForest forest = null;
         forest = new RandomForest();
+        forest.setSeed(0);
         forest.setNumTrees(100);
         try {
             forest.buildClassifier(data);
@@ -42,21 +43,46 @@ public class MLUtils {
         return forest;
     }
 
-    public static JSONObject punishBandit(String banditPath, int banditPull){
+    public static JSONObject punishBandit(String banditPath, int banditPull, float punishment){
         // kazn
         String jsonBanditString = readBanditFile(banditPath);
         JSONObject jsonObject = null;
         try{
             jsonObject = new JSONObject(jsonBanditString);
-            jsonObject.put("totalReward", jsonObject.getInt("totalReward") - 1);
+            jsonObject.put("totalReward", jsonObject.getDouble("totalReward") + punishment);
             jsonObject.put("regret", jsonObject.getInt("regret") + 1);
 
-            Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+            jsonObject.put("allTimePulls", jsonObject.getInt("allTimePulls") + 1);
+            String numberOfSelectionsString = jsonObject.getString("numberOfSelections");
+            int [] numOfSelIntArr = stringToArrInt(numberOfSelectionsString);
+            numOfSelIntArr[banditPull]++;
+            jsonObject.put("numberOfSelections", Arrays.toString(numOfSelIntArr));
+
+            String selectionsString = jsonObject.getString("selections");
+            Log.d("PARSING_SELECTIONS", selectionsString);
+
+            if(selectionsString.equals("[]")){
+                int [] selectionsArr = new int []{banditPull};
+                Log.d("PARSING_SELECTIONS", Arrays.toString(selectionsArr));
+                jsonObject.put("selections", Arrays.toString(selectionsArr));
+            }else{
+                int [] selectionsArr = stringToArrInt(selectionsString);
+                int [] selectionsArr2 = new int[selectionsArr.length+1];
+                for(int i = 0; i < selectionsArr.length; i++){
+                    selectionsArr2[i] = selectionsArr[i];
+                }
+
+                selectionsArr2[selectionsArr2.length-1] = banditPull;
+                Log.d("PARSING_SELECTIONS", Arrays.toString(selectionsArr2));
+                jsonObject.put("selections", Arrays.toString(selectionsArr2));
+            }
+
+            Log.d("EO_ME", " total reward "+jsonObject.getDouble("totalReward"));
             String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
             Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
-            int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+            double[] sumOfRewards = stringToArr(sumOfRewardsAsString);
             Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
-            sumOfRewards[banditPull]--;
+            sumOfRewards[banditPull]+=punishment;
             Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
             jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
             writeToBanditFile(banditPath, jsonObject.toString());
@@ -70,7 +96,7 @@ public class MLUtils {
         return jsonObject;
     }
 
-    public static JSONObject giveBanditReward(String banditPath, int banditPull){
+    public static JSONObject giveBanditReward(String banditPath, int banditPull, float reward){
         // nagrada
         String jsonBanditString = readBanditFile(banditPath);
         JSONObject jsonObject = null;
@@ -78,13 +104,40 @@ public class MLUtils {
             Log.d("EO_ME", "I AM GIVING BANDIT REWARD");
             jsonObject = new JSONObject(jsonBanditString);
             Log.d("EO_ME", "pass1");
-            jsonObject.put("totalReward", jsonObject.getInt("totalReward") + 1);
-            Log.d("EO_ME", " total reward "+jsonObject.getInt("totalReward"));
+
+            jsonObject.put("allTimePulls", jsonObject.getInt("allTimePulls") + 1);
+
+            String numberOfSelectionsString = jsonObject.getString("numberOfSelections");
+            int [] numOfSelIntArr = stringToArrInt(numberOfSelectionsString);
+            numOfSelIntArr[banditPull]++;
+            jsonObject.put("numberOfSelections", Arrays.toString(numOfSelIntArr));
+
+            String selectionsString = jsonObject.getString("selections");
+            Log.d("PARSING_SELECTIONS", selectionsString);
+
+            if(selectionsString.equals("[]")){
+                int [] selectionsArr = new int []{banditPull};
+                Log.d("PARSING_SELECTIONS", Arrays.toString(selectionsArr));
+                jsonObject.put("selections", Arrays.toString(selectionsArr));
+            }else{
+                int [] selectionsArr = stringToArrInt(selectionsString);
+                int [] selectionsArr2 = new int[selectionsArr.length+1];
+                for(int i = 0; i < selectionsArr.length; i++){
+                    selectionsArr2[i] = selectionsArr[i];
+                }
+
+                selectionsArr2[selectionsArr2.length-1] = banditPull;
+                Log.d("PARSING_SELECTIONS", Arrays.toString(selectionsArr2));
+                jsonObject.put("selections", Arrays.toString(selectionsArr2));
+            }
+
+            jsonObject.put("totalReward", jsonObject.getDouble("totalReward") + reward);
+            Log.d("EO_ME", " total reward "+jsonObject.getDouble("totalReward"));
             String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
             Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
-            int[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+            double[] sumOfRewards = stringToArr(sumOfRewardsAsString);
             Log.d("EO_ME", "sumOfRewards "+ Arrays.toString(sumOfRewards));
-            sumOfRewards[banditPull]++;
+            sumOfRewards[banditPull]+=reward;
             Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
             jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
             Log.d("EO_ME", "Sledec objekt pisem v datoteko" + jsonObject.toString());
@@ -98,7 +151,20 @@ public class MLUtils {
         return jsonObject;
     }
 
-    public static int[] stringToArr(String string) {
+    public static double[] stringToArr(String string) {
+        String[] strings = string.replace("[", "")
+                .replace("]", "")
+                .replaceAll(" ", "")
+                .split(",");
+        double[] result = new double[strings.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = Double.parseDouble(strings[i].trim());
+        }
+        return result;
+    }
+
+
+    public static int[] stringToArrInt(String string) {
         String[] strings = string.replace("[", "")
                 .replace("]", "")
                 .replaceAll(" ", "")

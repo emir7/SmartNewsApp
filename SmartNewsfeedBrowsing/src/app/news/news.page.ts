@@ -152,7 +152,7 @@ export class NewsPage implements OnInit, OnDestroy {
         setTimeout(() => {
             this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
                 if (!ctx.validObjs[0] || !ctx.validObjs[1] || !ctx.validObjs[2]) {
-                    this.mlDebug('SETAM VEREDNOSTI, KER NISM DOBU NČ OD GOOGLE ACTIVITY RECOG');
+                    //this.mlDebug('SETAM VEREDNOSTI, KER NISM DOBU NČ OD GOOGLE ACTIVITY RECOG');
                     this.contextService.setValidObjs([true, true, true]);
                 }
             });
@@ -1676,6 +1676,7 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.cancelLearning = true;
                     }
                 });
+
                 this.needUserFeedback = false;
 
             }

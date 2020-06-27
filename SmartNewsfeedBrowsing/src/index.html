@@ -21,6 +21,32 @@
 
 <body>
   <app-root></app-root>
+  <script>
+    var console = (function (oldCons) {
+      return {
+        log: function (o) {
+          if (typeof o == "object" && o != null) {
+            let keys = Object.keys(o);
+            if (keys.length == 1 && keys[0] == "value") {
+              return;
+            }
+          }
+          oldCons.log(o);
+        },
+        info: function (text) {
+          // oldCons.info(text);
+        },
+        warn: function (text) {
+          // oldCons.warn(text);
+        },
+        error: function (text) {
+          oldCons.error(text);
+        }
+      };
+    }(window.console));
+
+    window.console = console;
+  </script>
 </body>
 
 </html>

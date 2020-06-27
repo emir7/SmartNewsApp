@@ -21,15 +21,24 @@ public class SetInitializer {
         this.context = context;
     }
 
-    public void createDatasetFromScratch(String fullDatasetPath){
+    public void createDatasetFromScratch(String fullDatasetPath, String pathToBanditFile){
         BufferedReader reader = null;
         Instances dataset = MLUtils.constructDatasetHeader();
         dataset.setClassIndex(dataset.numAttributes() - 1);
         FileWriter fileWriter = null;
+        FileWriter fileWriter1 = null;
+
         try {
             File f = new File(fullDatasetPath);
+            File banditF = new File(pathToBanditFile);
+
+            banditF.getParentFile().mkdirs();
             f.getParentFile().mkdirs();
             fileWriter = new FileWriter(f);
+
+            fileWriter1 = new FileWriter(banditF);
+
+            fileWriter1.write("NONE");
 
             reader = new BufferedReader(
                     new InputStreamReader( context.getAssets().open("data.csv"), "UTF-8"));
@@ -82,6 +91,22 @@ public class SetInitializer {
                     e.printStackTrace();
                 }
             }
+
+            if(fileWriter1 != null){
+                try {
+                    fileWriter1.flush();
+                } catch (IOException e) {
+                    Log.e("EO_ME", "error while flushing filewriter inside setIniter");
+                    e.printStackTrace();
+                }
+                try {
+                    fileWriter1.close();
+                } catch (IOException e) {
+                    Log.e("EO_ME", "error while closing filewriter inside setIniter");
+                    e.printStackTrace();
+                }
+            }
+
         }
 
     }
