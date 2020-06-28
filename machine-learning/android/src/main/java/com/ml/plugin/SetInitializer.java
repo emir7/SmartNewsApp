@@ -65,15 +65,15 @@ public class SetInitializer {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("EO_ME", "error occured inside setInitializer1");
-            Log.e("EO_ME", e.toString());
+            Log.e(Constants.DEBUG_VAR, "error occured inside setInitializer1");
+            Log.e(Constants.DEBUG_VAR, e.toString());
         } finally {
             if(reader != null) {
                 try {
                     reader.close();
                 }catch (IOException e){
-                    Log.e("EO_ME", "error occured inside setInitializer2");
-                    Log.e("EO_ME", e.toString());
+                    Log.e(Constants.DEBUG_VAR, "error occured inside setInitializer2");
+                    Log.e(Constants.DEBUG_VAR, e.toString());
                 }
             }
 
@@ -81,13 +81,13 @@ public class SetInitializer {
                 try {
                     fileWriter.flush();
                 } catch (IOException e) {
-                    Log.e("EO_ME", "error while flushing filewriter inside setIniter");
+                    Log.e(Constants.DEBUG_VAR, "error while flushing filewriter inside setIniter");
                     e.printStackTrace();
                 }
                 try {
                     fileWriter.close();
                 } catch (IOException e) {
-                    Log.e("EO_ME", "error while closing filewriter inside setIniter");
+                    Log.e(Constants.DEBUG_VAR, "error while closing filewriter inside setIniter");
                     e.printStackTrace();
                 }
             }
@@ -96,13 +96,13 @@ public class SetInitializer {
                 try {
                     fileWriter1.flush();
                 } catch (IOException e) {
-                    Log.e("EO_ME", "error while flushing filewriter inside setIniter");
+                    Log.e(Constants.DEBUG_VAR, "error while flushing filewriter inside setIniter");
                     e.printStackTrace();
                 }
                 try {
                     fileWriter1.close();
                 } catch (IOException e) {
-                    Log.e("EO_ME", "error while closing filewriter inside setIniter");
+                    Log.e(Constants.DEBUG_VAR, "error while closing filewriter inside setIniter");
                     e.printStackTrace();
                 }
             }

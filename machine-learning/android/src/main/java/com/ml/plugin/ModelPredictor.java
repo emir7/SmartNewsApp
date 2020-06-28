@@ -44,29 +44,6 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
         this.delegate = delegate;
     }
 
-    private RandomForest getModel(){
-        ObjectInputStream objectinputstream = null;
-        RandomForest rf = null;
-        try {
-            FileInputStream streamIn = new FileInputStream(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model");
-            objectinputstream = new ObjectInputStream(streamIn);
-            rf = (RandomForest) objectinputstream.readObject();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d("EO_ME", "ERROR OCCURED WHILE GETTING MODEL");
-            Log.d("EO_ME", e.toString());
-        } finally {
-            if(objectinputstream != null){
-                try {
-                    objectinputstream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return rf;
-    }
 
     public void setDecisionBoundry(float val){
         this.decisionBoundry = val;
@@ -132,7 +109,7 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
 
     @Override
     protected JSObject doInBackground(Void... voids) {
-        RandomForest rf = getModel();
+        RandomForest rf = MLUtils.getModel(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model");
         if(rf == null){
             return null;
         }
@@ -163,7 +140,7 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
                         dataset.add(instance);
                         double result [] = rf.distributionForInstance(dataset.lastInstance());
 
-                        Log.d("EO_ME1", "UA = "+userActivity + " envb = "+envBrightness + " THEME = "+theme + " FONTSIZE = "+fontSize + " LAYOUT = "+layout +" probs = "+ Arrays.toString(result));
+                        Log.d(Constants.DEBUG_VAR, "UA = "+userActivity + " envb = "+envBrightness + " THEME = "+theme + " FONTSIZE = "+fontSize + " LAYOUT = "+layout +" probs = "+ Arrays.toString(result));
 
                         ModelOutput modelOutput = new ModelOutput(theme, layout, fontSize, result[1]);
 
@@ -181,11 +158,7 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
         }
 
 
-        // zapisemo max probab outcome v shared prefe
-        Log.d("EO_ME", "maxProbability = "+maxProbability);
-        Log.d("EO_ME", jsArray.toString());
-        Log.d("EO_ME", userActivity + " env b "+envBrightness);
-
+        Log.d(Constants.DEBUG_VAR, "maxProbablity = "+maxProbability);
         sharedpreferences.edit().putFloat("maxProbability",(float)maxProbability).apply();
 
         try {

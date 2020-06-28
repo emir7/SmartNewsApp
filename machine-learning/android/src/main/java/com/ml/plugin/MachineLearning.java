@@ -43,13 +43,13 @@ public class MachineLearning extends Plugin {
     public void trainClf(final PluginCall call){
 
         if(isWorkScheduled()){
-            Log.d("EO_ME", "NE treniram ker sm busy");
+            Log.d(Constants.DEBUG_VAR, "NE treniram ker sm busy");
             // nemors sprasevt zdej nc
             JSObject ret = new JSObject();
             ret.put("s", "busy");
             call.success(ret);
         }else{
-            Log.d("EO_ME", "treniram ker sm free");
+            Log.d(Constants.DEBUG_VAR, "treniram ker sm free");
             JSObject ret = new JSObject();
             ret.put("s", "free");
             call.success(ret);
@@ -73,7 +73,6 @@ public class MachineLearning extends Plugin {
             // lahko me sprasujes zdej
             Constraints.Builder constraintsBuilder = new Constraints.Builder().setRequiresBatteryNotLow(true);
 
-            Log.d("EO_ME", "dou sm  builderja");
             OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(ClassifierTrainer2.class);
 
             builder.setConstraints(constraintsBuilder.build());
@@ -88,7 +87,7 @@ public class MachineLearning extends Plugin {
 
     @PluginMethod
     public void sendZeroReward(PluginCall call){
-        Log.d("EO_ME", "posiljam na server zero reward");
+        Log.d(Constants.DEBUG_VAR, "posiljam na server zero reward");
 
 
         String username = call.getString("username");
@@ -97,7 +96,6 @@ public class MachineLearning extends Plugin {
 
         sendDataAPI(username, predictionDATA, banditPull);
         call.resolve();
-        //call.reject("Problem while sending request to the server!");
     }
 
     private void sendDataAPI(String username, String predictionDATA, int banditPull){
@@ -124,7 +122,7 @@ public class MachineLearning extends Plugin {
 
             jsonBody.put("banditCSV", currentNumberOfPulls+";"+banditPull+";"+"false;"+regret+";"+totalReward);
             jsonBody.put("banditJSON", banditData);
-            sender.sendPostRequest("http://93.103.215.63:9082/phase1/metrics", jsonBody.toString());
+            sender.sendPostRequest(Constants.SERVER_IP+"/phase1/metrics", jsonBody.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -133,25 +131,25 @@ public class MachineLearning extends Plugin {
     private boolean isWorkScheduled() {
         sharedpreferences = getContext().getSharedPreferences("si.fri.diploma", Context.MODE_PRIVATE);
 
-        Log.d("EO_ME", " === isWorkScheduled");
-        Log.d("EO_ME", "working bool je "+sharedpreferences.getBoolean("working", false));
+        Log.d(Constants.DEBUG_VAR, " === isWorkScheduled");
+        Log.d(Constants.DEBUG_VAR, "working bool je "+sharedpreferences.getBoolean("working", false));
         return sharedpreferences.getBoolean("working", false);
     }
 
 
     @PluginMethod
     public void classifierPrediction(final PluginCall call){
-        Log.d("EO_ME", "klasifikacija se pokliče");
+        Log.d(Constants.DEBUG_VAR, "klasifikacija se pokliče");
         if(!isWorkScheduled()){
             ModelPredictor modelPredictor = new ModelPredictor(getContext(), call, this, new AsyncResponse() {
                 @Override
                 public void processFinish(JSObject output) {
 
                     if(output != null){
-                        Log.d("EO_ME", "tole vračam clientu "+output.toString());
+                        Log.d(Constants.DEBUG_VAR, "tole vračam clientu "+output.toString());
                         call.success(output);
                     }else{
-                        Log.d("EO_ME", "ERROR VRAČAM CLIENTU");
+                        Log.d(Constants.DEBUG_VAR, "ERROR VRAČAM CLIENTU");
                         call.reject("Error while training model");
                     }
 
@@ -172,7 +170,6 @@ public class MachineLearning extends Plugin {
 
     @PluginMethod
     public void countByUA(PluginCall call){
-        Log.d("EO_ME", "STEJEM");
         String testPath = getContext().getExternalFilesDir(null).getAbsolutePath() + "/DatasetDEV/dataTrain.csv";
         Instances currentDataset = readDatasetFromFile(testPath);
 
@@ -194,7 +191,6 @@ public class MachineLearning extends Plugin {
         jsObject.put("cStill", cStill);
         jsObject.put("cFoot", cFoot);
         jsObject.put("cVehicle", cVehicle);
-        Log.d("EO_ME", jsObject.toString());
 
         call.success(jsObject);
 
@@ -204,7 +200,6 @@ public class MachineLearning extends Plugin {
     public void banditFileExists(PluginCall call){
         String path = getContext().getExternalFilesDir(null).getAbsoluteFile() + "/banditsDEV/data.json";
         File f = new File(path);
-        Log.d("EO_ME", "BANDIT FILE = "+f.exists());
         Scanner sc = null;
         try {
             sc = new Scanner(f);

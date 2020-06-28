@@ -7,7 +7,7 @@ export class GagNewsApiService {
     constructor(private http: HttpClient) { }
 
     get9gagNews() {
-        return this.http.get<any>('http://93.103.215.63:9082/api/gag');
+        return this.http.get<any>('http://163.172.169.249:9082/api/gag');
     }
 
 }

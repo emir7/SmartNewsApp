@@ -6,10 +6,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,21 +27,21 @@ import weka.core.converters.CSVLoader;
 public class MLUtils {
 
     public static RandomForest buildRF(Instances data){
-        Log.d("EO_ME", "treniram rf s toliko instanc "+data.numInstances());
+        Log.d(Constants.DEBUG_VAR, "treniram rf s toliko instanc "+data.numInstances());
         RandomForest forest = null;
         forest = new RandomForest();
-        forest.setSeed(0);
+        forest.setSeed(5);
         forest.setNumTrees(100);
         try {
             forest.buildClassifier(data);
-            Log.d("EO_ME", "passu sm cez z modelom11");
+            Log.d(Constants.DEBUG_VAR, "passu sm cez z modelom11");
         } catch (Exception e) {
-            Log.d("EO_ME", "for some reason mi ni ratal natrenirat modelaa");
-            Log.d("EO_ME", e.toString());
+            Log.d(Constants.DEBUG_VAR, "for some reason mi ni ratal natrenirat modelaa");
+            Log.d(Constants.DEBUG_VAR, e.toString());
             e.printStackTrace();
         }
 
-        Log.d("EO_ME", "passu sm cez z modelom");
+        Log.d(Constants.DEBUG_VAR, "passu sm cez z modelom");
         return forest;
     }
 
@@ -60,7 +62,6 @@ public class MLUtils {
 
             String selectionsString = jsonObject.getString("selections");
             Log.d("PARSING_SELECTIONS", selectionsString);
-
             if(selectionsString.equals("[]")){
                 int [] selectionsArr = new int []{banditPull};
                 Log.d("PARSING_SELECTIONS", Arrays.toString(selectionsArr));
@@ -77,20 +78,20 @@ public class MLUtils {
                 jsonObject.put("selections", Arrays.toString(selectionsArr2));
             }
 
-            Log.d("EO_ME", " total reward "+jsonObject.getDouble("totalReward"));
+            Log.d(Constants.DEBUG_VAR, " total reward "+jsonObject.getDouble("totalReward"));
             String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
-            Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+            Log.d(Constants.DEBUG_VAR, "sumOfRewardsAsString "+sumOfRewardsAsString);
             double[] sumOfRewards = stringToArr(sumOfRewardsAsString);
-            Log.d("EO_ME", "sumOfRewards "+Arrays.toString(sumOfRewards));
+            Log.d(Constants.DEBUG_VAR, "sumOfRewards "+Arrays.toString(sumOfRewards));
             sumOfRewards[banditPull]+=punishment;
-            Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+            Log.d(Constants.DEBUG_VAR, "sumOfRewards2 "+Arrays.toString(sumOfRewards));
             jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
             writeToBanditFile(banditPath, jsonObject.toString());
-            Log.d("EO_ME", "Sledec objekt pisem v datoteko" + jsonObject.toString());
+            Log.d(Constants.DEBUG_VAR, "Sledec objekt pisem v datoteko" + jsonObject.toString());
         }catch (JSONException e){
             e.printStackTrace();
-            Log.d("EO_ME", "error while punishing bandit");
-            Log.e("EO_ME", e.toString());
+            Log.d(Constants.DEBUG_VAR, "error while punishing bandit");
+            Log.e(Constants.DEBUG_VAR, e.toString());
         }
 
         return jsonObject;
@@ -101,9 +102,9 @@ public class MLUtils {
         String jsonBanditString = readBanditFile(banditPath);
         JSONObject jsonObject = null;
         try {
-            Log.d("EO_ME", "I AM GIVING BANDIT REWARD");
+            Log.d(Constants.DEBUG_VAR, "I AM GIVING BANDIT REWARD");
             jsonObject = new JSONObject(jsonBanditString);
-            Log.d("EO_ME", "pass1");
+            Log.d(Constants.DEBUG_VAR, "pass1");
 
             jsonObject.put("allTimePulls", jsonObject.getInt("allTimePulls") + 1);
 
@@ -132,20 +133,20 @@ public class MLUtils {
             }
 
             jsonObject.put("totalReward", jsonObject.getDouble("totalReward") + reward);
-            Log.d("EO_ME", " total reward "+jsonObject.getDouble("totalReward"));
+            Log.d(Constants.DEBUG_VAR, " total reward "+jsonObject.getDouble("totalReward"));
             String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
-            Log.d("EO_ME", "sumOfRewardsAsString "+sumOfRewardsAsString);
+            Log.d(Constants.DEBUG_VAR, "sumOfRewardsAsString "+sumOfRewardsAsString);
             double[] sumOfRewards = stringToArr(sumOfRewardsAsString);
-            Log.d("EO_ME", "sumOfRewards "+ Arrays.toString(sumOfRewards));
+            Log.d(Constants.DEBUG_VAR, "sumOfRewards "+ Arrays.toString(sumOfRewards));
             sumOfRewards[banditPull]+=reward;
-            Log.d("EO_ME", "sumOfRewards2 "+Arrays.toString(sumOfRewards));
+            Log.d(Constants.DEBUG_VAR, "sumOfRewards2 "+Arrays.toString(sumOfRewards));
             jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
-            Log.d("EO_ME", "Sledec objekt pisem v datoteko" + jsonObject.toString());
+            Log.d(Constants.DEBUG_VAR, "Sledec objekt pisem v datoteko" + jsonObject.toString());
             writeToBanditFile(banditPath, jsonObject.toString());
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.d("EO_ME", "error while giving bandit reward");
-            Log.e("EO_ME", e.toString());
+            Log.d(Constants.DEBUG_VAR, "error while giving bandit reward");
+            Log.e(Constants.DEBUG_VAR, e.toString());
         }
 
         return jsonObject;
@@ -218,7 +219,6 @@ public class MLUtils {
         ObjectOutputStream oos = null;
         FileOutputStream fout = null;
 
-        //String path = getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/Model/model";
         File f = new File(path);
         f.getParentFile().mkdirs();
         try{
@@ -238,6 +238,31 @@ public class MLUtils {
             }
         }
     }
+
+    public static RandomForest getModel(String modelPath){
+        ObjectInputStream objectinputstream = null;
+        RandomForest rf = null;
+        try {
+            FileInputStream streamIn = new FileInputStream(modelPath);
+            objectinputstream = new ObjectInputStream(streamIn);
+            rf = (RandomForest) objectinputstream.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(Constants.DEBUG_VAR, "ERROR OCCURED WHILE GETTING MODEL");
+            Log.d(Constants.DEBUG_VAR, e.toString());
+        } finally {
+            if(objectinputstream != null){
+                try {
+                    objectinputstream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return rf;
+    }
+
 
     public static Instances constructDatasetHeader(){
         ArrayList<Attribute> atts = new ArrayList<Attribute>();
@@ -276,94 +301,20 @@ public class MLUtils {
 
     public static Instances readDatasetFromFile(String path){
         CSVLoader csvLoader = new CSVLoader();
-        Log.d("EO_ME", "?=????????????");
 
         Instances data = null;
         try {
-            Log.d("EO_ME", "?????????????");
             csvLoader.setSource(new File(path));
             data = csvLoader.getDataSet();
             data.setClassIndex(data.numAttributes() - 1);
-            Log.d("EO_ME", "data = "+data.numInstances());
         } catch (IOException e) {
-            Log.e("EO_ME", "an error occured while reading dataset from file!");
-            Log.e("EO_ME", e.toString());
+            Log.e(Constants.DEBUG_VAR, "an error occured while reading dataset from file!");
+            Log.e(Constants.DEBUG_VAR, e.toString());
             e.printStackTrace();
         }
 
-        Log.d("EO_ME", "data = "+data.numInstances());
+        Log.d(Constants.DEBUG_VAR, "data = "+data.numInstances());
         return data;
-    }
-
-    public static ThresholdPoint getThreshold(Evaluation eval) {
-        ThresholdCurve tc = new ThresholdCurve();
-        int classIndex = 1;
-        Instances result = tc.getCurve(eval.predictions(), classIndex);
-
-
-        ThresholdPoint optimalThresholdPoint = new ThresholdPoint(0, 0, 0, 100);
-        for(int i = 0; i < result.numInstances(); i++) {
-            double tpr = result.get(i).value(5);
-            double fpr = result.get(i).value(4);
-            double thr = result.get(i).value(12);
-
-            double distance = Math.sqrt(fpr * fpr + (1 - tpr)*(1 - tpr));
-            if(distance < optimalThresholdPoint.getDistance()) {
-                optimalThresholdPoint = new ThresholdPoint(thr, fpr, tpr, distance);
-            }
-
-        }
-
-        return optimalThresholdPoint;
-    }
-
-    public static double [] calculatePrecision(Instances test, RandomForest forest, double decisionBoundry) throws Exception {
-        double tp = 0;
-        double fp = 0;
-
-        double fn = 0;
-        double tn = 0;
-
-        for(int i = 0; i < test.size(); i++) {
-            double forestPrediction [] = forest.distributionForInstance(test.get(i));
-            double prediction = 0;
-            if(forestPrediction[1] >= decisionBoundry){
-                prediction = 1;
-            }
-
-            if(prediction == 1){
-                if(test.get(i).value(test.numAttributes() - 1) == 1){
-                    tp++;
-                }else{
-                    fp++;
-                }
-            }
-
-            if(prediction == 0){
-                if(test.get(i).value(test.numAttributes() - 1) == 0){
-                    tn++;
-                }else{
-                    fn++;
-                }
-            }
-        }
-
-        double precision = tp / (tp + fp);
-        double recall = tp / (tp + fn);
-        double accuracy =  (tp + tn) / (tp + fp + fn + tn);
-        double fMeasure = (2 * precision * recall) / (precision + recall);
-        return new double[]{precision, recall, accuracy, fMeasure};
-    }
-
-    public static Instances[] splitDataset(Instances dataset){
-        int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
-        int testSize = dataset.numInstances() - trainSize;
-
-        dataset.randomize(new java.util.Random(5));
-        Instances train = new Instances(dataset, 0, trainSize);
-        Instances test = new Instances(dataset, trainSize, testSize);
-
-        return new Instances[]{train, test};
     }
 
     public static String readBanditFile(String banditPath){
@@ -383,10 +334,9 @@ public class MLUtils {
         try{
             fileWriter = new FileWriter(f);
             fileWriter.write(banditData);
-            Log.d("EO_ME", "uspesno sm dou nagrado");
         }catch (Exception e){
-            Log.e("EO_ME", "there was an error while updating bandits!");
-            Log.e("EO_ME", e.toString());
+            Log.e(Constants.DEBUG_VAR, "there was an error while updating bandits!");
+            Log.e(Constants.DEBUG_VAR, e.toString());
         }finally {
             try {
                 if(fileWriter != null){
