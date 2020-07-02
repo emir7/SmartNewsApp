@@ -149,7 +149,7 @@ export class MlService {
 
             if (marginalDiff >= epsilon) {
                 // če je razlika manjša kot 0.2 (glej 0.8) to pomen da rabmo vprašalnik
-                return resolve(Math.random() <= (1 - predictions[selectedIndex].p));
+                return resolve(true);
             } else {
                 // če je razlika večja kot 0.2 (glej 0.8) to pomen da NE rabmo vprašalnik
                 return resolve(false);

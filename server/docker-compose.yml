@@ -1,0 +1,19 @@
+version: '3.5'
+services: 
+    smartNewsMongo:
+        image: mongo:latest
+        restart: always
+        container_name: smartNewsMongo
+        ports: 
+            - "27017:27017"
+        expose:
+            - 27017
+    smart-news-server:
+        build: .
+        image: smartNewsServer
+        depends_on: 
+            - smartNewsMongo
+        ports: 
+            - "9082:9082"
+        expose:
+            - 9082

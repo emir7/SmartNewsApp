@@ -6,7 +6,7 @@ export class TutorialGuard implements CanActivate {
     constructor(private storage: Storage, private router: Router) { }
 
     canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | import("@angular/router").UrlTree | import("rxjs").Observable<boolean | import("@angular/router").UrlTree> | Promise<boolean | import("@angular/router").UrlTree> {
-        return this.storage.get('tutorialComplete4').then((tutorialComplete) => {
+        return this.storage.get('tutorialComplete7').then((tutorialComplete) => {
             if (!tutorialComplete) {
                 return true;
             }

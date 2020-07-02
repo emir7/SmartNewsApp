@@ -422,7 +422,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
                 if (this.lastPredictionDate != null) {
                     const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
-                    timerB = timeDiff >= 1 * 60; // change to 5
+                    timerB = timeDiff >= 5 * 60; // change to 5
                 }
 
                 if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
@@ -1753,20 +1753,20 @@ export class NewsPage implements OnInit, OnDestroy {
 
 
     mlDebug(d) {
-        this.toastController.create({
+        /*this.toastController.create({
             header: d,
             position: 'top',
             duration: 5000,
             color: 'light'
         }).then(toastEl => {
             toastEl.present();
-        });
+        });*/
     }
 
     displayPrediction(str) {
-        return this.toastController.create({
+        /*return this.toastController.create({
             header: str
-        });
+        });*/
     }
 
 
