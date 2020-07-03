@@ -5,7 +5,7 @@ module.exports.validate = function (req, res, next) {
         next();
         return;
     }
-    console.log('RETURNING NOK   0');
+
     return res.status(500).send({
         m: "NOK"
     });

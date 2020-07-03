@@ -1,37 +1,81 @@
-const fs = require("fs");
-const path = require("path");
+const mongoose = require('mongoose')
 
+const PhaseTwo = mongoose.model("PhaseTwo");
+const User = mongoose.model("User");
 
-function checkIfFolderExists(fileDirDestination) {
-    return fs.existsSync(fileDirDestination);
-}
+function createPhaseTwoInstance(phaseTwoObj) {
+    let phaseTwoInstance = new PhaseTwo();
 
-function initFileAppendData(predictionPathCSV, actualData) {
-    fs.writeFileSync(predictionPathCSV, "ALGO;USER_ACTIVITY;ENV_BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;PROB;OUTPUT\n");
-    appendData(predictionPathCSV, actualData);
-}
+    phaseTwoInstance.algorithm = phaseTwoObj.algorithm;
+    phaseTwoInstance.userActivity = phaseTwoObj.userActivity;
+    phaseTwoInstance.environmentBrightness = phaseTwoObj.environmentBrightness;
+    phaseTwoInstance.theme = phaseTwoObj.theme;
+    phaseTwoInstance.layout = phaseTwoObj.layout;
+    phaseTwoInstance.fontSize = phaseTwoObj.fontSize;
+    phaseTwoInstance.predictionProbability = phaseTwoObj.predictionProbability;
+    phaseTwoInstance.output = phaseTwoObj.output;
 
-function appendData(predictionPathCSV, actualData) {
-    fs.appendFileSync(predictionPathCSV, actualData + "\n");
+    return phaseTwoInstance.save()
+        .then(() => {
+            return phaseTwoInstance._id;
+        });
 }
 
 module.exports.writeData = (req, res) => {
 
-    const username = req.body.username;
-    const predictionDATA = req.body.predictionDATA;
-
-    const fileDirDestination = path.join(__dirname, '..', '..', 'phase2', username);
-    const predictionPathCSV = path.join(__dirname, '..', '..', 'phase2', username, 'prediction.csv');
-
-    if (!checkIfFolderExists(fileDirDestination)) {
-        fs.mkdirSync(fileDirDestination);
-        initFileAppendData(predictionPathCSV, predictionDATA);
-    } else {
-        appendData(predictionPathCSV, predictionDATA);
+    if (req.body.username == null) {
+        console.log("Username is required!");
+        return res.status(500).send({ m: "nok" });
     }
 
-    res.status(200).send({
-        m: "OK"
-    });
+    if (req.body.phaseTwo == null) {
+        console.log("PhaseTwo object is missing!");
+        return res.status(500).send({ m: "nok" });
+    }
 
+    if (req.body.phaseTwo.algorithm == null ||
+        req.body.phaseTwo.userActivity == null ||
+        req.body.phaseTwo.environmentBrightness == null ||
+        req.body.phaseTwo.theme == null ||
+        req.body.phaseTwo.layout == null ||
+        req.body.phaseTwo.fontSize == null ||
+        req.body.phaseTwo.predictionProbability == null ||
+        req.body.phaseTwo.output == null) {
+
+        console.log("Phase2 field is required!");
+        return res.status(500).send({ m: "nok" });
+    }
+
+
+    createPhaseTwoInstance(req.body.phaseTwo).then((phaseTwoID) => {
+        User.findOneAndUpdate({ username: req.body.username },
+            { $push: { phaseTwoData: phaseTwoID } }, function (err, userDoc) {
+                if (err || userDoc == null) {
+                    console.log("Error while searching for a user by username (phase2)");
+                    console.log(err);
+                    return res.status(500).send({ m: "nok" });
+                }
+
+                return res.status(200).send({ m: "ok" });
+
+            });
+    }).catch(err => {
+        console.log(err);
+        console.log("There was an error while creating phasetwo instance!");
+        res.status(500).send({ m: "nok" });
+    })
+
+
+};
+
+module.exports.getAllData = (req, res) => {
+    User.find({}).populate("phaseTwoData").exec(function (err, userDocs) {
+        if (err) {
+            console.log("error while requesting all data from phase2");
+            return res.status(500).send({ m: "nok" });
+        }
+
+        return res.status(200).send(userDocs);
+
+    });
 };

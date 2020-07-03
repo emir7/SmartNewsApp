@@ -1,8 +1,12 @@
 const mongoose = require('mongoose')
 
-//require('./user');
+require('./prediction');
+require('./banditData');
+require('./currentBandit');
+require('./phaseTwo');
+require('./user');
 
-dbURI = 'mongodb://192.168.99.100/smartnews'
+dbURI = 'mongodb://smart-news-mongo:11111/smartnews'
 
 mongoose.connect(
     dbURI, {

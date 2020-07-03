@@ -1,6 +1,8 @@
 const express = require('express');
 const logger = require('morgan');
 
+require('./api/models/db');
+
 const app = express();
 const gagApi = require('./api/routes/gag');
 const dataCollectionApi = require('./api/routes/data');
@@ -9,6 +11,8 @@ const bodyParser = require('body-parser');
 
 const phase1 = require('./api/routes/phase1');
 const phase2 = require('./api/routes/pashe2');
+
+const user = require('./api/routes/user');
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -34,6 +38,7 @@ app.use('/data', dataCollectionApi);
 app.use('/news', newsApi);
 app.use('/phase1', phase1);
 app.use('/phase2', phase2);
+app.use('/user', user);
 
 app.use(function (_, res, next) {
     res.charset = 'UTF-16'
