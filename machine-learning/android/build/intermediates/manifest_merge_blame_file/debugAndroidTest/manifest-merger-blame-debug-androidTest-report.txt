@@ -1,0 +1,402 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.ml.plugin.machinelearning.test" >
+4
+5    <uses-sdk
+5-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:5:5-74
+6        android:minSdkVersion="21"
+6-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:5:15-41
+7        android:targetSdkVersion="29" />
+7-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:5:42-71
+8
+9    <instrumentation
+9-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:11:5-15:84
+10        android:name="androidx.test.runner.AndroidJUnitRunner"
+10-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:11:22-76
+11        android:functionalTest="false"
+11-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:14:22-52
+12        android:handleProfiling="false"
+12-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:13:22-53
+13        android:label="Tests for com.ml.plugin.machinelearning.test"
+13-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:15:22-82
+14        android:targetPackage="com.ml.plugin.machinelearning.test" />
+14-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:12:22-80
+15
+16    <uses-permission android:name="android.permission.WAKE_LOCK" />
+16-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:23:5-68
+16-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:23:22-65
+17    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+17-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:24:5-79
+17-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:24:22-76
+18    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+18-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:25:5-81
+18-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:25:22-78
+19
+20    <uses-feature
+20-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-13:36
+21        android:name="android.hardware.camera"
+21-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:12:9-47
+22        android:required="false" />
+22-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:13:9-33
+23
+24    <uses-permission android:name="android.permission.INTERNET" /> <!-- Required by older versions of Google Play services to create IID tokens -->
+24-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:23:5-67
+24-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:23:22-64
+25    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+25-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:26:5-82
+25-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:26:22-79
+26    <uses-permission android:name="android.permission.REORDER_TASKS" />
+26-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:24:5-72
+26-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:24:22-69
+27
+28    <application
+28-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:7:5-9:19
+29        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+29-->[androidx.core:core:1.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/1bd162d1e9982c51999cbe410f0d807a/core-1.0.0/AndroidManifest.xml:22:18-86
+30        android:debuggable="true" >
+30-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:7:18-43
+31        <uses-library android:name="android.test.runner" />
+31-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:8:9-60
+31-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/tmp/manifest/androidTest/debug/manifestMerger1360807399632501310.xml:8:23-57
+32
+33        <service
+33-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:12:9-19:19
+34            android:name="com.ml.plugin.ClassifierTrainer2"
+34-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:13:13-60
+35            android:exported="true"
+35-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:14:13-36
+36            android:stopWithTask="false" >
+36-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:15:13-41
+37            <intent-filter>
+37-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:16:13-18:29
+38                <action android:name="MojaAkcija123" />
+38-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:17:17-56
+38-->[__tested_artifact__::machine-learning] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/build/intermediates/library_manifest/debug/AndroidManifest.xml:17:25-53
+39            </intent-filter>
+40        </service>
+41
+42        <provider
+42-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:28:9-34:35
+43            android:name="androidx.work.impl.WorkManagerInitializer"
+43-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:29:13-69
+44            android:authorities="com.ml.plugin.machinelearning.test.workmanager-init"
+44-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:30:13-68
+45            android:directBootAware="false"
+45-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:31:13-44
+46            android:exported="false"
+46-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:32:13-37
+47            android:multiprocess="true" />
+47-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:33:13-40
+48
+49        <service
+49-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:36:9-41:35
+50            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+50-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:37:13-88
+51            android:directBootAware="false"
+51-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:38:13-44
+52            android:enabled="@bool/enable_system_alarm_service_default"
+52-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:39:13-72
+53            android:exported="false" />
+53-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:40:13-37
+54        <service
+54-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:42:9-48:35
+55            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+55-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:43:13-84
+56            android:directBootAware="false"
+56-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:44:13-44
+57            android:enabled="@bool/enable_system_job_service_default"
+57-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:45:13-70
+58            android:exported="true"
+58-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:46:13-36
+59            android:permission="android.permission.BIND_JOB_SERVICE" />
+59-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:47:13-69
+60
+61        <receiver
+61-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:50:9-55:35
+62            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+62-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:51:13-88
+63            android:directBootAware="false"
+63-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:52:13-44
+64            android:enabled="true"
+64-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:53:13-35
+65            android:exported="false" />
+65-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:54:13-37
+66        <receiver
+66-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:56:9-66:20
+67            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+67-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:57:13-106
+68            android:directBootAware="false"
+68-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:58:13-44
+69            android:enabled="false"
+69-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:59:13-36
+70            android:exported="false" >
+70-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:60:13-37
+71            <intent-filter>
+71-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:62:13-65:29
+72                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+72-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:63:17-87
+72-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:63:25-84
+73                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+73-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:64:17-90
+73-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:64:25-87
+74            </intent-filter>
+75        </receiver>
+76        <receiver
+76-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:67:9-77:20
+77            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+77-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:68:13-104
+78            android:directBootAware="false"
+78-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:69:13-44
+79            android:enabled="false"
+79-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:70:13-36
+80            android:exported="false" >
+80-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:71:13-37
+81            <intent-filter>
+81-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:73:13-76:29
+82                <action android:name="android.intent.action.BATTERY_OKAY" />
+82-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:74:17-77
+82-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:74:25-74
+83                <action android:name="android.intent.action.BATTERY_LOW" />
+83-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:75:17-76
+83-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:75:25-73
+84            </intent-filter>
+85        </receiver>
+86        <receiver
+86-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:78:9-88:20
+87            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+87-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:79:13-104
+88            android:directBootAware="false"
+88-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:80:13-44
+89            android:enabled="false"
+89-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:81:13-36
+90            android:exported="false" >
+90-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:82:13-37
+91            <intent-filter>
+91-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:84:13-87:29
+92                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+92-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:85:17-83
+92-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:85:25-80
+93                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
+93-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:86:17-82
+93-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:86:25-79
+94            </intent-filter>
+95        </receiver>
+96        <receiver
+96-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:89:9-98:20
+97            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+97-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:90:13-103
+98            android:directBootAware="false"
+98-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:91:13-44
+99            android:enabled="false"
+99-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:92:13-36
+100            android:exported="false" >
+100-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:93:13-37
+101            <intent-filter>
+101-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:95:13-97:29
+102                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+102-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:96:17-79
+102-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:96:25-76
+103            </intent-filter>
+104        </receiver>
+105        <receiver
+105-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:99:9-110:20
+106            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+106-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:100:13-88
+107            android:directBootAware="false"
+107-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:101:13-44
+108            android:enabled="false"
+108-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:102:13-36
+109            android:exported="false" >
+109-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:103:13-37
+110            <intent-filter>
+110-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:105:13-109:29
+111                <action android:name="android.intent.action.BOOT_COMPLETED" />
+111-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:106:17-79
+111-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:106:25-76
+112                <action android:name="android.intent.action.TIME_SET" />
+112-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:107:17-73
+112-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:107:25-70
+113                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+113-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:108:17-81
+113-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:108:25-78
+114            </intent-filter>
+115        </receiver>
+116        <receiver
+116-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:111:9-120:20
+117            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+117-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:112:13-99
+118            android:directBootAware="false"
+118-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:113:13-44
+119            android:enabled="@bool/enable_system_alarm_service_default"
+119-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:114:13-72
+120            android:exported="false" >
+120-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:115:13-37
+121            <intent-filter>
+121-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:117:13-119:29
+122                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
+122-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:118:17-98
+122-->[android.arch.work:work-runtime:1.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/f399738ffe7c28b4fca613d1d66d20f0/jetified-work-runtime-1.0.1/AndroidManifest.xml:118:25-95
+123            </intent-filter>
+124        </receiver>
+125
+126        <service
+126-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:16:9-18:40
+127            android:name="com.getcapacitor.plugin.background.BackgroundTaskService"
+127-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:17:13-84
+128            android:exported="false" />
+128-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:18:13-37
+129
+130        <receiver android:name="com.getcapacitor.plugin.notification.TimedNotificationPublisher" />
+130-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:20:9-100
+130-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:20:19-97
+131        <receiver android:name="com.getcapacitor.plugin.notification.NotificationDismissReceiver" />
+131-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:21:9-101
+131-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:21:19-98
+132
+133        <meta-data
+133-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:23:9-25:37
+134            android:name="firebase_messaging_auto_init_enabled"
+134-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:24:13-64
+135            android:value="false" />
+135-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:25:13-34
+136
+137        <service
+137-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:27:9-33:19
+138            android:name="com.getcapacitor.CapacitorFirebaseMessagingService"
+138-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:28:13-78
+139            android:stopWithTask="false" >
+139-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:29:13-41
+140            <intent-filter>
+140-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:30:13-32:29
+141                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+141-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:31:17-78
+141-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:31:25-75
+142            </intent-filter>
+143        </service>
+144        <!--
+145             FirebaseMessagingService performs security checks at runtime,
+146             but set to not exported to explicitly avoid allowing another app to call it.
+147        -->
+148        <service
+148-->[com.google.firebase:firebase-messaging:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/5e7de9fe52993bbeac9bf31c54edd0d9/jetified-firebase-messaging-18.0.0/AndroidManifest.xml:28:9-34:19
+149            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+149-->[com.google.firebase:firebase-messaging:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/5e7de9fe52993bbeac9bf31c54edd0d9/jetified-firebase-messaging-18.0.0/AndroidManifest.xml:29:13-82
+150            android:exported="false" >
+150-->[com.google.firebase:firebase-messaging:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/5e7de9fe52993bbeac9bf31c54edd0d9/jetified-firebase-messaging-18.0.0/AndroidManifest.xml:30:13-37
+151            <intent-filter android:priority="-500" >
+151-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:30:13-32:29
+152                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+152-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:31:17-78
+152-->[:capacitor-android] /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/@capacitor/android/capacitor/build/intermediates/library_manifest/debug/AndroidManifest.xml:31:25-75
+153            </intent-filter>
+154        </service>
+155        <service
+155-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:29:9-35:19
+156            android:name="com.google.firebase.components.ComponentDiscoveryService"
+156-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:30:13-84
+157            android:exported="false" >
+157-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:31:13-37
+158            <meta-data
+158-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:32:13-34:85
+159                android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+159-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:33:17-96
+160                android:value="com.google.firebase.components.ComponentRegistrar" />
+160-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:34:17-82
+161        </service>
+162
+163        <receiver
+163-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:37:9-44:20
+164            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+164-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:38:13-78
+165            android:exported="true"
+165-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:39:13-36
+166            android:permission="com.google.android.c2dm.permission.SEND" >
+166-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:40:13-73
+167            <intent-filter>
+167-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:41:13-43:29
+168                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+168-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:42:17-81
+168-->[com.google.firebase:firebase-iid:18.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/18e6a94b711229f1b3c78e18f95177f2/jetified-firebase-iid-18.0.0/AndroidManifest.xml:42:25-78
+169            </intent-filter>
+170        </receiver>
+171
+172        <provider
+172-->[com.google.firebase:firebase-common:17.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/8ac6b10224cd10794dbe6db95812d5d2/jetified-firebase-common-17.0.0/AndroidManifest.xml:12:9-16:39
+173            android:name="com.google.firebase.provider.FirebaseInitProvider"
+173-->[com.google.firebase:firebase-common:17.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/8ac6b10224cd10794dbe6db95812d5d2/jetified-firebase-common-17.0.0/AndroidManifest.xml:13:13-77
+174            android:authorities="com.ml.plugin.machinelearning.test.firebaseinitprovider"
+174-->[com.google.firebase:firebase-common:17.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/8ac6b10224cd10794dbe6db95812d5d2/jetified-firebase-common-17.0.0/AndroidManifest.xml:14:13-72
+175            android:exported="false"
+175-->[com.google.firebase:firebase-common:17.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/8ac6b10224cd10794dbe6db95812d5d2/jetified-firebase-common-17.0.0/AndroidManifest.xml:15:13-37
+176            android:initOrder="100" />
+176-->[com.google.firebase:firebase-common:17.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/8ac6b10224cd10794dbe6db95812d5d2/jetified-firebase-common-17.0.0/AndroidManifest.xml:16:13-36
+177
+178        <activity
+178-->[com.google.android.gms:play-services-base:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/441941c14f627e7a75bbf96377a5df69/jetified-play-services-base-16.0.1/AndroidManifest.xml:23:9-26:75
+179            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+179-->[com.google.android.gms:play-services-base:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/441941c14f627e7a75bbf96377a5df69/jetified-play-services-base-16.0.1/AndroidManifest.xml:24:13-79
+180            android:exported="false"
+180-->[com.google.android.gms:play-services-base:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/441941c14f627e7a75bbf96377a5df69/jetified-play-services-base-16.0.1/AndroidManifest.xml:25:13-37
+181            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+181-->[com.google.android.gms:play-services-base:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/441941c14f627e7a75bbf96377a5df69/jetified-play-services-base-16.0.1/AndroidManifest.xml:26:13-72
+182
+183        <meta-data
+183-->[com.google.android.gms:play-services-basement:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/411403bf8638caa631c751d47fd92141/jetified-play-services-basement-16.0.1/AndroidManifest.xml:23:9-25:69
+184            android:name="com.google.android.gms.version"
+184-->[com.google.android.gms:play-services-basement:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/411403bf8638caa631c751d47fd92141/jetified-play-services-basement-16.0.1/AndroidManifest.xml:24:13-58
+185            android:value="@integer/google_play_services_version" />
+185-->[com.google.android.gms:play-services-basement:16.0.1] /home/emir/.gradle/caches/transforms-2/files-2.1/411403bf8638caa631c751d47fd92141/jetified-play-services-basement-16.0.1/AndroidManifest.xml:25:13-66
+186
+187        <provider
+187-->[androidx.lifecycle:lifecycle-process:2.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/28573f39daf86dfd120980829755ad4b/lifecycle-process-2.0.0/AndroidManifest.xml:23:9-27:43
+188            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+188-->[androidx.lifecycle:lifecycle-process:2.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/28573f39daf86dfd120980829755ad4b/lifecycle-process-2.0.0/AndroidManifest.xml:24:13-79
+189            android:authorities="com.ml.plugin.machinelearning.test.lifecycle-process"
+189-->[androidx.lifecycle:lifecycle-process:2.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/28573f39daf86dfd120980829755ad4b/lifecycle-process-2.0.0/AndroidManifest.xml:25:13-69
+190            android:exported="false"
+190-->[androidx.lifecycle:lifecycle-process:2.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/28573f39daf86dfd120980829755ad4b/lifecycle-process-2.0.0/AndroidManifest.xml:26:13-37
+191            android:multiprocess="true" />
+191-->[androidx.lifecycle:lifecycle-process:2.0.0] /home/emir/.gradle/caches/transforms-2/files-2.1/28573f39daf86dfd120980829755ad4b/lifecycle-process-2.0.0/AndroidManifest.xml:27:13-40
+192
+193        <activity
+193-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:27:9-33:20
+194            android:name="androidx.test.core.app.InstrumentationActivityInvoker$BootstrapActivity"
+194-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:28:13-99
+195            android:theme="@android:style/Theme" >
+195-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:29:13-49
+196            <intent-filter>
+196-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:30:13-32:29
+197                <action android:name="android.intent.action.MAIN" />
+197-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:31:17-69
+197-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:31:25-66
+198            </intent-filter>
+199        </activity>
+200        <activity
+200-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:34:9-40:20
+201            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity"
+201-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:35:13-95
+202            android:theme="@android:style/Theme" >
+202-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:36:13-49
+203            <intent-filter>
+203-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:30:13-32:29
+204                <action android:name="android.intent.action.MAIN" />
+204-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:31:17-69
+204-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:31:25-66
+205            </intent-filter>
+206        </activity>
+207        <activity
+207-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:41:9-47:20
+208            android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyFloatingActivity"
+208-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:42:13-103
+209            android:theme="@android:style/Theme.Dialog" >
+209-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:43:13-56
+210            <intent-filter>
+210-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:30:13-32:29
+211                <action android:name="android.intent.action.MAIN" />
+211-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:31:17-69
+211-->[androidx.test:core:1.2.0] /home/emir/.gradle/caches/transforms-2/files-2.1/ce21ad858299f639a8b8ffb7c68d4405/core-1.2.0/AndroidManifest.xml:31:25-66
+212            </intent-filter>
+213        </activity>
+214    </application>
+215
+216</manifest>

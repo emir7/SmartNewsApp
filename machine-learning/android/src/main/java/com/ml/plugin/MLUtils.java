@@ -97,6 +97,50 @@ public class MLUtils {
         return jsonObject;
     }
 
+    public static JSONObject giveZeroReward(String banditPath, int banditPull){
+        String jsonBanditString = readBanditFile(banditPath);
+        JSONObject jsonObject = null;
+
+        try {
+            jsonObject = new JSONObject(jsonBanditString);
+            jsonObject.put("allTimePulls", jsonObject.getInt("allTimePulls") + 1); // increment number of all time pulls
+            String numberOfSelectionsString = jsonObject.getString("numberOfSelections"); // update pulled bandit index
+            int [] numOfSelIntArr = stringToArrInt(numberOfSelectionsString);
+            numOfSelIntArr[banditPull]++;
+            jsonObject.put("numberOfSelections", Arrays.toString(numOfSelIntArr));
+
+            // dodamo v selections arr
+            String selectionsString = jsonObject.getString("selections");
+            Log.d("PARSING_SELECTIONS", selectionsString);
+
+            if(selectionsString.equals("[]")){
+                int [] selectionsArr = new int []{banditPull};
+                jsonObject.put("selections", Arrays.toString(selectionsArr));
+            }else{
+                int [] selectionsArr = stringToArrInt(selectionsString);
+                int [] selectionsArr2 = new int[selectionsArr.length+1];
+                for(int i = 0; i < selectionsArr.length; i++){
+                    selectionsArr2[i] = selectionsArr[i];
+                }
+
+                selectionsArr2[selectionsArr2.length-1] = banditPull;
+                jsonObject.put("selections", Arrays.toString(selectionsArr2));
+            }
+
+            String sumOfRewardsAsString = jsonObject.getString("sumOfRewards");
+            double[] sumOfRewards = stringToArr(sumOfRewardsAsString);
+            jsonObject.put("sumOfRewards", Arrays.toString(sumOfRewards));
+
+            writeToBanditFile(banditPath, jsonObject.toString());
+
+        }catch (JSONException e){
+            Log.d(Constants.DEBUG_VAR, "there was an error while giving zero reward");
+            Log.d(Constants.DEBUG_VAR, e.toString());
+        }
+
+        return jsonObject;
+    }
+
     public static JSONObject giveBanditReward(String banditPath, int banditPull, float reward){
         // nagrada
         String jsonBanditString = readBanditFile(banditPath);

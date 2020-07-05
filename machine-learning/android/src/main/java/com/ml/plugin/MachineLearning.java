@@ -94,11 +94,11 @@ public class MachineLearning extends Plugin {
         String predictionDATA = call.getString("predictionDATA");
         int banditPull = call.getInt("banditPull");
 
-        sendDataAPI(username, predictionDATA, banditPull);
+        sendZeroReward(username, predictionDATA, banditPull);
         call.resolve();
     }
 
-    private void sendDataAPI(String username, String predictionDATA, int banditPull){
+    private void sendZeroReward(String username, String predictionDATA, int banditPull){
         Sender sender = Sender.getInstance();
         JSONObject jsonBody = new JSONObject();
 
@@ -108,21 +108,39 @@ public class MachineLearning extends Plugin {
             if(jsonBanditString == null){
                 return;
             }
-            JSONObject banditData = new JSONObject(jsonBanditString);
+            JSONObject currentBandit = new JSONObject(jsonBanditString);
+
 
             jsonBody.put("validID", "idjasoiadsjoiadsjdosaijadsojasdosadikjdsaoijsdaoisdaj");
-            jsonBody.put("firstTime", false);
             jsonBody.put("username", username);
-            jsonBody.put("dataModel", "same;as;before");
-            jsonBody.put("predictionDATA", predictionDATA);
 
-            int currentNumberOfPulls = banditData.getInt("allTimePulls");
-            int regret = banditData.getInt("regret");
-            double totalReward = banditData.getDouble("totalReward");
+            String [] parsedCSVArr = predictionDATA.split(";");
+            JSONObject predictionObj = new JSONObject();
 
-            jsonBody.put("banditCSV", currentNumberOfPulls+";"+banditPull+";"+"false;"+regret+";"+totalReward);
-            jsonBody.put("banditJSON", banditData);
+            predictionObj.put("userActivity", parsedCSVArr[0]);
+            predictionObj.put("environmentBrightness", Integer.parseInt(parsedCSVArr[1]));
+            predictionObj.put("theme", parsedCSVArr[2]);
+            predictionObj.put("layout", parsedCSVArr[3]);
+            predictionObj.put("fontSize", parsedCSVArr[4]);
+            predictionObj.put("predictionProbability", Double.parseDouble(parsedCSVArr[6]));
+            predictionObj.put("output", parsedCSVArr[7]);
+
+            jsonBody.put("prediction", predictionObj);
+
+            JSONObject banditsData = new JSONObject();
+            banditsData.put("trialIndex", currentBandit.getInt("allTimePulls"));
+            banditsData.put("banditIndex", banditPull);
+            banditsData.put("banditDecision", false);
+            banditsData.put("regret", currentBandit.getInt("regret"));
+            banditsData.put("reward", 0);
+            banditsData.put("totalReward", currentBandit.getDouble("totalReward"));
+
+            jsonBody.put("banditsData", banditsData);
+            jsonBody.put("currentBandit", currentBandit);
+
+
             sender.sendPostRequest(Constants.SERVER_IP+"/phase1/metrics", jsonBody.toString());
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

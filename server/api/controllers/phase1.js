@@ -40,6 +40,7 @@ function createBanditInstance(banditDataObj) {
 
 module.exports.writeMetrics = (req, res) => {
 
+    console.log(req.body);
     if (req.body.username == null) {
         console.log("Username not provided");
         return res.status(500).send({ m: "nok" });

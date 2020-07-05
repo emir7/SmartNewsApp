@@ -109,7 +109,14 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
 
     @Override
     protected JSObject doInBackground(Void... voids) {
-        RandomForest rf = MLUtils.getModel(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model");
+        RandomForest rf = null;
+
+        if(this.getCall().getInt("algorithm") == 0){ // personaliziran
+           rf = MLUtils.getModel(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model");
+        }else{ // general model
+            rf = MLUtils.getModel(getCtx().getExternalFilesDir(null).getAbsolutePath() + "/ModelDEV/generalModel");
+        }
+
         if(rf == null){
             return null;
         }

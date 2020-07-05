@@ -3,6 +3,7 @@ import { Storage } from '@ionic/storage';
 import { Router } from '@angular/router';
 import { v4 as uuidv4 } from 'uuid';
 import { Plugins } from '@capacitor/core';
+import { LabAPIService } from '../shared/lab.testing.api.service';
 
 @Component({
     selector: 'app-tutorial',
@@ -18,7 +19,7 @@ export class TutorialPage implements OnInit, OnDestroy {
 
     uuidData = '';
 
-    constructor(private storage: Storage, private router: Router) {
+    constructor(private storage: Storage, private router: Router, private labAPIService: LabAPIService) {
         const { MachineLearning } = Plugins;
         this.machineLearningPlugin = MachineLearning;
     }
@@ -30,6 +31,7 @@ export class TutorialPage implements OnInit, OnDestroy {
                 .then(() => {
                     return this.storeUserData(transformedUsername);
                 }).then(() => {
+                    this.labAPIService.registerUser(transformedUsername + this.uuidData);
                     return this.machineLearningPlugin.trainClf({
                         username: transformedUsername + this.uuidData,
                         firstTime: true

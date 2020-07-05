@@ -16,7 +16,7 @@ import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
 import { MlService } from '../shared/ml.service';
-import { take } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { LabAPIService } from '../shared/lab.testing.api.service';
 
 @Component({
@@ -410,29 +410,34 @@ export class NewsPage implements OnInit, OnDestroy {
             loadingEl.present();
             console.log("IZVAJAM SE1");
 
+            if (this.mlContextSub) {
+                this.mlContextSub.unsubscribe();
+            }
+
+            let tmpBool = false;
+
             this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
                 console.log("IZVAJAM SE2");
                 let globalObj = null;
                 console.log(ctxData);
 
-                let timerB = false;
-                if (this.lastPredictionDate == null) {
-                    timerB = true;
+                console.log("MYBOOL: " + tmpBool);
+                if (this.mlContextSub) {
+                    console.log("MLCONTEXT IS CLOSED = " + this.mlContextSub.closed);
                 }
 
-                if (this.lastPredictionDate != null) {
-                    const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
-                    timerB = timeDiff >= 5 * 60; // change to 5
-                }
+                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && !tmpBool && this.mlContextSub && !this.cancelLearning) {
+                    this.mlContextSub.unsubscribe();
 
-                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
+                    tmpBool = true;
                     console.log(ctxData);
                     this.lastPredictionDate = new Date();
                     this.dismissAllQuizs();
                     console.log("IZVAJAM SE3");
                     this.machineLearningPlugin.classifierPrediction({
                         u: ctxData.userActivityObj.types[0],
-                        e: '' + ctxData.brightnessObj.value
+                        e: '' + ctxData.brightnessObj.value,
+                        algorithm: 0
                     }).then((clfPredData) => {
 
                         let maxConfidence = 0;
@@ -520,73 +525,51 @@ export class NewsPage implements OnInit, OnDestroy {
             .then(loadingEl => {
                 loadingEl.present();
 
+                let tmpBool = false;
                 this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
 
-                    let timerB = false;
-
-                    if (this.lastPredictionDate == null) {
-                        timerB = true;
-                    }
-
-                    if (this.lastPredictionDate != null) {
-                        const timeDiff = (new Date().getTime() - this.lastPredictionDate.getTime()) / 1000;
-                        timerB = timeDiff >= 2 * 60; // change to 5
-                    }
-
-                    if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && timerB && !this.cancelLearning) {
+                    if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && !tmpBool && this.mlContextSub && !this.cancelLearning) {
+                        tmpBool = true;
                         this.lastPredictionDate = new Date();
+                        this.mlContextSub.unsubscribe();
 
-                        if (this.modelSelected === 0) {
-                            this.machineLearningPlugin.classifierPrediction({
-                                u: ctxData.userActivityObj.types[0],
-                                e: '' + ctxData.brightnessObj.value
-                            }).then((clfPredData) => {
-                                let maxConfidence = 0;
-                                let choosenIndex = 0;
-                                for (let i = 0; i < clfPredData.a.length; i++) {
-                                    if (clfPredData.a[i].p >= maxConfidence) {
-                                        maxConfidence = clfPredData.a[i].p;
-                                        choosenIndex = i;
-                                    }
+                        this.machineLearningPlugin.classifierPrediction({
+                            u: ctxData.userActivityObj.types[0],
+                            e: '' + ctxData.brightnessObj.value,
+                            algorithm: this.modelSelected
+                        }).then((clfPredData) => {
+                            let maxConfidence = 0;
+                            let choosenIndex = 0;
+                            for (let i = 0; i < clfPredData.a.length; i++) {
+                                if (clfPredData.a[i].p >= maxConfidence) {
+                                    maxConfidence = clfPredData.a[i].p;
+                                    choosenIndex = i;
                                 }
+                            }
 
-                                if (!this.firstTimeInNews) {
-                                    this.fetchInitNews();
-                                    this.firstTimeInNews = true;
-                                }
-
-                                this.topPredictedView = clfPredData.a[choosenIndex];
-                                this.setDisplayView(this.topPredictedView);
-
-                                this.modelDecisionBoundry = clfPredData.b;
-                                loadingEl.dismiss();
-                                this.setLabTestingTimer();
-
-                            }).catch((err) => {
-                                if (!this.firstTimeInNews) {
-                                    this.fetchInitNews();
-                                    this.firstTimeInNews = true;
-                                }
-
-                                loadingEl.dismiss();
-                                this.selectRandomView();
-                                this.setDisplayView(this.topPredictedView);
-
-                                console.log(err);
-                            });
-                        } else {
                             if (!this.firstTimeInNews) {
                                 this.fetchInitNews();
                                 this.firstTimeInNews = true;
                             }
 
+                            this.topPredictedView = clfPredData.a[choosenIndex];
+                            this.setDisplayView(this.topPredictedView);
+
+                            this.modelDecisionBoundry = clfPredData.b;
+                            loadingEl.dismiss();
+                            this.setLabTestingTimer();
+                        }).catch(err => {
+                            if (!this.firstTimeInNews) {
+                                this.fetchInitNews();
+                                this.firstTimeInNews = true;
+                            }
+
+                            loadingEl.dismiss();
                             this.selectRandomView();
                             this.setDisplayView(this.topPredictedView);
-                            loadingEl.dismiss();
 
-                            this.setLabTestingTimer();
-                        }
-
+                            console.log(err);
+                        });
                     }
 
                 });
@@ -597,7 +580,6 @@ export class NewsPage implements OnInit, OnDestroy {
     setLabTestingTimer() {
         this.mlQuizTimeout = setTimeout(() => {
             this.sendMetricsToServer('?');
-            console.log('WAHAHAHAHAHAHA');
         }, 20000);
     }
 
@@ -606,12 +588,19 @@ export class NewsPage implements OnInit, OnDestroy {
         this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
             if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
 
-                let mlData = `${this.modelSelected};${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
-                mlData += `${this.topPredictedView.t};${this.topPredictedView.l};`;
-                mlData += `${this.topPredictedView.f};${this.modelDecisionBoundry};${this.topPredictedView.p};${o}`;
+                const phaseTwo = {
+                    algorithm: this.modelSelected,
+                    userActivity: ctx.userActivityObj.types[0],
+                    environmentBrightness: ctx.brightnessObj.value,
+                    theme: this.topPredictedView.t,
+                    layout: this.topPredictedView.l,
+                    fontSize: this.topPredictedView.f,
+                    predictionProbability: this.topPredictedView.p,
+                    output: o
+                }
 
                 const username = this.userInfo.username + this.userInfo.id;
-                this.labApiService.postData(username, mlData);
+                this.labApiService.postData(username, phaseTwo);
 
                 clearTimeout(this.mlQuizTimeout);
                 this.mlQuizTimeout = null;
@@ -874,32 +863,33 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     inBrowser($event) {
-        if ($event === 'inBrowser') {
-            this.dismissAllQuizs();
-
-
-            if (this.mlContextSub) {
-                console.log('sou sm v browser, zato brisem subscription');
-                this.mlContextSub.unsubscribe();
-            }
-            console.log('sou sm v browser, zato brisem timeoute in use');
-            this.lastPredictionDate = null;
-            clearTimeout(this.mlQuizTimeout);
-            this.mlQuizTimeout = null;
-        } else {
-            console.log('sou sm iz browserja nazaj v app');
-
-            if (!this.mlContextSub || this.mlContextSub.closed) {
-                console.log('sou sm iz browserja nazaj v app in vracam subscription!');
-                // RESUB
-                if (this.samplingType === 'SMART_SAMPLING') {
-                    this.subscribeToMLContext();
-                } else if (this.samplingType === 'LAB_SAMPLING') {
-                    this.initLabSampling();
-                }
-
-            }
-        }
+        console.log("BROWSER EVENT: " + $event);
+        /* if ($event === 'inBrowser') {
+             this.dismissAllQuizs();
+ 
+ 
+             if (this.mlContextSub) {
+                 console.log('sou sm v browser, zato brisem subscription');
+                 this.mlContextSub.unsubscribe();
+             }
+             console.log('sou sm v browser, zato brisem timeoute in use');
+             this.lastPredictionDate = null;
+             clearTimeout(this.mlQuizTimeout);
+             this.mlQuizTimeout = null;
+         } else {
+             console.log('sou sm iz browserja nazaj v app');
+ 
+             if (!this.mlContextSub || this.mlContextSub.closed) {
+                 console.log('sou sm iz browserja nazaj v app in vracam subscription!');
+                 // RESUB
+                 if (this.samplingType === 'SMART_SAMPLING') {
+                     this.subscribeToMLContext();
+                 } else if (this.samplingType === 'LAB_SAMPLING') {
+                     this.initLabSampling();
+                 }
+ 
+             }
+         }*/
 
 
     }
@@ -1457,6 +1447,7 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        console.log("Destroying");
         if (this.authorFontSizeSub) {
             this.authorFontSizeSub.unsubscribe();
         }
@@ -1658,6 +1649,9 @@ export class NewsPage implements OnInit, OnDestroy {
         this.contextService.getCurrentContext().pipe(take(1)).subscribe((ctx) => {
             if (ctx != null && ctx.validObjs[0] && ctx.validObjs[1] && ctx.validObjs[2]) {
                 // USER_ACTIVITY; BRIGHTNESS;THEME;LAYOUT;FONT_SIZE;BOUNDRY;P;OUTPUT
+
+                console.log("------------------------ SENDING DATA TO SERVER ----------------------------------");
+
                 let mlData = `${ctx.userActivityObj.types[0]};${ctx.brightnessObj.value};`;
                 mlData += `${this.topPredictedView.t};${this.topPredictedView.l};${this.topPredictedView.f};`;
                 mlData += `${this.modelDecisionBoundry};${this.topPredictedView.p};${o}`;
