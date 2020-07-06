@@ -6,7 +6,7 @@ require('./currentBandit');
 require('./phaseTwo');
 require('./user');
 
-dbURI = 'mongodb://smart-news-mongo:11111/smartnews'
+const dbURI = 'mongodb://smart-news-mongo:11111/smartnews'
 
 mongoose.connect(
     dbURI, {

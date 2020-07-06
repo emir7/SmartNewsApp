@@ -79,3 +79,19 @@ module.exports.getAllData = (req, res) => {
 
     });
 };
+
+module.exports.removeUser = (req, res) => {
+    if (req.body.username == null || typeof req.body.username !== "string") {
+        return res.status(500).send({ m: "nok" });
+    }
+
+    User.remove({ username: req.body.username }, function (err) {
+        if (err) {
+            return res.status(500).send({ m: "nok" });
+        }
+
+        return res.status(200).send({ m: "ok" });
+
+    })
+
+};

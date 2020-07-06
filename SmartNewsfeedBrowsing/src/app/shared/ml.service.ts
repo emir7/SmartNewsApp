@@ -142,10 +142,6 @@ export class MlService {
             const max2 = results[results.length - 2];
 
             const marginalDiff = 1 - (max1 - max2);
-            console.log(`marginalDiff = ${marginalDiff}`);
-            console.log(results);
-            console.log(`maxPred = ${predictions[selectedIndex].p} boundary = ${boundary}`);
-            console.log('...............................................===================........................');
 
             if (marginalDiff >= epsilon) {
                 // če je razlika manjša kot 0.2 (glej 0.8) to pomen da rabmo vprašalnik

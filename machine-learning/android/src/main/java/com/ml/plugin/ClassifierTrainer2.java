@@ -68,7 +68,6 @@ public class ClassifierTrainer2 extends Worker {
         banditPath = getApplicationContext().getExternalFilesDir(null).getAbsoluteFile() + "/banditsDEV/data.json";
         generalModelPath = getApplicationContext().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/generalModel";
 
-
         isFirstTime = getInputData().getBoolean("isFirstTime", true);
         banditDecidedToAsk = getInputData().getBoolean("banditDecidedToAsk", true);
         banditPull = getInputData().getInt("banditPull", 0);
@@ -105,24 +104,31 @@ public class ClassifierTrainer2 extends Worker {
                 Log.d("predDATA", predictionDATA);
                 JSONObject jsonObject = null;
 
+                // get last maximum view probability p(Y), p(N) = 1 - p(Y)
                 float outcomeProbablityY = sharedpreferences.getFloat("maxProbability", 0);
                 float outcomeProbabilityN = 1 - outcomeProbablityY;
 
+                // construct old prediction
                 float [] oldPrediction = new float[]{outcomeProbabilityN, outcomeProbablityY};
 
+                // get last instance from trainset and ground truth
                 Instance lastInstance = getTrainset().lastInstance();
                 int groundTruthIndex = (int)lastInstance.value(getTrainset().numAttributes()-1);
 
+                // make new predcition
                 double [] newPredictionProbs = randomForest.distributionForInstance(lastInstance);
 
+                // rabimo da vidmo, ce gremo v pravi smeri
                 float newPredictionP = (float) newPredictionProbs[groundTruthIndex];
                 float oldPredictionP = oldPrediction[groundTruthIndex];
 
+                // calculate real class old
                 int oldPredictionClass = 0;
                 if(outcomeProbablityY > outcomeProbabilityN){
                     oldPredictionClass = 1;
                 }
 
+                // calculate new prediction
                 int newPredictionClass = 0;
                 if(newPredictionProbs[1] > newPredictionProbs[0]){
                     newPredictionClass = 1;
@@ -134,6 +140,7 @@ public class ClassifierTrainer2 extends Worker {
 
                 float directionVector = newPredictionP - oldPredictionP;
 
+                // check if bandit decided to ask
                 if (banditDecidedToAsk) {
                     // preverimo ali gremo v pravi smeri
                     Log.d(Constants.DEBUG_VAR, "BANDIT DECIDED TO ASK");
@@ -141,6 +148,7 @@ public class ClassifierTrainer2 extends Worker {
                     float reward = directionVector;
 
                     if (directionVector > 0) {
+                        // ce se prejsna in zdejsna predikcija razlikujeta in je nova celo pravilna => BONUS NAGRADA!
                         if(oldPredictionClass != newPredictionClass && newPredictionClass == groundTruthIndex){
                             Log.d(Constants.DEBUG_VAR, "TIME FOR BIG REWARD");
                             reward += 1;
@@ -149,6 +157,7 @@ public class ClassifierTrainer2 extends Worker {
                         jsonObject = MLUtils.giveBanditReward(getBanditPath(), banditPull, reward);
                         sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk, reward);
                     } else if(directionVector < 0){
+                        // ce se prejsna in zdejsna predikcija razlikujeta in zdej sploh nimamo prou => BONUS KAZN
                         if(oldPredictionClass != newPredictionClass && newPredictionClass != groundTruthIndex){
                             Log.d(Constants.DEBUG_VAR, "TIME FOR BIG PUNISHMENT");
                             reward -= 1;
@@ -172,7 +181,7 @@ public class ClassifierTrainer2 extends Worker {
                         // nagrada
                         Log.d(Constants.DEBUG_VAR, "bandit decided not to ask and he was right. Precision now is even worse "+reward);
                         jsonObject = MLUtils.giveBanditReward(getBanditPath(), banditPull, -reward);
-                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk, reward);
+                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk, -reward);
 
                     } else if(directionVector > 0){
                         if(oldPredictionClass != newPredictionClass && newPredictionClass == groundTruthIndex){
@@ -182,7 +191,7 @@ public class ClassifierTrainer2 extends Worker {
                         // kazn
                         Log.d(Constants.DEBUG_VAR, "bandit decided not to ask and he was WRONG. Precision is now grater, we need to punish him "+reward);
                         jsonObject = MLUtils.punishBandit(getBanditPath(), banditPull, -reward);
-                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk,reward);
+                        sendPostRequestNotFirstTime(username, jsonObject, predictionDATA, banditPull, banditDecidedToAsk,-reward);
                     }else{
                         jsonObject = MLUtils.giveZeroReward(getBanditPath(), banditPull);
                         sendZeroReward(username, predictionDATA, banditPull, jsonObject);

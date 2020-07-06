@@ -16,7 +16,7 @@ import { SensorReadingService } from '../shared/sensor.reading.service';
 import { ContextModel, ViewDescription } from '../shared/models/context/contextModel';
 import { ModalController } from '@ionic/angular';
 import { MlService } from '../shared/ml.service';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { LabAPIService } from '../shared/lab.testing.api.service';
 
 @Component({
@@ -107,12 +107,12 @@ export class NewsPage implements OnInit, OnDestroy {
 
     firstTimeInNews = false;
 
-    cancelLearning = false;
     modelDecisionBoundry = -1;
 
     modelSelected = 0;
 
     samplingType = '';
+    cancelLearning = false;
 
     constructor(
         public loadingController: LoadingController,
@@ -160,8 +160,8 @@ export class NewsPage implements OnInit, OnDestroy {
 
 
         this.phaseController().then((samplingType) => {
-            console.log('samplingType is ' + samplingType);
             this.samplingType = samplingType;
+            console.log('CURRENT PHASE: ' + this.samplingType);
             if (samplingType === 'SMART_SAMPLING') {
                 this.subscribeToMLContext();
             } else {
@@ -238,7 +238,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
         return this.storage.get('dateOfInstall').then((t) => {
             const timeDiff = (new Date().getTime() - new Date(t).getTime()) / (1000 * 60 * 60 * 24);
-            console.log('DNEVI od installacije ===== ' + timeDiff);
             if (Math.floor(timeDiff) < 14) {
                 return null;
             } else {
@@ -257,9 +256,7 @@ export class NewsPage implements OnInit, OnDestroy {
                     this.storage.set('selectedModelDate', new Date().getTime());
                 } else {
                     const timeDiffM = (new Date().getTime() - new Date(modelT).getTime()) / (1000 * 60 * 60);
-                    console.log('DNEVI od modelaaaaaaa ===== ' + timeDiffM);
-                    console.log('ZADNI ČAS MODEL JE ' + modelT);
-                    console.log('ZADNI UPORABLJENI MODEL JE ' + lastSelectedModel);
+
                     if (Math.floor(timeDiffM) >= 24) {
                         if (lastSelectedModel === 0) {
                             this.modelSelected = 1;
@@ -404,11 +401,9 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     subscribeToMLContext() {
-        console.log('initing smart sampling');
 
         this.displayLoadingElement().then(loadingEl => {
             loadingEl.present();
-            console.log("IZVAJAM SE1");
 
             if (this.mlContextSub) {
                 this.mlContextSub.unsubscribe();
@@ -417,29 +412,21 @@ export class NewsPage implements OnInit, OnDestroy {
             let tmpBool = false;
 
             this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
-                console.log("IZVAJAM SE2");
                 let globalObj = null;
-                console.log(ctxData);
 
-                console.log("MYBOOL: " + tmpBool);
-                if (this.mlContextSub) {
-                    console.log("MLCONTEXT IS CLOSED = " + this.mlContextSub.closed);
-                }
 
-                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && !tmpBool && this.mlContextSub && !this.cancelLearning) {
+                if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && !tmpBool && this.mlContextSub) {
                     this.mlContextSub.unsubscribe();
 
                     tmpBool = true;
-                    console.log(ctxData);
                     this.lastPredictionDate = new Date();
                     this.dismissAllQuizs();
-                    console.log("IZVAJAM SE3");
                     this.machineLearningPlugin.classifierPrediction({
                         u: ctxData.userActivityObj.types[0],
                         e: '' + ctxData.brightnessObj.value,
                         algorithm: 0
                     }).then((clfPredData) => {
-
+                        this.cancelLearning = false;
                         let maxConfidence = 0;
                         let choosenIndex = 0;
                         for (let i = 0; i < clfPredData.a.length; i++) {
@@ -457,20 +444,12 @@ export class NewsPage implements OnInit, OnDestroy {
                         };
                     }).then((obj) => {
                         globalObj = obj;
-                        console.log("prediction");
-                        console.log(obj);
                         return obj;
                     }).then((_) => {
                         loadingEl.dismiss();
                         return this.mlService.upperConfidenceBound();
                     }).then((data) => {
-                        console.log("-------------------------");
-                        console.log(data);
-                        console.log("-------------------------");
                         const allSelections = data.selections;
-                        console.log("haduken");
-                        console.log(allSelections);
-                        console.log("haduken");
 
                         const lastValue = allSelections[allSelections.length - 1];
                         this.banditPullIndex = lastValue;
@@ -520,7 +499,6 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     initLabSampling() {
-        console.log('initing lab sampling');
         this.displayLoadingElement()
             .then(loadingEl => {
                 loadingEl.present();
@@ -528,7 +506,7 @@ export class NewsPage implements OnInit, OnDestroy {
                 let tmpBool = false;
                 this.mlContextSub = this.contextService.getCurrentContext().subscribe((ctxData) => {
 
-                    if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && !tmpBool && this.mlContextSub && !this.cancelLearning) {
+                    if (ctxData != null && ctxData.validObjs[0] && ctxData.validObjs[1] && ctxData.validObjs[2] && !tmpBool && this.mlContextSub) {
                         tmpBool = true;
                         this.lastPredictionDate = new Date();
                         this.mlContextSub.unsubscribe();
@@ -538,6 +516,10 @@ export class NewsPage implements OnInit, OnDestroy {
                             e: '' + ctxData.brightnessObj.value,
                             algorithm: this.modelSelected
                         }).then((clfPredData) => {
+                            console.log("------------------------------------");
+                            console.log(clfPredData);
+                            console.log("============================");
+                            this.cancelLearning = false;
                             let maxConfidence = 0;
                             let choosenIndex = 0;
                             for (let i = 0; i < clfPredData.a.length; i++) {
@@ -554,11 +536,15 @@ export class NewsPage implements OnInit, OnDestroy {
 
                             this.topPredictedView = clfPredData.a[choosenIndex];
                             this.setDisplayView(this.topPredictedView);
-
+                            console.log("==================================================");
                             this.modelDecisionBoundry = clfPredData.b;
                             loadingEl.dismiss();
                             this.setLabTestingTimer();
                         }).catch(err => {
+                            this.cancelLearning = true;
+                            console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                            console.log(err);
+
                             if (!this.firstTimeInNews) {
                                 this.fetchInitNews();
                                 this.firstTimeInNews = true;
@@ -578,9 +564,18 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     setLabTestingTimer() {
-        this.mlQuizTimeout = setTimeout(() => {
-            this.sendMetricsToServer('?');
-        }, 20000);
+        console.log("---------------- HEEEEEEEEERE ---------------------------------")
+        if (Math.random() < 0.5) {
+            console.log("Not going to ask user --------------------------");
+            this.mlQuizTimeout = setTimeout(() => {
+                this.sendMetricsToServer('?');
+            }, 20000);
+        } else {
+            console.log("I am going to ask user -----------------------------------");
+            this.mlQuizTimeout = setTimeout(() => {
+                this.popupPhase2Quiz();
+            }, 20000);
+        }
     }
 
     sendMetricsToServer(o) {
@@ -612,8 +607,6 @@ export class NewsPage implements OnInit, OnDestroy {
 
     labTestingQuizAlert() {
         this.dismissAllQuizs();
-
-        console.log('clearam timeeeeeeeout.....');
 
         clearTimeout(this.mlQuizTimeout);
         this.mlQuizTimeout = null;
@@ -1447,7 +1440,6 @@ export class NewsPage implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        console.log("Destroying");
         if (this.authorFontSizeSub) {
             this.authorFontSizeSub.unsubscribe();
         }
@@ -1663,10 +1655,14 @@ export class NewsPage implements OnInit, OnDestroy {
                     banditPull: this.banditPullIndex,
                     username: this.userInfo.username + this.userInfo.id,
                     predictionDATA: mlData
-                }).then((mlReturnedData) => {
-                    console.log(mlReturnedData);
-                    console.log('.........................');
-                    if (mlReturnedData != null && mlReturnedData.s === 'busy') {
+                }).then((retData) => {
+                    if (retData) {
+                        if (retData.s === 'busy') {
+                            this.cancelLearning = true;
+                        } else {
+                            this.cancelLearning = false;
+                        }
+                    } else {
                         this.cancelLearning = true;
                     }
                 });
@@ -1677,6 +1673,34 @@ export class NewsPage implements OnInit, OnDestroy {
         });
     }
 
+    popupPhase2Quiz() {
+        this.dismissAllQuizs();
+        clearTimeout(this.mlQuizTimeout);
+        this.mlQuizTimeout = null;
+
+        this.alertController.create({
+            header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
+            backdropDismiss: false,
+            buttons: [
+                {
+                    text: 'DA',
+                    handler: () => {
+                        this.sendMetricsToServer('Y');
+                    }
+                },
+                {
+                    text: 'NE',
+                    handler: () => {
+                        this.sendMetricsToServer('N');
+                    }
+                }
+            ]
+        }).then(alertEl => {
+            alertEl.present();
+        });
+
+    }
+
     popupImmQuiz() {
         this.dismissAllQuizs();
 
@@ -1685,6 +1709,7 @@ export class NewsPage implements OnInit, OnDestroy {
 
         this.alertController.create({
             header: 'Ali ste zadovoljni s trenutnim prikazom novic?',
+            backdropDismiss: false,
             buttons: [
                 {
                     text: 'DA',

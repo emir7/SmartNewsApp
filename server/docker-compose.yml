@@ -5,10 +5,6 @@ services:
         restart: always
         command: mongod --port 11111
         container_name: smart-news-mongo
-        ports: 
-            - "11111:11111"
-        expose:
-            - 11111
     smart-news-server:
         build: .
         image: smart-news-server

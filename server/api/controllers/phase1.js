@@ -40,7 +40,6 @@ function createBanditInstance(banditDataObj) {
 
 module.exports.writeMetrics = (req, res) => {
 
-    console.log(req.body);
     if (req.body.username == null) {
         console.log("Username not provided");
         return res.status(500).send({ m: "nok" });
@@ -153,4 +152,20 @@ module.exports.getAllData = (req, res) => {
         return res.status(200).send(userDocs);
 
     });
+};
+
+module.exports.removeUser = (req, res) => {
+    if (req.body.username == null || typeof req.body.username !== "string") {
+        return res.status(500).send({ m: "nok" });
+    }
+
+    User.remove({ username: req.body.username }, function (err) {
+        if (err) {
+            return res.status(500).send({ m: "nok" });
+        }
+
+        return res.status(200).send({ m: "ok" });
+
+    })
+
 };
