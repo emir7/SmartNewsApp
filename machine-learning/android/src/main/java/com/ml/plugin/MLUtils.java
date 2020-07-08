@@ -21,6 +21,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
 
@@ -371,6 +372,7 @@ public class MLUtils {
         }
         return null;
     }
+
 
     public static void writeToBanditFile(String banditPath, String banditData){
         File f = new File(banditPath);

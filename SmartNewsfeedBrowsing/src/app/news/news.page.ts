@@ -1654,7 +1654,8 @@ export class NewsPage implements OnInit, OnDestroy {
                     banditDecidedToAsk: this.needUserFeedback,
                     banditPull: this.banditPullIndex,
                     username: this.userInfo.username + this.userInfo.id,
-                    predictionDATA: mlData
+                    predictionDATA: mlData,
+                    t: "" + new Date().getTime() // posljemo kot string ker mamo probleme ce user zapre aplikacijo sred treniranja se ista instanca 2x doda, NE SME SE!
                 }).then((retData) => {
                     if (retData) {
                         if (retData.s === 'busy') {
@@ -1769,14 +1770,14 @@ export class NewsPage implements OnInit, OnDestroy {
 
 
     mlDebug(d) {
-        /*this.toastController.create({
+        this.toastController.create({
             header: d,
             position: 'top',
             duration: 5000,
             color: 'light'
         }).then(toastEl => {
             toastEl.present();
-        });*/
+        });
     }
 
     displayPrediction(str) {

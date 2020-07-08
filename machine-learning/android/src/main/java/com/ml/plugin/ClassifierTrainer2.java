@@ -46,6 +46,7 @@ public class ClassifierTrainer2 extends Worker {
     private boolean isFirstTime;
     private Instances trainset;
     private Instances testset;
+    private Instance lastUserFeedback;
 
     private SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor;
@@ -54,6 +55,7 @@ public class ClassifierTrainer2 extends Worker {
 
     private String username;
     private String predictionDATA;
+    private String lastInstanceTime;
 
     public ClassifierTrainer2(Context context, WorkerParameters params) {
         super(context, params);
@@ -78,6 +80,7 @@ public class ClassifierTrainer2 extends Worker {
 
         username = getInputData().getString("username");
         predictionDATA = getInputData().getString("predictionDATA");
+        lastInstanceTime = getInputData().getString("time");
     }
 
     @NonNull
@@ -114,6 +117,8 @@ public class ClassifierTrainer2 extends Worker {
 
                 // get last instance from trainset and ground truth
                 Instance lastInstance = getTrainset().lastInstance();
+                Log.d(Constants.DEBUG_VAR, "vals3: "+lastUserFeedback.toString());
+
                 int groundTruthIndex = (int)lastInstance.value(getTrainset().numAttributes()-1);
 
                 // make new predcition
@@ -320,7 +325,7 @@ public class ClassifierTrainer2 extends Worker {
             randomForest = MLUtils.buildRF(getTrainset()); // 7) Natreniramo model
             Log.d(Constants.DEBUG_VAR, "STVAR JE FIRST TIME11");
         } else {
-            Log.d(Constants.DEBUG_VAR, "STVAR NI FIRST TIME");
+            Log.d(Constants.DEBUG_VAR, "STVAR NI FIRST TIME "+Arrays.toString(getPassedInstance()));
             Instances instances = MLUtils.constructDatasetHeader(); // 1) Skonstruiramo header za novo dodane instance
             instances.setClassIndex(instances.numAttributes() - 1); // 2) Povemo kateri index je class
             Instance instance = new DenseInstance(6); // 3) Kreiramo prazno instanco
@@ -333,7 +338,10 @@ public class ClassifierTrainer2 extends Worker {
             // na indeksu 5 in 6 so boundary in probability
             instance.setValue(instances.attribute("o"), getPassedInstance()[7]); // output
 
+            Log.d(Constants.DEBUG_VAR, "HADUKEN: "+instance.toString());
+
             instances.add(instance); // 7) Instanco dodamo
+            setLastUserFeedback(instances.get(0));
             Log.d(Constants.DEBUG_VAR, "treniram model s toliko novih instanc " + instances.numInstances());
             randomForest = trainClfWithData(instances); // 7) Model treniramo
 
@@ -343,16 +351,33 @@ public class ClassifierTrainer2 extends Worker {
     }
 
     public RandomForest trainClfWithData(Instances newInstances) {
-
+        // delamo ker pr ondestroy se stvar poklice 2x
         Log.d(Constants.DEBUG_VAR, "first time je drugic false, appendam v trenining berem iz iz treninga");
-        Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
-        Log.d(Constants.DEBUG_VAR, "st prebranih instanc po dodajanju je " + instances.numInstances());
+        Log.d(Constants.DEBUG_VAR, "v metodo sm prsu z "+newInstances.get(0).toString());
 
-        instances.addAll(newInstances);  // 2) Dodamo nove instance
-        MLUtils.writeDataToFile(getTrainingPath(), newInstances, true); // Appendamo instance v fajl
-        setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
-        return MLUtils.buildRF(getTrainset()); // 6) Model vrnemo in pošljemo v serialzacijo
+        if(!sharedpreferences.getString("lastInstanceTime", "").equals(lastInstanceTime)){
+            Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
+            Log.d(Constants.DEBUG_VAR, "zadnja instanca iz datoteke je"+instances.lastInstance().toString());
+            instances.addAll(newInstances);  // 2) Dodamo novo instanco
+            setLastUserFeedback(newInstances.get(0));
+            Log.d(Constants.DEBUG_VAR, "zadnja instanca po dodajanju nove datotek not je"+lastUserFeedback.toString());
+            setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
+            Log.d(Constants.DEBUG_VAR, "zadnja instanca po initu trainseta je "+lastUserFeedback.toString());
+            MLUtils.writeDataToFile(getTrainingPath(), newInstances, true); // Appendamo instance v fajl
+            sharedpreferences.edit().putString("lastInstanceTime",lastInstanceTime).apply();
+            Log.d(Constants.DEBUG_VAR, "vals1: "+lastUserFeedback.toString());
+            return MLUtils.buildRF(getTrainset()); // 6) Model vrnemo in pošljemo v serialzacijo
+        }else{
+            Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
+            Log.d(Constants.DEBUG_VAR, "st prebranih instanc po dodajanju je " + instances.numInstances());
+            setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
+
+            Log.d(Constants.DEBUG_VAR, "vals2: "+lastUserFeedback.toString());
+            return MLUtils.buildRF(getTrainset()); // 6) Model vrnemo in pošljemo v serialzacijo
+        }
+
     }
+
 
     public String getBanditPath() {
         return banditPath;
@@ -369,6 +394,10 @@ public class ClassifierTrainer2 extends Worker {
 
     public void setTrainset(Instances trainset) {
         this.trainset = trainset;
+    }
+
+    public void setLastUserFeedback(Instance lastInstance){
+        this.lastUserFeedback = lastInstance;
     }
 
     public void setTestset(Instances testset) {

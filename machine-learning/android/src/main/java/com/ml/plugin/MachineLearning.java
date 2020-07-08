@@ -58,6 +58,9 @@ public class MachineLearning extends Plugin {
             dataBuilder.putBoolean("isFirstTime", call.getBoolean("firstTime"));
             dataBuilder.putString("username", call.getString("username"));
 
+            // posljemo kot string ker mamo probleme ce user zapre aplikacijo sred treniranja se ista instanca 2x doda, NE SME SE!
+            dataBuilder.putString("time", call.getString("t"));
+
             if(call.getBoolean("firstTime")){
                 SetInitializer setInitializer = new SetInitializer(getContext());
                 String fullDSpath = getContext().getExternalFilesDir(null).getAbsolutePath()+"/DatasetDEV/fullset.csv";
