@@ -109,6 +109,7 @@ public class ClassifierTrainer2 extends Worker {
                 float outcomeProbabilityN = 1 - outcomeProbablityY;
 
                 // construct old prediction
+                // [p(N), p(Y)]
                 float [] oldPrediction = new float[]{outcomeProbabilityN, outcomeProbablityY};
 
                 // get last instance from trainset and ground truth
@@ -122,6 +123,7 @@ public class ClassifierTrainer2 extends Worker {
                 float newPredictionP = (float) newPredictionProbs[groundTruthIndex];
                 float oldPredictionP = oldPrediction[groundTruthIndex];
 
+
                 // calculate real class old
                 int oldPredictionClass = 0;
                 if(outcomeProbablityY > outcomeProbabilityN){
@@ -133,6 +135,11 @@ public class ClassifierTrainer2 extends Worker {
                 if(newPredictionProbs[1] > newPredictionProbs[0]){
                     newPredictionClass = 1;
                 }
+
+
+                // override => za bug ce se ne gre se 1x postavt predikcija iz ModelPredictorja! (2x hitr uprasalnik)
+                sharedpreferences.edit().putFloat("maxProbability", (float)newPredictionProbs[1]).apply();
+
 
                 Log.d(Constants.DEBUG_VAR, "ground_truth = "+groundTruthIndex);
                 Log.d(Constants.DEBUG_VAR, "ucasih: "+ Arrays.toString(oldPrediction) + " govoru sm "+oldPredictionClass);

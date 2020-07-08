@@ -1666,9 +1666,6 @@ export class NewsPage implements OnInit, OnDestroy {
                         this.cancelLearning = true;
                     }
                 });
-
-                this.needUserFeedback = false;
-
             }
         });
     }
