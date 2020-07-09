@@ -13,13 +13,8 @@ import com.ml.plugin.data.api.sender.Sender;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Arrays;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -104,6 +99,8 @@ public class ClassifierTrainer2 extends Worker {
                 this.sharedpreferences.edit().putBoolean("working", false).apply();
                 return Result.success();
             } else {
+                Log.d(Constants.DEBUG_VAR, "BEFORE APPEND TO FILE: "+getTrainset().lastInstance().toString() + " SIZE: "+getTrainset().numInstances());
+
                 Log.d("predDATA", predictionDATA);
                 JSONObject jsonObject = null;
 
@@ -116,13 +113,15 @@ public class ClassifierTrainer2 extends Worker {
                 float [] oldPrediction = new float[]{outcomeProbabilityN, outcomeProbablityY};
 
                 // get last instance from trainset and ground truth
-                Instance lastInstance = getTrainset().lastInstance();
+                //Instance lastInstance = getTrainset().lastInstance();
                 Log.d(Constants.DEBUG_VAR, "vals3: "+lastUserFeedback.toString());
 
-                int groundTruthIndex = (int)lastInstance.value(getTrainset().numAttributes()-1);
+                int groundTruthIndex = (int)lastUserFeedback.classValue();
 
+
+                Log.d(Constants.DEBUG_VAR, ""+lastUserFeedback.classValue());
                 // make new predcition
-                double [] newPredictionProbs = randomForest.distributionForInstance(lastInstance);
+                double [] newPredictionProbs = randomForest.distributionForInstance(lastUserFeedback);
 
                 // rabimo da vidmo, ce gremo v pravi smeri
                 float newPredictionP = (float) newPredictionProbs[groundTruthIndex];
@@ -141,14 +140,15 @@ public class ClassifierTrainer2 extends Worker {
                     newPredictionClass = 1;
                 }
 
+                Log.d(Constants.DEBUG_VAR, "AFTER APPEND TO FILE: "+getTrainset().lastInstance().toString() + " SIZE: "+getTrainset().numInstances());
 
-                // override => za bug ce se ne gre se 1x postavt predikcija iz ModelPredictorja! (2x hitr uprasalnik)
-                sharedpreferences.edit().putFloat("maxProbability", (float)newPredictionProbs[1]).apply();
-
+                //RandomForest randomForest2 = MLUtils.buildRF(MLUtils.readDatasetFromFile(getTrainingPath()));
 
                 Log.d(Constants.DEBUG_VAR, "ground_truth = "+groundTruthIndex);
                 Log.d(Constants.DEBUG_VAR, "ucasih: "+ Arrays.toString(oldPrediction) + " govoru sm "+oldPredictionClass);
                 Log.d(Constants.DEBUG_VAR, "zdej: "+ Arrays.toString(newPredictionProbs) + " zdej govorim "+newPredictionClass);
+                //Log.d(Constants.DEBUG_VAR, "  ---- "+Arrays.toString(randomForest2.distributionForInstance(lastUserFeedback)));
+
 
                 float directionVector = newPredictionP - oldPredictionP;
 
@@ -214,6 +214,7 @@ public class ClassifierTrainer2 extends Worker {
 
                 this.sharedpreferences.edit().putBoolean("working", false).apply();
                 Log.d(Constants.DEBUG_VAR, "WORKING BOOL DAJEM NA FALSE");
+                sharedpreferences.edit().putFloat("maxProbability", (float)newPredictionProbs[1]).apply();
 
                 return Result.success();
             }
@@ -221,7 +222,7 @@ public class ClassifierTrainer2 extends Worker {
         } catch (Exception e) {
             Log.e(Constants.DEBUG_VAR, "error while evaluating rf!");
             Log.e(Constants.DEBUG_VAR, e.toString());
-            return Result.failure();
+            return Result.success();
         }
 
 

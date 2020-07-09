@@ -74,7 +74,7 @@ export class TutorialPage implements OnInit, OnDestroy {
         };
 
         return this.storage.set('userInfo', user).then(() => {
-            return this.storage.set('tutorialComplete7', true);
+            return this.storage.set('tutorialComplete8', true);
         });
     }
 

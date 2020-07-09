@@ -245,6 +245,7 @@ public class MLUtils {
                 }
 
                 fileWriter.write(line);
+                Log.d(Constants.DEBUG_VAR, "SUCCESSFULLY APPEND TO FILEE!");
             }
         } catch (IOException e) {
             e.printStackTrace();

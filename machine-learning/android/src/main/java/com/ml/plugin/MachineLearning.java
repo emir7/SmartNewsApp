@@ -82,7 +82,7 @@ public class MachineLearning extends Plugin {
             builder.setInputData(dataBuilder.build());
 
             WorkManager.getInstance().
-                    enqueueUniqueWork("classifierTrainerML", ExistingWorkPolicy.KEEP, builder.build());
+                    enqueueUniqueWork("classifiertrain", ExistingWorkPolicy.KEEP, builder.build());
 
         }
 
