@@ -1770,14 +1770,14 @@ export class NewsPage implements OnInit, OnDestroy {
 
 
     mlDebug(d) {
-        this.toastController.create({
+        /*this.toastController.create({
             header: d,
             position: 'top',
             duration: 5000,
             color: 'light'
         }).then(toastEl => {
             toastEl.present();
-        });
+        });*/
     }
 
     displayPrediction(str) {
