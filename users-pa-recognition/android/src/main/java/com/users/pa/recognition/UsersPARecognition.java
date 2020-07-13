@@ -5,9 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -48,6 +48,9 @@ public class UsersPARecognition extends Plugin {
                 jsProbsArr.put(probsArr[i]);
                 jsStringTypesArr.put(activityTypeToString(typesArr[i]));
             }
+
+            Log.d("USER_PA_RECOGNITION_", jsStringTypesArr.toString());
+
 
             jsObject.put("values", jsTypesArr);
             jsObject.put("probs", jsProbsArr);

@@ -1,21 +1,22 @@
 {
   "name": "users-pa-recognition",
   "version": "0.0.1",
-  "description": "android plugin for users physical activity recognition",
+  "description": "/",
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "scripts": {
     "build": "npm run clean && tsc",
-    "clean": "rm -rf ./dist",
+    "clean": "rimraf ./dist",
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
-  "author": "emir",
+  "author": "Ehmir",
   "license": "MIT",
   "dependencies": {
     "@capacitor/core": "latest"
   },
   "devDependencies": {
+    "rimraf": "^3.0.0",
     "typescript": "^3.2.4",
     "@capacitor/ios": "latest",
     "@capacitor/android": "latest"
@@ -41,9 +42,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://emirha7@bitbucket.org/emirha7/smartnewsfeedbrowsing.git"
+    "url": "/"
   },
   "bugs": {
-    "url": "https://emirha7@bitbucket.org/emirha7/smartnewsfeedbrowsing.git/issues"
+    "url": "//issues"
   }
 }

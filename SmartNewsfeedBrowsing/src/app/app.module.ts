@@ -21,7 +21,7 @@ import { HomeGuard } from './shared/guards/home.guard';
 import { TutorialGuard } from './shared/guards/tutorial.guard';
 import { HttpClientModule } from '@angular/common/http';
 
-import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
+//import { StreamingMedia } from '@ionic-native/streaming-media/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { HttpClient } from '@angular/common/http';
 import { ActionCounterService } from './shared/action.counter.service';
@@ -47,7 +47,7 @@ import { LabAPIService } from './shared/lab.testing.api.service';
     ThemeService,
     HomeGuard,
     TutorialGuard,
-    StreamingMedia,
+    //StreamingMedia,
     File,
     HttpClient,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }

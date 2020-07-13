@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, Afte
 import { take } from 'rxjs/operators';
 import { Plugins } from '@capacitor/core';
 
-const { CustomChromeBrowser } = Plugins;
+const { Browser } = Plugins;
 
 
 @Component({
@@ -42,10 +42,10 @@ export class GridViewComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openUrl(url: string) {
-        CustomChromeBrowser.open({ url });
-        CustomChromeBrowser.addListener('browserClosed', () => {
+        Browser.open({ url });
+        /*CustomChromeBrowser.addListener('browserClosed', () => {
             this.inBrowser.emit('outBrowser');
-        });
+        });*/
         this.inBrowser.emit('inBrowser');
     }
 

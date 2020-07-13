@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, NgZone, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { take } from 'rxjs/operators';
 import { Plugins } from '@capacitor/core';
-const { CustomChromeBrowser } = Plugins;
+const { Browser } = Plugins;
 
 @Component({
     selector: 'app-LargeCard',
@@ -43,10 +43,10 @@ export class LargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openUrl(url: string) {
-        CustomChromeBrowser.open({ url });
-        CustomChromeBrowser.addListener('browserClosed', () => {
+        Browser.open({ url });
+        /*CustomChromeBrowser.addListener('browserClosed', () => {
             this.inBrowser.emit('outBrowser');
-        });
+        });*/
         this.inBrowser.emit('inBrowser');
     }
 

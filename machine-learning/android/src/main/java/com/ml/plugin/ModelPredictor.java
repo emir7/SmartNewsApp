@@ -110,16 +110,24 @@ public class ModelPredictor extends AsyncTask<Void, Void, JSObject> {
     @Override
     protected JSObject doInBackground(Void... voids) {
         RandomForest rf = null;
+        String modelPath = "";
+        String trainingPath = "";
 
         if(this.getCall().getInt("algorithm") == 0){ // personaliziran
-           rf = MLUtils.getModel(getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model");
+            modelPath = getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/model";
+            trainingPath = getCtx().getExternalFilesDir(null).getAbsolutePath() + "/DatasetDEV/dataTrain.csv";
         }else{ // general model
-            rf = MLUtils.getModel(getCtx().getExternalFilesDir(null).getAbsolutePath() + "/ModelDEV/generalModel");
+            modelPath = getCtx().getExternalFilesDir(null).getAbsoluteFile() + "/ModelDEV/generalModel";
+            trainingPath = getCtx().getExternalFilesDir(null).getAbsolutePath()+"/DatasetDEV/fullset.csv";
         }
 
+        rf = MLUtils.getModel(modelPath, trainingPath);
+
         if(rf == null){
+            Log.d(Constants.DEBUG_VAR, "random forest is null!");
             return null;
         }
+
         String [] possibleThemes = new String[]{"light-theme", "dark-theme"};
         String [] possibleLayouts = new String[]{"xLargeCards", "largeCards"};
         String [] possibleFontSizes = new String[]{"small-font", "large-font"};

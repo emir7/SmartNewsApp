@@ -4,7 +4,7 @@ import { IonSlides } from '@ionic/angular';
 import { IndexSlideService } from 'src/app/shared/index.slide.service';
 import { Plugins } from '@capacitor/core';
 
-const { CustomChromeBrowser } = Plugins;
+const { Browser } = Plugins;
 
 @Component({
     selector: 'app-XLargeCard',
@@ -50,10 +50,10 @@ export class XLargeCardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openUrl(url: string) {
-        CustomChromeBrowser.open({ url });
-        CustomChromeBrowser.addListener('browserClosed', () => {
+        Browser.open({ url });
+        /*CustomChromeBrowser.addListener('browserClosed', () => {
             this.inBrowser.emit('outBrowser');
-        });
+        });*/
         this.inBrowser.emit('inBrowser');
     }
 

@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ml.plugin.machinelearning"
+    package="com.ml.plugin.machineserver"
     android:versionCode="1"
     android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="21"
         android:targetSdkVersion="29" />
-
-    <application>
-        <service
-            android:name="com.ml.plugin.ClassifierTrainer2"
-            android:exported="true"
-            android:stopWithTask="false" >
-            <intent-filter>
-                <action android:name="MojaAkcija123" />
-            </intent-filter>
-        </service>
-    </application>
 
 </manifest>

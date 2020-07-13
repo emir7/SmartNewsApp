@@ -1,7 +1,7 @@
 {
   "name": "machine-learning",
   "version": "0.0.1",
-  "description": "ml",
+  "description": "/",
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "scripts": {
@@ -10,7 +10,7 @@
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
-  "author": "emir",
+  "author": "Ehmir",
   "license": "MIT",
   "dependencies": {
     "@capacitor/core": "latest"
@@ -25,7 +25,7 @@
     "dist/",
     "ios/",
     "android/",
-    "MachineLearning.podspec"
+    "MachineServer.podspec"
   ],
   "keywords": [
     "capacitor",
@@ -42,9 +42,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://emirha7@bitbucket.org/emirha7/smartnewsfeedbrowsing.git"
+    "url": "/"
   },
   "bugs": {
-    "url": "https://emirha7@bitbucket.org/emirha7/smartnewsfeedbrowsing.git/issues"
+    "url": "//issues"
   }
 }

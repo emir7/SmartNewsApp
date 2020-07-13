@@ -14,12 +14,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Random;
 
 import weka.classifiers.trees.RandomForest;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-
 
 public class ClassifierTrainer2 extends Worker {
 
@@ -33,10 +34,8 @@ public class ClassifierTrainer2 extends Worker {
     private boolean banditDecidedToAsk; // banditova odlocitev
     private int banditPull; // rocka bandita
 
-
     public static final String MODEL_DECISION_BOUNDRY = "boundry";
     public static final String MODEL_PRECISION = "precision";
-
 
     private boolean isFirstTime;
     private Instances trainset;
@@ -69,29 +68,35 @@ public class ClassifierTrainer2 extends Worker {
         banditDecidedToAsk = getInputData().getBoolean("banditDecidedToAsk", true);
         banditPull = getInputData().getInt("banditPull", 0);
         passedInstance = getInputData().getStringArray("newData");
-
+        Log.d(Constants.DEBUG_VAR, Arrays.toString(passedInstance) +"<-----");
         Log.d(Constants.DEBUG_VAR, "banditDecidedToAsk "+banditDecidedToAsk);
         Log.d(Constants.DEBUG_VAR, "banditPull "+banditPull);
 
         username = getInputData().getString("username");
         predictionDATA = getInputData().getString("predictionDATA");
         lastInstanceTime = getInputData().getString("time");
+
+    }
+
+    @Override
+    public void onStopped() {
+        super.onStopped();
+        Log.d(Constants.DEBUG_VAR, "current (ClassifierTrainer2) work was stopped!!!");
     }
 
     @NonNull
     @Override
     public Result doWork() {
-        RandomForest randomForest = trainClassifier();
+        Log.d(Constants.DEBUG_VAR, "DO WORK" + new Date().getTime());
 
+        RandomForest randomForest = trainClassifier();
         MLUtils.serializeModel(randomForest, getModelPath());
         Log.d(Constants.DEBUG_VAR, "ratal mi je serializacijo izvesti");
 
-        this.sharedpreferences.edit().putBoolean("working", true).apply();
-
         try {
-            this.sharedpreferences.edit().putFloat(MODEL_DECISION_BOUNDRY, 0.5f).apply(); // zapisemo threshold
+            this.sharedpreferences.edit().putFloat(MODEL_DECISION_BOUNDRY, 0.5f).apply(); // zapisemo threshold -> now useless
 
-            if (getIsFirstTime()) {
+            if(getIsFirstTime()) {
                 this.sharedpreferences.edit().putBoolean("started", false).apply();
                 Log.d(Constants.DEBUG_VAR, "WORKING BOOL DAJEM NA FALSE");
                 MLUtils.serializeModel(randomForest, generalModelPath);
@@ -113,15 +118,21 @@ public class ClassifierTrainer2 extends Worker {
                 float [] oldPrediction = new float[]{outcomeProbabilityN, outcomeProbablityY};
 
                 // get last instance from trainset and ground truth
-                //Instance lastInstance = getTrainset().lastInstance();
                 Log.d(Constants.DEBUG_VAR, "vals3: "+lastUserFeedback.toString());
 
-                int groundTruthIndex = (int)lastUserFeedback.classValue();
+                int groundTruthIndex = 0;//(int)lastUserFeedback.classValue();
+                String [] tempArr = lastUserFeedback.toString().split(",");
+                groundTruthIndex = Integer.parseInt(tempArr[tempArr.length - 1]);
 
 
-                Log.d(Constants.DEBUG_VAR, ""+lastUserFeedback.classValue());
+                Log.d(Constants.DEBUG_VAR, ""+groundTruthIndex);
                 // make new predcition
-                double [] newPredictionProbs = randomForest.distributionForInstance(lastUserFeedback);
+                Instances instances = MLUtils.constructDatasetHeader();
+                instances.add(lastUserFeedback);
+                Log.d(Constants.DEBUG_VAR, ""+instances.size());
+                Log.d(Constants.DEBUG_VAR, instances.get(0).toString());
+                instances.setClassIndex(instances.numAttributes()-1);
+                double [] newPredictionProbs = randomForest.distributionForInstance(instances.get(0));
 
                 // rabimo da vidmo, ce gremo v pravi smeri
                 float newPredictionP = (float) newPredictionProbs[groundTruthIndex];
@@ -142,13 +153,10 @@ public class ClassifierTrainer2 extends Worker {
 
                 Log.d(Constants.DEBUG_VAR, "AFTER APPEND TO FILE: "+getTrainset().lastInstance().toString() + " SIZE: "+getTrainset().numInstances());
 
-                //RandomForest randomForest2 = MLUtils.buildRF(MLUtils.readDatasetFromFile(getTrainingPath()));
 
                 Log.d(Constants.DEBUG_VAR, "ground_truth = "+groundTruthIndex);
                 Log.d(Constants.DEBUG_VAR, "ucasih: "+ Arrays.toString(oldPrediction) + " govoru sm "+oldPredictionClass);
                 Log.d(Constants.DEBUG_VAR, "zdej: "+ Arrays.toString(newPredictionProbs) + " zdej govorim "+newPredictionClass);
-                //Log.d(Constants.DEBUG_VAR, "  ---- "+Arrays.toString(randomForest2.distributionForInstance(lastUserFeedback)));
-
 
                 float directionVector = newPredictionP - oldPredictionP;
 
@@ -215,7 +223,6 @@ public class ClassifierTrainer2 extends Worker {
                 this.sharedpreferences.edit().putBoolean("working", false).apply();
                 Log.d(Constants.DEBUG_VAR, "WORKING BOOL DAJEM NA FALSE");
                 sharedpreferences.edit().putFloat("maxProbability", (float)newPredictionProbs[1]).apply();
-
                 return Result.success();
             }
 
@@ -224,8 +231,6 @@ public class ClassifierTrainer2 extends Worker {
             Log.e(Constants.DEBUG_VAR, e.toString());
             return Result.success();
         }
-
-
     }
 
 
@@ -319,7 +324,7 @@ public class ClassifierTrainer2 extends Worker {
 
         if (getIsFirstTime()) {
             Log.d(Constants.DEBUG_VAR, "STVAR JE FIRST TIME");
-            Instances dataset = MLUtils.readDatasetFromFile(getFullDatasetPath()); // 1) Ker prvic treniram preberem vse iz fajla kar imam
+            Instances dataset = MLUtils.readDatasetFromFileMy(getFullDatasetPath()); // 1) Ker prvic treniram preberem vse iz fajla kar imam
             setTrainset(dataset);
             Log.d(Constants.DEBUG_VAR, "NUM INSTANCES IN TRAIN SET" + getTrainset().numInstances());
             MLUtils.writeDataToFile(getTrainingPath(), getTrainset(), false); // 5) Zacnem s pisanjem train seta (FULL DATASET)
@@ -342,34 +347,34 @@ public class ClassifierTrainer2 extends Worker {
             Log.d(Constants.DEBUG_VAR, "HADUKEN: "+instance.toString());
 
             instances.add(instance); // 7) Instanco dodamo
-            setLastUserFeedback(instances.get(0));
+            setLastUserFeedback(instance);
             Log.d(Constants.DEBUG_VAR, "treniram model s toliko novih instanc " + instances.numInstances());
-            randomForest = trainClfWithData(instances); // 7) Model treniramo
+            randomForest = trainClfWithData(instances, instance); // 7) Model treniramo
 
         }
 
         return randomForest; //8) model vrnemo
     }
 
-    public RandomForest trainClfWithData(Instances newInstances) {
+    public RandomForest trainClfWithData(Instances newInstances, Instance addedInstance) {
         // delamo ker pr ondestroy se stvar poklice 2x
         Log.d(Constants.DEBUG_VAR, "first time je drugic false, appendam v trenining berem iz iz treninga");
         Log.d(Constants.DEBUG_VAR, "v metodo sm prsu z "+newInstances.get(0).toString());
 
         if(!sharedpreferences.getString("lastInstanceTime", "").equals(lastInstanceTime)){
-            Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
-            Log.d(Constants.DEBUG_VAR, "zadnja instanca iz datoteke je"+instances.lastInstance().toString());
-            instances.addAll(newInstances);  // 2) Dodamo novo instanco
-            setLastUserFeedback(newInstances.get(0));
-            Log.d(Constants.DEBUG_VAR, "zadnja instanca po dodajanju nove datotek not je"+lastUserFeedback.toString());
+            Instances instances = MLUtils.readDatasetFromFileMy(getTrainingPath()); // 1) Preberemo obstojece instance
+            Log.d(Constants.DEBUG_VAR, "zadnja instanca iz datoteke je: " + addedInstance.toString());
+            instances.add(addedInstance);  // 2) Dodamo novo instanco
+            setLastUserFeedback(addedInstance);
+            Log.d(Constants.DEBUG_VAR, "zadnja instanca po dodajanju nove datotek not je" + lastUserFeedback.toString());
             setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
             Log.d(Constants.DEBUG_VAR, "zadnja instanca po initu trainseta je "+lastUserFeedback.toString());
-            MLUtils.writeDataToFile(getTrainingPath(), newInstances, true); // Appendamo instance v fajl
+            MLUtils.appendDataToFile(getTrainingPath(), getPassedInstance()); // Appendamo instance v fajl
             sharedpreferences.edit().putString("lastInstanceTime",lastInstanceTime).apply();
             Log.d(Constants.DEBUG_VAR, "vals1: "+lastUserFeedback.toString());
             return MLUtils.buildRF(getTrainset()); // 6) Model vrnemo in pošljemo v serialzacijo
         }else{
-            Instances instances = MLUtils.readDatasetFromFile(getTrainingPath()); // 1) Preberemo obstojece instance
+            Instances instances = MLUtils.readDatasetFromFileMy(getTrainingPath()); // 1) Preberemo obstojece instance
             Log.d(Constants.DEBUG_VAR, "st prebranih instanc po dodajanju je " + instances.numInstances());
             setTrainset(instances); // 3) Nastavimo trainset globalen in testset -> rabimo za evalvacijo modela
 

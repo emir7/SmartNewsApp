@@ -63,7 +63,10 @@ export class TutorialPage implements OnInit, OnDestroy {
     }
 
     finish() {
-        this.router.navigateByUrl('/news');
+        this.storage.set('tutorialComplete8', true).then(() => {
+            this.router.navigateByUrl('/news');
+        });
+
     }
 
     storeUserData(username) {
@@ -73,9 +76,8 @@ export class TutorialPage implements OnInit, OnDestroy {
             id: this.uuidData
         };
 
-        return this.storage.set('userInfo', user).then(() => {
-            return this.storage.set('tutorialComplete8', true);
-        });
+        return this.storage.set('userInfo', user);
     }
+
 
 }

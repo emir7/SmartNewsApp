@@ -21,6 +21,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
@@ -28,6 +29,14 @@ import weka.core.converters.CSVLoader;
 public class MLUtils {
 
     public static RandomForest buildRF(Instances data){
+        try{
+            for(int i = 10; i >= 1; i--){
+                Log.d(Constants.DEBUG_VAR, data.get(data.size()-i).toString());
+            }
+        }catch(Exception e) {
+            Log.d(Constants.DEBUG_VAR, "CWASH");
+        }
+
         Log.d(Constants.DEBUG_VAR, "treniram rf s toliko instanc "+data.numInstances());
         RandomForest forest = null;
         forest = new RandomForest();
@@ -222,6 +231,36 @@ public class MLUtils {
         return result;
     }
 
+    public static void appendDataToFile(String path, String []lineArr) {
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(path, true);
+
+            String line = "\n";
+            for(int j = 0; j < lineArr.length; j++){
+                if(j == 0){
+                    line += lineArr[j];
+                } else if (j == 5 || j == 6) {
+                    continue;
+                } else {
+                    line += ","+lineArr[j];
+                }
+            }
+
+                fileWriter.write(line);
+        } catch (IOException e) {
+            Log.d(Constants.DEBUG_VAR, e.getMessage());
+        } finally {
+            if(fileWriter != null){
+                try {
+                    fileWriter.flush();
+                    fileWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     public static void writeDataToFile(String path, Instances newData, boolean append) {
         FileWriter fileWriter = null;
@@ -285,7 +324,7 @@ public class MLUtils {
         }
     }
 
-    public static RandomForest getModel(String modelPath){
+    public static RandomForest getModel(String modelPath, String backupTrainPath){
         ObjectInputStream objectinputstream = null;
         RandomForest rf = null;
         try {
@@ -296,6 +335,10 @@ public class MLUtils {
             e.printStackTrace();
             Log.d(Constants.DEBUG_VAR, "ERROR OCCURED WHILE GETTING MODEL");
             Log.d(Constants.DEBUG_VAR, e.toString());
+
+            RandomForest randomForest = buildRF(readDatasetFromFileMy(backupTrainPath));
+            serializeModel(randomForest, modelPath);
+            return randomForest;
         } finally {
             if(objectinputstream != null){
                 try {
@@ -304,6 +347,11 @@ public class MLUtils {
                     e.printStackTrace();
                 }
             }
+        }
+
+        if(rf == null){
+            rf = buildRF(readDatasetFromFileMy(backupTrainPath));
+            serializeModel(rf, modelPath);
         }
 
         return rf;
@@ -343,6 +391,38 @@ public class MLUtils {
         atts.add(new Attribute("o", outputVals));
 
         return new Instances("Dataset",atts,0);
+    }
+
+    public static Instances readDatasetFromFileMy(String path) {
+        Instances instances = constructDatasetHeader();
+        try{
+            File f = new File(path);
+            Scanner sc = new Scanner(f);
+            sc.nextLine();
+            while(sc.hasNextLine()) {
+                String line = sc.nextLine();
+                String [] strArr = line.split(",");
+                Instance newI = new DenseInstance(6);
+                newI.setDataset(instances);
+
+                for(int i = 0; i < strArr.length; i++) {
+                    if(i == 1) {
+                        newI.setValue(i, Double.parseDouble(strArr[i]));
+                    } else {
+                        newI.setValue(i, strArr[i]);
+                    }
+                }
+
+                instances.add(newI);
+            }
+            sc.close();
+        }catch(Exception e){
+            Log.d(Constants.DEBUG_VAR, "ERRRRRRRRRRRRRRRRRRORRRRRRRRRRRRR");
+            Log.d(Constants.DEBUG_VAR, e.toString());
+        }
+
+        instances.setClassIndex(instances.numAttributes()-1);
+        return instances;
     }
 
     public static Instances readDatasetFromFile(String path){

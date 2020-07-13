@@ -9,6 +9,7 @@ import android.util.Log;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
@@ -25,8 +26,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Scanner;
 
 import weka.core.Instance;
@@ -43,18 +44,17 @@ public class MachineLearning extends Plugin {
     public void trainClf(final PluginCall call){
 
         if(isWorkScheduled()){
-            Log.d(Constants.DEBUG_VAR, "NE treniram ker sm busy");
-            // nemors sprasevt zdej nc
+            Log.d(Constants.DEBUG_VAR, "Currently not training because I'm busy!");
             JSObject ret = new JSObject();
             ret.put("s", "busy");
             call.success(ret);
+            scheduleFallbackTrainer();
         }else{
             Log.d(Constants.DEBUG_VAR, "treniram ker sm free");
             JSObject ret = new JSObject();
             ret.put("s", "free");
             call.success(ret);
             Data.Builder dataBuilder = new Data.Builder();
-            this.sharedpreferences.edit().putBoolean("working", true).apply();
             dataBuilder.putBoolean("isFirstTime", call.getBoolean("firstTime"));
             dataBuilder.putString("username", call.getString("username"));
 
@@ -74,16 +74,68 @@ public class MachineLearning extends Plugin {
             }
 
             // lahko me sprasujes zdej
-            Constraints.Builder constraintsBuilder = new Constraints.Builder().setRequiresBatteryNotLow(true);
+            Constraints.Builder constraintsBuilder = new Constraints.Builder().setRequiresBatteryNotLow(true)
+                    .setRequiredNetworkType(NetworkType.CONNECTED);
 
             OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(ClassifierTrainer2.class);
 
             builder.setConstraints(constraintsBuilder.build());
             builder.setInputData(dataBuilder.build());
 
-            WorkManager.getInstance().
+            Log.d(Constants.DEBUG_VAR, "I am trying to create another instance of manager");
+
+
+            // shranimo si kdaj smo zaceli
+            this.sharedpreferences.edit().putLong("workStartedTime", new Date().getTime()).apply();
+            this.sharedpreferences.edit().putBoolean("working", true).apply();
+
+            WorkManager.getInstance(getContext()).
                     enqueueUniqueWork("classifiertrain", ExistingWorkPolicy.KEEP, builder.build());
 
+        }
+
+    }
+
+    public void cancelAndRetrain(){
+        // update boolean and time
+        this.sharedpreferences.edit().putLong("workStartedTime", new Date().getTime()).apply();
+        this.sharedpreferences.edit().putBoolean("working", true).apply();
+
+        // cancel work
+        WorkManager.getInstance(getContext()).cancelAllWork();
+
+        OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(FallbackML.class);
+        OneTimeWorkRequest oneTimeWorkRequest = builder.build();
+
+        // start a new one
+        WorkManager.getInstance(getContext()).
+                enqueueUniqueWork("classifiertrainfallback", ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
+    }
+
+    public void scheduleFallbackTrainer(){
+        long currentTime = new Date().getTime();
+        long workStartTime = this.sharedpreferences.getLong("workStartedTime", currentTime);
+        long timeDiff = (currentTime - workStartTime) / (1000*60);
+        boolean workmanagerIsWorking = this.sharedpreferences.getBoolean("working", true);
+        Log.d(Constants.DEBUG_VAR, "time passed.." +timeDiff +"and workbool has value of "+workmanagerIsWorking);
+
+        if(timeDiff >= 15 && workmanagerIsWorking) {
+            // skenslas trenuten work in zacnes novega
+            WorkManager.getInstance(getContext()).cancelAllWork();
+
+            OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(FallbackML.class);
+            OneTimeWorkRequest oneTimeWorkRequest = builder.build();
+
+            this.sharedpreferences.edit().putLong("workStartedTime", new Date().getTime()).apply();
+            this.sharedpreferences.edit().putBoolean("working", true).apply();
+
+            WorkManager.getInstance(getContext()).
+                    enqueueUniqueWork("classifiertrainfallback", ExistingWorkPolicy.KEEP, oneTimeWorkRequest);
+            return;
+        }
+
+        if(timeDiff >= 30){
+            cancelAndRetrain();
         }
 
     }
@@ -91,7 +143,6 @@ public class MachineLearning extends Plugin {
     @PluginMethod
     public void sendZeroReward(PluginCall call){
         Log.d(Constants.DEBUG_VAR, "posiljam na server zero reward");
-
 
         String username = call.getString("username");
         String predictionDATA = call.getString("predictionDATA");
@@ -167,11 +218,10 @@ public class MachineLearning extends Plugin {
                 public void processFinish(JSObject output) {
 
                     if(output != null){
-                        Log.d(Constants.DEBUG_VAR, "tole vračam clientu "+output.toString());
                         call.success(output);
                     }else{
-                        Log.d(Constants.DEBUG_VAR, "ERROR VRAČAM CLIENTU");
                         call.reject("Error while training model");
+                        scheduleFallbackTrainer();
                     }
 
                 }
@@ -184,6 +234,7 @@ public class MachineLearning extends Plugin {
             }
         }else{
             call.reject("Error while predicting IM BUSY WITH MODEL TRAININGA");
+            scheduleFallbackTrainer();
         }
 
 

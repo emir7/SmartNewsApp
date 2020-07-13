@@ -1,32 +1,13 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-3    package="com.ml.plugin.machinelearning"
+3    package="com.ml.plugin.machineserver"
 4    android:versionCode="1"
 5    android:versionName="1.0" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="21"
-8-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+8-->/home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 9        android:targetSdkVersion="29" />
-9-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+9-->/home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 10
-11    <application>
-11-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:5:5-12:19
-12        <service
-12-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:6:7-11:17
-13            android:name="com.ml.plugin.ClassifierTrainer2"
-13-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:6:16-63
-14            android:exported="true"
-14-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:6:64-87
-15            android:stopWithTask="false" >
-15-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:7:11-39
-16            <intent-filter>
-16-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:8:9-10:25
-17                <action android:name="MojaAkcija123" />
-17-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:9:11-49
-17-->/home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:9:19-47
-18            </intent-filter>
-19        </service>
-20    </application>
-21
-22</manifest>
+11</manifest>

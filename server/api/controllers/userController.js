@@ -43,3 +43,17 @@ module.exports.getAllUsers = (req, res) => {
     })
 
 };
+
+// DEBUG ONLY
+module.exports.deleteAll = (req, res) => {
+    User.remove({}, (err) => {
+        if (err) {
+            console.log("there was an error removing all users!");
+            console.log(err);
+            return res.status(500).send({});
+        }
+
+        return res.status(200).send({ m: "ok" });
+
+    });
+};

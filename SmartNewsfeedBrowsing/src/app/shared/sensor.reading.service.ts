@@ -59,6 +59,10 @@ export class SensorReadingService {
         this.userPARecognition.startTrackingUserActivity();
 
         this.userPARecognition.addListener('userPhysicalActivity', (data) => {
+            console.log("EOOOOO_MEEEE");
+            console.log(data);
+            console.log("===============");
+
             this.setCurrentUserActivity({
                 probs: data.probs,
                 values: data.values,

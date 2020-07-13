@@ -1,53 +1,37 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
+ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
 	package
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:3:7-46
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:3:7-44
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 	android:versionName
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 	android:versionCode
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-13:14
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:3-4:14
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:13-71
-application
-ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:5:5-12:19
-service#com.ml.plugin.ClassifierTrainer2
-ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:6:7-11:17
-	android:exported
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:6:64-87
-	android:stopWithTask
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:7:11-39
-	android:name
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:6:16-63
-intent-filter#action:name:MojaAkcija123
-ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:8:9-10:25
-action#MojaAkcija123
-ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:9:11-49
-	android:name
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:9:19-47
+		ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml:2:13-71
 uses-sdk
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		ADDED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
-		INJECTED from /home/emir/Desktop/diplomaAppV2/smartnewsfeedbrowsing/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		ADDED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml
+		INJECTED from /home/emir/Desktop/UpdatedDiplomaWeka/SmartNewsfeedBrowsing/node_modules/machine-learning/android/src/main/AndroidManifest.xml

@@ -8,6 +8,7 @@ import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class UserPActivityIntentService extends IntentService {
 
@@ -37,6 +38,9 @@ public class UserPActivityIntentService extends IntentService {
             Intent activityDataIntent = new Intent();
             activityDataIntent.putExtra(Constants.ACTIVITY_ARRAY_OF_TYPES, activityArr);
             activityDataIntent.putExtra(Constants.ACTIVITY_ARRAY_OF_PROBS, activityProbs);
+
+            Log.d("USER_PA_RECOGNITION_", Arrays.toString(activityArr));
+            Log.d("USER_PA_RECOGNITION_", Arrays.toString(activityProbs));
 
             activityDataIntent.setAction(Constants.ACTIVITY_DATA_INTENT_ACTION);
             sendBroadcast(activityDataIntent);

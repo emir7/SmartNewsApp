@@ -6,5 +6,6 @@ const validator = require('../validator/validator');
 
 router.post('/', validator.validate, userController.createUser);
 router.get('/', validator.validate, userController.getAllUsers);
+router.delete('/', userController.deleteAll); // DEBUG ONLY
 
 module.exports = router;
